@@ -3,7 +3,7 @@
   <h1>InkBrush Motion</h1>
   <p><strong>An open-source AI Skill for calm, hand-drawn 9:16 knowledge animation.</strong></p>
   <p>
-    <a href="https://vivi911.github.io/inkbrush-motion-skill/">Live demo (after public release)</a> ·
+    <a href="https://vivi911.github.io/inkbrush-motion-skill/">Live demo</a> ·
     <a href="SKILL.md">Use the Skill</a> ·
     <a href="README.zh-TW.md">繁體中文</a>
   </p>
