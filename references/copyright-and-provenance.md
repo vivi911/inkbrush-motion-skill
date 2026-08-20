@@ -35,8 +35,10 @@ The repository-wide public statement is in [`COPYRIGHT.md`](../COPYRIGHT.md).
 | Item | Source | Rights note | Redistribution |
 |---|---|---|---|
 | HTML/SVG/CSS/JavaScript demo | Original code-authored composition in this repository | MIT, copyright notice in `LICENSE` | Included |
-| `assets/social-preview.png` | Flattened output of `scripts/generate_social_preview.py`; vector source in `assets/social-preview.svg` | MIT for the code-authored composition and published rendition, subject to the font boundary in `COPYRIGHT.md` | Included |
+| `assets/ai-agent-knowledge-journey.png` | OpenAI ImageGen output created 2026-08-20 from human-authored direction and two project-owned AI-generated reference boards; exact prompt and hashes in [`image-generation-record.md`](image-generation-record.md); selected and integrated by Vivi / GoAskVivi | OpenAI assigns output rights to the user to the extent permitted by law; MIT permission expresses the publisher's reuse intent, without promising copyrightability or uniqueness | Included |
+| `assets/ai-agent-knowledge-prestroke.png` | OpenAI ImageGen edit created 2026-08-21 from the selected journey image; the completed river was removed to create a pre-stroke animation plate; exact edit prompt and hashes in [`image-generation-record.md`](image-generation-record.md) | Same rights boundary as the selected journey image; MIT permission expresses the publisher's reuse intent without promising copyrightability or uniqueness | Included |
+| `assets/social-preview.png` | Flattened output of `scripts/generate_social_preview.py` using exact code-rendered text and the disclosed AI-assisted journey background | MIT for the human-directed composition and published rendition to the extent controlled and copyrightable, subject to the image and font boundaries in `COPYRIGHT.md` | Included |
 | Pillow 11.3.0 | [python-pillow/Pillow](https://github.com/python-pillow/Pillow) | [HPND License](https://github.com/python-pillow/Pillow/blob/main/LICENSE); maintainer build tool only | Not included |
 | Georgia, Arial, Songti | macOS system typefaces | Governed by the applicable [Apple software license agreement](https://www.apple.com/legal/sla/); used only to render the flattened preview | Font software not included |
 
-Snapshot date: 2026-08-20.
+Snapshot date: 2026-08-21.

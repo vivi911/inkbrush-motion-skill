@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="assets/social-preview.png" alt="InkBrush Motion — a 9:16 Chinese ink-wash knowledge animation" width="820">
+  <img src="assets/social-preview.png" alt="InkBrush Motion turns AI knowledge into a Chinese ink-wash journey" width="100%">
   <h1>InkBrush Motion</h1>
-  <p><strong>An open-source AI Skill for calm, hand-drawn 9:16 knowledge animation.</strong></p>
+  <p><strong>An open-source AI Skill for calm, brush-led 9:16 knowledge animation.</strong></p>
   <p>
     <a href="https://vivi911.github.io/inkbrush-motion-skill/">Live demo</a> ·
     <a href="SKILL.md">Use the Skill</a> ·
@@ -9,14 +9,21 @@
   </p>
   <p>
     <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-7c2f2f">
-    <img alt="No runtime dependencies" src="https://img.shields.io/badge/runtime-dependencies-0-27352f">
+    <img alt="No runtime dependencies" src="https://img.shields.io/badge/runtime-0%20dependencies-27352f">
     <img alt="Native 9:16" src="https://img.shields.io/badge/canvas-9%3A16-c6a15b">
   </p>
 </div>
 
-Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. It turns structured knowledge into a Chinese ink-wash journey with exact text, visible brush causality, delayed ink diffusion, and a static approval gate before animation.
+Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. The live demo teaches one reliable AI-agent loop—**Context → Action → Evidence**—as a calligraphy brush completes a Chinese ink-wash journey. Give AI the right context, ask for one clear next step, and check the result before you trust it. Exact knowledge text stays code-native while the AI-assisted scene carries the feeling.
 
 The repository includes both the reusable Skill and a zero-dependency SVG/CSS/JavaScript delivery demo.
+
+<div align="center">
+  <a href="https://vivi911.github.io/inkbrush-motion-skill/">
+    <img src="assets/ai-agent-knowledge-journey.png" alt="AI-assisted ink-wash scene linking Context, Action, and Evidence" width="390">
+  </a>
+  <p><em>Click the scroll to watch the live 9:16 lesson.</em></p>
+</div>
 
 ## What you get
 
@@ -87,9 +94,9 @@ The demo is intentionally dependency-free. The references list optional open-sou
 
 Copyright © 2026 Vivi (GoAskVivi).
 
-The source code, Skill instructions, documentation, code-authored SVG/CSS/JavaScript visuals, and published social-preview PNG in this repository are available under the [MIT License](LICENSE), subject to the detailed third-party and font boundaries in [COPYRIGHT.md](COPYRIGHT.md). Keep the copyright and license notice with copies or substantial portions.
+The source code, Skill instructions, documentation, code-authored SVG/CSS/JavaScript visuals, published social-preview PNG, and the selected AI-assisted demo backgrounds in this repository are available under the [MIT License](LICENSE) to the extent those materials are copyrightable and controlled by the publisher, subject to the detailed boundaries in [COPYRIGHT.md](COPYRIGHT.md). Keep the copyright and license notice with copies or substantial portions.
 
-The names **GoAskVivi** and its brand identity are not licensed for implied endorsement. This public package contains no ImageGen raster style boards. See [COPYRIGHT.md](COPYRIGHT.md) for the authorship, AI-assistance, third-party, and trademark boundaries.
+The names **GoAskVivi** and its brand identity are not licensed for implied endorsement. See [COPYRIGHT.md](COPYRIGHT.md) for the human direction, AI-assistance, third-party, and trademark boundaries.
 
 ## Contributing
 

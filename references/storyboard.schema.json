@@ -21,6 +21,7 @@
     "styleRecipe": {"enum": ["shan-shui-scroll", "minimal-calligraphy", "seal-diagram"]},
     "textMode": {"const": "code-native"},
     "staticArtifact": {"type": "string", "pattern": "\\.svg$"},
+    "staticArtifactSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "beats": {
       "type": "array",
       "minItems": 3,
@@ -28,10 +29,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "label", "startSecond", "endSecond"],
+        "required": ["id", "label", "copy", "startSecond", "endSecond"],
         "properties": {
           "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
           "label": {"type": "string", "minLength": 1},
+          "copy": {"type": "string", "minLength": 1},
           "zhLabel": {"type": "string", "minLength": 1},
           "startSecond": {"type": "number", "minimum": 0},
           "endSecond": {"type": "number", "exclusiveMinimum": 0}
@@ -75,7 +77,7 @@
     },
     {
       "if": {"properties": {"status": {"enum": ["MOTION_PROOF_READY", "RENDERER_REQUIRED", "STATIC_REVIEW_READY"]}}},
-      "then": {"required": ["staticArtifact"]}
+      "then": {"required": ["staticArtifact", "staticArtifactSha256"]}
     },
     {
       "if": {"properties": {"status": {"const": "MOTION_PROOF_READY"}}},
@@ -84,7 +86,7 @@
     },
     {
       "if": {"properties": {"status": {"const": "PLAN_ONLY"}}},
-      "then": {"not": {"required": ["staticArtifact"]}}
+      "then": {"not": {"anyOf": [{"required": ["staticArtifact"]}, {"required": ["staticArtifactSha256"]}]}}
     }
   ]
 }

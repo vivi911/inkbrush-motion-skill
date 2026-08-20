@@ -55,4 +55,4 @@ Return `STATIC_REVIEW_READY` only when:
 2. all required text is exact and legible at 360×640;
 3. hierarchy works with motion disabled;
 4. source and license notes are complete; and
-5. the exact artifact hash is recorded before motion begins.
+5. `staticArtifactSha256` records the exact artifact bundle before motion begins. If the SVG links a local PNG, the bundle hash covers both files so changing either one invalidates approval.

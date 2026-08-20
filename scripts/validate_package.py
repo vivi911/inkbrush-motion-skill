@@ -29,9 +29,10 @@ REQUIRED = [
     ".gitignore", ".nojekyll", ".github/workflows/validate.yml",
     "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md",
     "SECURITY.md", "index.html", "styles.css", "app.js", "agents/openai.yaml",
-    "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png", "assets/demo-plan.json",
+    "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png",
+    "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/demo-plan.json",
     "references/style-contract.md", "references/motion-contract.md", "references/qa-rubric.md",
-    "references/copyright-and-provenance.md", "references/open-source-notes.md", "references/storyboard.schema.json",
+    "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
     "scripts/generate_social_preview.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
 ]
 
@@ -141,7 +142,7 @@ def main() -> int:
     if re.search(r"\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\b|navigator\.sendBeacon|import\s*\(\s*[\"'](?:https?:)?//", javascript): errors.append("app.js must not make runtime network requests")
     for svg_name in ["assets/icon.svg", "assets/social-preview.svg", "assets/static-board.svg"]:
         try:
-            validate_svg_safety(ROOT / svg_name)
+            validate_svg_safety(ROOT / svg_name, allow_local_png=svg_name == "assets/static-board.svg")
         except ValueError as exc:
             errors.append(str(exc))
 
@@ -155,6 +156,7 @@ def main() -> int:
         if set(schema_properties.get("styleRecipe", {}).get("enum", [])) != STYLE_RECIPES: errors.append("schema styleRecipe enum drifts from the Python validator")
         beat_schema = schema_properties.get("beats", {}).get("items", {})
         if beat_schema.get("additionalProperties") is not False or set(beat_schema.get("properties", {})) != BEAT_FIELDS: errors.append("schema beat fields drift from the Python validator")
+        if set(beat_schema.get("required", [])) != {"id", "label", "copy", "startSecond", "endSecond"}: errors.append("schema required beat fields drift from the Python validator")
         motion_schema = schema_properties.get("motionEvidence", {})
         if motion_schema.get("additionalProperties") is not False or set(motion_schema.get("properties", {})) != MOTION_FIELDS: errors.append("schema motionEvidence fields drift from the Python validator")
         if set(motion_schema.get("properties", {}).get("rendererLane", {}).get("enum", [])) != RENDERER_LANES: errors.append("schema rendererLane enum drifts from the Python validator")
@@ -165,18 +167,25 @@ def main() -> int:
                 {"properties": {"width": {"const": 720}, "height": {"const": 1280}}},
                 {"properties": {"width": {"const": 1080}, "height": {"const": 1920}}},
             ]},
-            {"if": {"properties": {"status": {"enum": sorted(["STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED"])}}}, "then": {"required": ["staticArtifact"]}},
+            {"if": {"properties": {"status": {"enum": sorted(["STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED"])}}}, "then": {"required": ["staticArtifact", "staticArtifactSha256"]}},
             {"if": {"properties": {"status": {"const": "MOTION_PROOF_READY"}}}, "then": {"required": ["motionEvidence"]}, "else": {"not": {"required": ["motionEvidence"]}}},
-            {"if": {"properties": {"status": {"const": "PLAN_ONLY"}}}, "then": {"not": {"required": ["staticArtifact"]}}},
+            {"if": {"properties": {"status": {"const": "PLAN_ONLY"}}}, "then": {"not": {"anyOf": [{"required": ["staticArtifact"]}, {"required": ["staticArtifactSha256"]}]}}},
         ]
         if schema.get("allOf") != expected_schema_gates: errors.append("schema state and dimension gates drift from the Python validator")
         plan = json.loads((ROOT / "assets/demo-plan.json").read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
         errors.extend(f"demo-plan: {error}" for error in validate(plan, ROOT))
+        for beat in plan.get("beats", []):
+            for field in ("label", "copy"):
+                exact_text = beat.get(field)
+                if isinstance(exact_text, str) and exact_text not in html:
+                    errors.append(f"index.html is missing exact demo-plan beat {field}: {exact_text!r}")
     except (json.JSONDecodeError, ValueError) as exc:
         errors.append(f"invalid JSON: {exc}")
 
     try:
         if png_dimensions(ROOT / "assets/social-preview.png") != (1280, 640): errors.append("assets/social-preview.png must be 1280x640")
+        if png_dimensions(ROOT / "assets/ai-agent-knowledge-journey.png") != (1080, 1920): errors.append("assets/ai-agent-knowledge-journey.png must be 1080x1920")
+        if png_dimensions(ROOT / "assets/ai-agent-knowledge-prestroke.png") != (1080, 1920): errors.append("assets/ai-agent-knowledge-prestroke.png must be 1080x1920")
     except ValueError as exc:
         errors.append(str(exc))
 

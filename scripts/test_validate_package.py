@@ -102,6 +102,12 @@ def main() -> None:
         result = run_validator(schema_case)
         expect("reject schema field drift", result.returncode == 1 and "schema top-level fields drift" in result.stdout)
 
+        schema_beat_case = clone_candidate(parent, "schema-required-beat-drift")
+        schema_path = schema_beat_case / "references/storyboard.schema.json"
+        schema_path.write_text(schema_path.read_text(encoding="utf-8").replace('"required": ["id", "label", "copy", "startSecond", "endSecond"]', '"required": ["id", "label", "startSecond", "endSecond"]', 1), encoding="utf-8")
+        result = run_validator(schema_beat_case)
+        expect("reject schema required beat drift", result.returncode == 1 and "required beat fields drift" in result.stdout)
+
         schema_gate_case = clone_candidate(parent, "schema-gate-drift")
         schema_path = schema_gate_case / "references/storyboard.schema.json"
         schema_path.write_text(schema_path.read_text(encoding="utf-8").replace('{"const": 1280}', '{"const": 1920}', 1), encoding="utf-8")
@@ -115,10 +121,10 @@ def main() -> None:
         expect("reject active content in shipped SVG", result.returncode == 1 and "forbids <script>" in result.stdout)
 
         manifest_case = clone_candidate(parent, "missing-manifest")
-        for relative in [".nojekyll", ".github/workflows/validate.yml", "scripts/test_validate_storyboard.py"]:
+        for relative in [".nojekyll", ".github/workflows/validate.yml", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "references/image-generation-record.md"]:
             (manifest_case / relative).unlink()
         result = run_validator(manifest_case)
-        expect("reject missing CI/Pages/test manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 3)
+        expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 6)
 
         print("PASS: all public-package negative tests")
 

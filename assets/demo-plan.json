@@ -2,21 +2,22 @@
   "$schema": "../references/storyboard.schema.json",
   "version": "1.0",
   "status": "STATIC_REVIEW_READY",
-  "title": "AI Collaboration",
-  "summary": "A brush reveals the path from observation to a finished deliverable.",
+  "title": "How Reliable AI Agents Work",
+  "summary": "A brush-led ink journey reveals the Context, Action, and Evidence loop for dependable AI work.",
   "aspectRatio": "9:16",
   "width": 720,
   "height": 1280,
   "fps": 30,
-  "previewSeconds": 9,
-  "finalHoldFrames": 30,
+  "previewSeconds": 9.2,
+  "finalHoldFrames": 36,
   "safeMarginPercent": 8,
   "styleRecipe": "shan-shui-scroll",
   "textMode": "code-native",
   "staticArtifact": "assets/static-board.svg",
+  "staticArtifactSha256": "e81f446173243c3c61aa647bcfc3e8f671fa0397b8fc669b84aec7f66103793b",
   "beats": [
-    {"id": "observe", "label": "Observe", "zhLabel": "看見問題", "startSecond": 0.7, "endSecond": 3.0},
-    {"id": "decide", "label": "Decide", "zhLabel": "找到取捨", "startSecond": 3.0, "endSecond": 6.0},
-    {"id": "deliver", "label": "Deliver", "zhLabel": "完成交付", "startSecond": 6.0, "endSecond": 8.0}
+    {"id": "context", "label": "Context", "copy": "Give the goal, audience, and boundaries.", "startSecond": 0.7, "endSecond": 3.2},
+    {"id": "action", "label": "Action", "copy": "Ask for one clear next step.", "startSecond": 3.2, "endSecond": 5.9},
+    {"id": "evidence", "label": "Evidence", "copy": "Check the result before calling it done.", "startSecond": 5.9, "endSecond": 8.9}
   ]
 }

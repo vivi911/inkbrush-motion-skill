@@ -10,7 +10,7 @@ import tempfile
 import zlib
 from pathlib import Path
 
-from artifact_checks import sha256_file
+from artifact_checks import sha256_file, sha256_static_artifact
 from validate_storyboard import validate
 
 
@@ -33,19 +33,22 @@ def base_plan() -> dict:
         "fps": 30, "previewSeconds": 9, "finalHoldFrames": 30, "safeMarginPercent": 8,
         "styleRecipe": "shan-shui-scroll", "textMode": "code-native", "staticArtifact": "board.svg",
         "beats": [
-            {"id": "observe", "label": "Observe", "startSecond": 0.5, "endSecond": 3},
-            {"id": "decide", "label": "Decide", "startSecond": 3, "endSecond": 6},
-            {"id": "deliver", "label": "Deliver", "startSecond": 6, "endSecond": 8},
+            {"id": "observe", "label": "Observe", "copy": "See the whole task.", "startSecond": 0.5, "endSecond": 3},
+            {"id": "decide", "label": "Decide", "copy": "Choose one next step.", "startSecond": 3, "endSecond": 6},
+            {"id": "deliver", "label": "Deliver", "copy": "Check the evidence.", "startSecond": 6, "endSecond": 8},
         ],
     }
 
 
 def write_svg(path: Path, *, nested: bool = False, styled: bool = False) -> None:
-    values = [("Human AI", 48), ("Observe", 40), ("Decide", 40), ("Deliver", 40)]
+    values = [
+        ("Human AI", 48), ("Observe", 40), ("Decide", 40), ("Deliver", 40),
+        ("See the whole task.", 24), ("Choose one next step.", 24), ("Check the evidence.", 24),
+    ]
     nodes = ""
     for index, (text, size) in enumerate(values):
         class_attribute = ' class="label"' if styled and index == 0 else ""
-        nodes += f'<text x="20" y="{80 + index * 60}" fill="#111" font-size="{size}"{class_attribute}>{text}</text>'
+        nodes += f'<text x="80" y="{160 + index * 60}" fill="#111" font-size="{size}"{class_attribute}>{text}</text>'
     if nested: nodes = f"<g>{nodes}</g>"
     path.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">{nodes}</svg>', encoding="utf-8")
 
@@ -60,13 +63,21 @@ def main() -> None:
         root = Path(temp)
         plan = base_plan()
         write_svg(root / "board.svg")
+        plan["staticArtifactSha256"] = sha256_static_artifact(root / "board.svg")
         expect("valid static evidence", validate(plan, root) == [])
         expect("artifact states fail closed without base_dir", any("base_dir" in error for error in validate(plan, None)))
+
+        unsafe_margin = root / "unsafe-margin.svg"
+        unsafe_margin.write_text((root / "board.svg").read_text(encoding="utf-8").replace('x="80"', 'x="20"', 1), encoding="utf-8")
+        bad = copy.deepcopy(plan); bad["staticArtifact"] = "unsafe-margin.svg"; bad["staticArtifactSha256"] = sha256_static_artifact(unsafe_margin)
+        expect("reject text outside declared safe margin", any("safe margin" in error for error in validate(bad, root)))
 
         bad = copy.deepcopy(plan); bad["aspectRatio"] = "16:9"
         expect("reject non-portrait ratio", any("aspectRatio" in error for error in validate(bad, root)))
         bad = copy.deepcopy(plan); bad["textMode"] = "image-model"
         expect("reject image-model text", any("textMode" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(plan); del bad["beats"][0]["copy"]
+        expect("reject missing beat copy", any("copy must be non-empty" in error for error in validate(bad, root)))
         bad = copy.deepcopy(plan); bad["staticArtifact"] = "missing.svg"
         expect("reject missing artifact", any("does not exist" in error for error in validate(bad, root)))
 
@@ -83,6 +94,8 @@ def main() -> None:
             "no-fill.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280"><text x="20" y="80" fill="none" font-size="48">Human AI</text></svg>', "opaque hex fill"),
             "off-canvas.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280"><text x="-999" y="80" fill="#111" font-size="48">Human AI</text></svg>', "off-canvas"),
             "active-content.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280"><script>alert(1)</script><image href="https://example.com/a.png"/><text x="20" y="80" fill="#111" font-size="48">Human AI</text></svg>', "<script>"),
+            "external-image.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280"><image href="https://example.com/a.png"/><text x="20" y="80" fill="#111" font-size="48">Human AI</text></svg>', "sibling PNG filename"),
+            "traversal-image.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280"><image href="../a.png"/><text x="20" y="80" fill="#111" font-size="48">Human AI</text></svg>', "sibling PNG filename"),
             "event-handler.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" onload="alert(1)"><text x="20" y="80" fill="#111" font-size="48">Human AI</text></svg>', "event attributes"),
             "root-transform.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" transform="translate(9999 0)"><text x="20" y="80" fill="#111" font-size="48">Human AI</text></svg>', "transform or clip"),
             "root-clip.svg": ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" clip-path="url(#empty)"><defs><clipPath id="empty"/></defs><text x="20" y="80" fill="#111" font-size="48">Human AI</text></svg>', "transform or clip"),
@@ -110,6 +123,14 @@ def main() -> None:
         bad = copy.deepcopy(plan); bad["status"] = "PLAN_ONLY"
         expect("reject PLAN_ONLY claiming a static artifact", any("must not claim" in error for error in validate(bad, root)))
 
+        write_png(root / "linked.png", 720, 1280, (236, 226, 207, 255))
+        linked_board = root / "linked-board.svg"
+        linked_board.write_text((root / "board.svg").read_text(encoding="utf-8").replace(">", '><image href="linked.png" x="0" y="0" width="720" height="1280"/>', 1), encoding="utf-8")
+        linked = copy.deepcopy(plan); linked["staticArtifact"] = "linked-board.svg"; linked["staticArtifactSha256"] = sha256_static_artifact(linked_board)
+        expect("valid hash-bound local PNG static evidence", validate(linked, root) == [])
+        write_png(root / "linked.png", 720, 1280, (220, 210, 191, 255))
+        expect("reject changed linked PNG after static approval", any("static artifact bundle" in error for error in validate(linked, root)))
+
         bad = copy.deepcopy(plan); bad["status"] = "MOTION_PROOF_READY"
         expect("reject motion state without approval evidence", any("motionEvidence" in error for error in validate(bad, root)))
 
@@ -118,7 +139,7 @@ def main() -> None:
         motion = copy.deepcopy(plan); motion["status"] = "MOTION_PROOF_READY"
         motion["motionEvidence"] = {
             "rendererLane": "svg-js", "rendererOwner": "Maker", "reviewer": "Reviewer",
-            "staticApprovalSha256": sha256_file(root / "board.svg"),
+            "staticApprovalSha256": sha256_static_artifact(root / "board.svg"),
             "frames": [
                 {"role": role, "frame": frame, "path": f"frame-{index}.png", "sha256": sha256_file(root / f"frame-{index}.png")}
                 for index, (role, frame) in enumerate([("start", 0), ("middle", 120), ("end", 240)])

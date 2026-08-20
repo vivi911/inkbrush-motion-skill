@@ -39,7 +39,7 @@ If no approved lane exists, return `RENDERER_REQUIRED`. Do not install a tool or
 
 For `MOTION_PROOF_READY`, record:
 
-- the SHA-256 of the approved static board;
+- the SHA-256 of the approved static artifact bundle, including any linked local PNG;
 - renderer lane and reviewer names;
 - duration, frame rate, dimensions, and final hold;
 - three unique PNG evidence frames at start, middle, and end;

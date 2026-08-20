@@ -7,6 +7,7 @@ import hashlib
 import math
 import re
 import struct
+import unicodedata
 import zlib
 from pathlib import Path
 from xml.etree import ElementTree
@@ -114,7 +115,7 @@ def _numeric_attribute(node: ElementTree.Element, name: str, path: Path) -> floa
     return value
 
 
-def validate_svg_safety(path: Path) -> ElementTree.Element:
+def validate_svg_safety(path: Path, *, allow_local_png: bool = False) -> ElementTree.Element:
     try:
         raw = path.read_text(encoding="utf-8")
         lowered = raw.lower()
@@ -129,10 +130,25 @@ def validate_svg_safety(path: Path) -> ElementTree.Element:
 
     blocked_elements = {
         "a", "animate", "animateMotion", "animateTransform", "discard", "foreignObject", "iframe",
-        "image", "script", "set", "style", "use",
+        "script", "set", "style", "use",
     }
     for node in root.iter():
         name = _local_name(node.tag)
+        if name == "image":
+            if not allow_local_png:
+                raise ValueError(f"SVG review evidence forbids <image>: {path}")
+            allowed_image_attributes = {"height", "href", "opacity", "preserveAspectRatio", "width", "x", "y"}
+            unknown_image_attributes = {_local_name(attribute) for attribute in node.attrib} - allowed_image_attributes
+            if unknown_image_attributes:
+                raise ValueError(f"SVG local image has unsupported attributes {sorted(unknown_image_attributes)}: {path}")
+            href = next((value for attribute, value in node.attrib.items() if _local_name(attribute) == "href"), "")
+            if not href or Path(href).name != href or Path(href).suffix.lower() != ".png":
+                raise ValueError(f"SVG local image must reference a sibling PNG filename: {path}")
+            linked_png = path.parent / href
+            if not linked_png.is_file():
+                raise ValueError(f"SVG local image does not exist: {linked_png}")
+            if png_dimensions(linked_png) not in {(720, 1280), (1080, 1920)}:
+                raise ValueError(f"SVG local image must be a native 9:16 review asset: {linked_png}")
         if name in blocked_elements:
             raise ValueError(f"SVG review evidence forbids <{name}>: {path}")
         forbidden_attributes = {"class", "style"}.intersection(node.attrib)
@@ -142,7 +158,7 @@ def validate_svg_safety(path: Path) -> ElementTree.Element:
             attribute_name = _local_name(attribute).lower()
             if attribute_name.startswith("on"):
                 raise ValueError(f"SVG review evidence forbids event attributes: {path}")
-            if attribute_name in {"href", "base"} and not value.startswith("#"):
+            if name != "image" and attribute_name in {"href", "base"} and not value.startswith("#"):
                 raise ValueError(f"SVG review evidence forbids external references: {path}")
             for match in re.finditer(r"url\(([^)]*)\)", value, re.IGNORECASE):
                 target = match.group(1).strip().strip("\"'")
@@ -151,8 +167,22 @@ def validate_svg_safety(path: Path) -> ElementTree.Element:
     return root
 
 
-def svg_viewbox_and_flat_text(path: Path) -> tuple[tuple[float, float, float, float], list[tuple[str, float]]]:
-    root = validate_svg_safety(path)
+def _estimated_text_width(value: str, size: float, letter_spacing: float) -> float:
+    units = 0.0
+    for character in value:
+        if character.isspace():
+            units += 0.35
+        elif unicodedata.east_asian_width(character) in {"W", "F"}:
+            units += 1.0
+        elif unicodedata.category(character).startswith("P"):
+            units += 0.48
+        else:
+            units += 0.62
+    return units * size + max(0, len(value) - 1) * max(0.0, letter_spacing)
+
+
+def svg_viewbox_and_flat_text(path: Path) -> tuple[tuple[float, float, float, float], list[tuple[str, float, float, float, float]]]:
+    root = validate_svg_safety(path, allow_local_png=True)
 
     raw_viewbox = root.attrib.get("viewBox", "")
     try:
@@ -184,7 +214,7 @@ def svg_viewbox_and_flat_text(path: Path) -> tuple[tuple[float, float, float, fl
         if "transparent SVG root" in str(exc): raise
         raise ValueError(f"invalid SVG root opacity in {path}") from exc
 
-    visible_text: list[tuple[str, float]] = []
+    visible_text: list[tuple[str, float, float, float, float]] = []
     for child in root:
         if _local_name(child.tag) != "text":
             continue
@@ -217,9 +247,35 @@ def svg_viewbox_and_flat_text(path: Path) -> tuple[tuple[float, float, float, fl
         size = _numeric_attribute(child, "font-size", path)
         value = (child.text or "").strip()
         if value:
-            visible_text.append((value, size))
+            raw_spacing = child.attrib.get("letter-spacing", "0").replace("px", "")
+            try:
+                letter_spacing = float(raw_spacing)
+            except ValueError as exc:
+                raise ValueError(f"SVG text requires numeric letter-spacing: {path}") from exc
+            if not math.isfinite(letter_spacing):
+                raise ValueError(f"SVG text requires finite letter-spacing: {path}")
+            visible_text.append((value, size, x, y, _estimated_text_width(value, size, letter_spacing)))
 
     nested_text = [node for node in root.iter() if _local_name(node.tag) == "text"]
     if len(nested_text) != len(visible_text):
         raise ValueError(f"all review text must be direct children of the SVG root: {path}")
     return viewbox, visible_text
+
+
+def sha256_static_artifact(path: Path) -> str:
+    """Hash the SVG plus every validated sibling PNG it references."""
+    root = validate_svg_safety(path, allow_local_png=True)
+    digest = hashlib.sha256()
+    digest.update(b"inkbrush-static-artifact-v1\0")
+    digest.update(path.name.encode("utf-8"))
+    digest.update(b"\0")
+    digest.update(path.read_bytes())
+    for node in root.iter():
+        if _local_name(node.tag) != "image":
+            continue
+        href = next(value for attribute, value in node.attrib.items() if _local_name(attribute) == "href")
+        digest.update(b"\0linked-png\0")
+        digest.update(href.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update((path.parent / href).read_bytes())
+    return digest.hexdigest()

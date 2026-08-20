@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from artifact_checks import png_dimensions, sha256_file, svg_viewbox_and_flat_text
+from artifact_checks import png_dimensions, sha256_file, sha256_static_artifact, svg_viewbox_and_flat_text
 
 
 STATES = {"PLAN_ONLY", "STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED", "HOLD"}
@@ -23,8 +23,8 @@ REQUIRED_FIELDS = {
     "version", "status", "title", "summary", "aspectRatio", "width", "height", "fps",
     "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "beats",
 }
-TOP_LEVEL_FIELDS = REQUIRED_FIELDS | {"$schema", "staticArtifact", "motionEvidence"}
-BEAT_FIELDS = {"id", "label", "zhLabel", "startSecond", "endSecond"}
+TOP_LEVEL_FIELDS = REQUIRED_FIELDS | {"$schema", "staticArtifact", "staticArtifactSha256", "motionEvidence"}
+BEAT_FIELDS = {"id", "label", "copy", "zhLabel", "startSecond", "endSecond"}
 MOTION_FIELDS = {"rendererLane", "rendererOwner", "reviewer", "staticApprovalSha256", "frames"}
 FRAME_FIELDS = {"role", "frame", "path", "sha256"}
 
@@ -83,7 +83,7 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
     if not _finite_number(margin) or not 8 <= margin <= 15: errors.append("safeMarginPercent must be a finite number between 8 and 15")
     if plan.get("styleRecipe") not in STYLE_RECIPES: errors.append(f"styleRecipe must be one of {sorted(STYLE_RECIPES)}")
     if plan.get("textMode") != "code-native": errors.append("textMode must be code-native")
-    if status == "PLAN_ONLY" and "staticArtifact" in plan: errors.append("PLAN_ONLY must not claim a staticArtifact")
+    if status == "PLAN_ONLY" and ({"staticArtifact", "staticArtifactSha256"} & plan.keys()): errors.append("PLAN_ONLY must not claim a static artifact or hash")
 
     beats = plan.get("beats")
     if not isinstance(beats, list) or not 3 <= len(beats) <= 6:
@@ -103,6 +103,7 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
         elif beat_id in seen_ids: errors.append(f"{prefix}.id must be unique")
         else: seen_ids.add(beat_id)
         if not isinstance(beat.get("label"), str) or not beat.get("label", "").strip(): errors.append(f"{prefix}.label must be non-empty")
+        if not isinstance(beat.get("copy"), str) or not beat.get("copy", "").strip(): errors.append(f"{prefix}.copy must be non-empty")
         start, end = beat.get("startSecond"), beat.get("endSecond")
         if not _finite_number(start) or not _finite_number(end) or start < 0 or end <= start:
             errors.append(f"{prefix} requires 0 <= finite startSecond < finite endSecond")
@@ -115,6 +116,7 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
         errors.append("artifact-bearing states require a base_dir; evidence cannot be verified from JSON alone")
 
     static_path: Path | None = None
+    verified_static_hash: str | None = None
     if status in STATIC_STATES and base_dir is not None:
         static_path = _artifact(base_dir, plan.get("staticArtifact"), "staticArtifact", errors)
         if static_path is not None:
@@ -125,12 +127,28 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
                     viewbox, flat_text = svg_viewbox_and_flat_text(static_path)
                     if valid_dimensions and viewbox != (0.0, 0.0, float(width), float(height)):
                         errors.append(f"staticArtifact viewBox must be 0 0 {width} {height}")
-                    visible = {text: size for text, size in flat_text}
-                    required_text = [plan.get("title", "")] + [beat.get("label", "") for beat in beats]
+                    visible = {text: size for text, size, _x, _y, _estimated_width in flat_text}
+                    required_text = [plan.get("title", "")] + [beat.get("label", "") for beat in beats] + [beat.get("copy", "") for beat in beats]
                     required_text += [beat["zhLabel"] for beat in beats if isinstance(beat.get("zhLabel"), str)]
                     for text in required_text:
                         if text not in visible: errors.append(f"staticArtifact is missing exact flat text: {text!r}")
                         elif visible[text] < 18: errors.append(f"staticArtifact text is too small for mobile review: {text!r}")
+                    if valid_dimensions and _finite_number(margin):
+                        safe_x = float(width) * float(margin) / 100
+                        safe_y = float(height) * float(margin) / 100
+                        for text, size, x, y, estimated_width in flat_text:
+                            if x < safe_x or x + estimated_width > float(width) - safe_x or y - size < safe_y or y + size * 0.25 > float(height) - safe_y:
+                                errors.append(f"staticArtifact text exceeds the {margin:g}% safe margin: {text!r}")
+                except ValueError as exc:
+                    errors.append(str(exc))
+            claimed_static_hash = plan.get("staticArtifactSha256")
+            if not isinstance(claimed_static_hash, str) or not HEX64.match(claimed_static_hash):
+                errors.append("staticArtifactSha256 must be 64 lowercase hex characters")
+            else:
+                try:
+                    verified_static_hash = sha256_static_artifact(static_path)
+                    if claimed_static_hash != verified_static_hash:
+                        errors.append("staticArtifactSha256 does not match the static artifact bundle")
                 except ValueError as exc:
                     errors.append(str(exc))
 
@@ -148,7 +166,7 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
             if isinstance(owner, str) and isinstance(reviewer, str) and owner.strip() and reviewer.strip() and owner.strip().casefold() == reviewer.strip().casefold(): errors.append("reviewer must be independent from rendererOwner")
             approval_hash = motion.get("staticApprovalSha256")
             if not isinstance(approval_hash, str) or not HEX64.match(approval_hash): errors.append("staticApprovalSha256 must be 64 lowercase hex characters")
-            elif approval_hash != sha256_file(static_path): errors.append("staticApprovalSha256 does not match staticArtifact")
+            elif verified_static_hash is None or approval_hash != verified_static_hash: errors.append("staticApprovalSha256 does not match the static artifact bundle")
 
             frames = motion.get("frames")
             if not isinstance(frames, list) or len(frames) != 3:
