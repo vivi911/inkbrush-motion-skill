@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280" role="img" aria-labelledby="title description">
+  <title id="title">AI Collaboration static ink-wash storyboard</title>
+  <desc id="description">A 9:16 Chinese ink-wash landscape mapping Observe, Decide, and Deliver along a river.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5efdf"/><stop offset="1" stop-color="#d9cbb2"/></linearGradient>
+    <linearGradient id="river" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#121614"/><stop offset=".75" stop-color="#26342e"/><stop offset="1" stop-color="#8f312b"/></linearGradient>
+    <filter id="mist"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" seed="17"/><feComponentTransfer><feFuncA type="table" tableValues="0 .1"/></feComponentTransfer></filter>
+  </defs>
+  <rect width="720" height="1280" fill="url(#paper)"/>
+  <rect width="720" height="1280" filter="url(#grain)" opacity=".35"/>
+  <path d="M-30 570L114 395L193 505L304 332L397 519L490 420L575 532L653 382L758 559V724H-30Z" fill="#66736e" opacity=".18"/>
+  <path d="M-20 625L86 515L191 599L274 469L374 612L476 489L555 594L660 478L744 599V750H-20Z" fill="#34423b" opacity=".27"/>
+  <path d="M-30 607C143 556 242 632 386 591S606 542 756 594M-20 674C128 634 241 703 379 655S602 621 742 666" fill="none" stroke="#fffdf4" stroke-width="44" stroke-linecap="round" opacity=".52" filter="url(#mist)"/>
+  <path d="M103 936C123 786 134 647 148 493M168 934C169 804 181 688 203 580M128 725C89 695 74 659 73 631M140 642C177 621 198 591 206 559M179 761C220 737 239 707 245 676" fill="none" stroke="#26352f" stroke-width="8" stroke-linecap="round" opacity=".83"/>
+  <path d="M74 632C93 631 113 645 129 672C100 664 79 652 74 632ZM205 560C184 567 165 586 150 616C179 603 200 583 205 560ZM245 676C219 682 200 701 182 731C215 719 240 697 245 676Z" fill="#26352f" opacity=".77"/>
+  <path d="M149 1027C152 947 219 909 257 849C300 781 261 710 316 650C360 603 434 621 466 559C498 497 439 429 484 356C513 308 563 292 589 236" fill="none" stroke="#1d2925" stroke-width="48" stroke-linecap="round" opacity=".15" filter="url(#mist)"/>
+  <path d="M149 1027C152 947 219 909 257 849C300 781 261 710 316 650C360 603 434 621 466 559C498 497 439 429 484 356C513 308 563 292 589 236" fill="none" stroke="url(#river)" stroke-width="19" stroke-linecap="round"/>
+  <circle cx="221" cy="894" r="6" fill="#96352e"/><circle cx="323" cy="652" r="6" fill="#96352e"/><circle cx="479" cy="424" r="6" fill="#96352e"/>
+  <rect x="578" y="1122" width="64" height="64" rx="3" fill="none" stroke="#96352e" stroke-width="5"/>
+  <text x="78" y="168" fill="#151c18" font-family="Georgia, serif" font-size="47" font-weight="600">AI Collaboration</text>
+  <text x="80" y="210" fill="#59635d" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="3">A KNOWLEDGE JOURNEY</text>
+  <text x="250" y="879" fill="#852f29" font-family="Arial, sans-serif" font-size="17" font-weight="700">01</text>
+  <text x="250" y="920" fill="#17201c" font-family="Georgia, serif" font-size="40" font-weight="600">Observe</text>
+  <text x="250" y="955" fill="#4f5b55" font-family="Georgia, serif" font-size="21">看見問題</text>
+  <text x="344" y="643" fill="#852f29" font-family="Arial, sans-serif" font-size="17" font-weight="700">02</text>
+  <text x="344" y="684" fill="#17201c" font-family="Georgia, serif" font-size="40" font-weight="600">Decide</text>
+  <text x="344" y="718" fill="#4f5b55" font-family="Georgia, serif" font-size="21">找到取捨</text>
+  <text x="370" y="395" fill="#852f29" font-family="Arial, sans-serif" font-size="17" font-weight="700">03</text>
+  <text x="308" y="437" fill="#17201c" font-family="Georgia, serif" font-size="40" font-weight="600">Deliver</text>
+  <text x="348" y="473" fill="#4f5b55" font-family="Georgia, serif" font-size="21">完成交付</text>
+  <text x="585" y="1000" fill="#202823" font-family="serif" font-size="72">知</text>
+  <text x="585" y="1082" fill="#202823" font-family="serif" font-size="72" opacity=".55">行</text>
+  <text x="590" y="1167" fill="#96352e" font-family="serif" font-size="23" font-weight="600">問問</text>
+  <text x="80" y="1192" fill="#59635d" font-family="Arial, sans-serif" font-size="13" font-weight="700">INKBRUSH MOTION · 2026</text>
+</svg>

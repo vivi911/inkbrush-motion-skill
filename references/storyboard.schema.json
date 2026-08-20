@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vivi911.github.io/inkbrush-motion-skill/references/storyboard.schema.json",
+  "title": "InkBrush Motion Storyboard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "status", "title", "summary", "aspectRatio", "width", "height", "fps", "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "beats"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "version": {"const": "1.0"},
+    "status": {"enum": ["PLAN_ONLY", "STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED", "HOLD"]},
+    "title": {"type": "string", "minLength": 1},
+    "summary": {"type": "string", "minLength": 1},
+    "aspectRatio": {"const": "9:16"},
+    "width": {"enum": [720, 1080]},
+    "height": {"enum": [1280, 1920]},
+    "fps": {"const": 30},
+    "previewSeconds": {"type": "number", "minimum": 6, "maximum": 10},
+    "finalHoldFrames": {"type": "integer", "minimum": 30},
+    "safeMarginPercent": {"type": "number", "minimum": 8, "maximum": 15},
+    "styleRecipe": {"enum": ["shan-shui-scroll", "minimal-calligraphy", "seal-diagram"]},
+    "textMode": {"const": "code-native"},
+    "staticArtifact": {"type": "string", "pattern": "\\.svg$"},
+    "beats": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "startSecond", "endSecond"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+          "label": {"type": "string", "minLength": 1},
+          "zhLabel": {"type": "string", "minLength": 1},
+          "startSecond": {"type": "number", "minimum": 0},
+          "endSecond": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    },
+    "motionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rendererLane", "rendererOwner", "reviewer", "staticApprovalSha256", "frames"],
+      "properties": {
+        "rendererLane": {"enum": ["svg-js", "gsap-svg", "remotion-svg", "after-effects"]},
+        "rendererOwner": {"type": "string", "minLength": 1},
+        "reviewer": {"type": "string", "minLength": 1},
+        "staticApprovalSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "frames": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role", "frame", "path", "sha256"],
+            "properties": {
+              "role": {"enum": ["start", "middle", "end"]},
+              "frame": {"type": "integer", "minimum": 0},
+              "path": {"type": "string", "pattern": "\\.png$"},
+              "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {"properties": {"width": {"const": 720}, "height": {"const": 1280}}},
+        {"properties": {"width": {"const": 1080}, "height": {"const": 1920}}}
+      ]
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["MOTION_PROOF_READY", "RENDERER_REQUIRED", "STATIC_REVIEW_READY"]}}},
+      "then": {"required": ["staticArtifact"]}
+    },
+    {
+      "if": {"properties": {"status": {"const": "MOTION_PROOF_READY"}}},
+      "then": {"required": ["motionEvidence"]},
+      "else": {"not": {"required": ["motionEvidence"]}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "PLAN_ONLY"}}},
+      "then": {"not": {"required": ["staticArtifact"]}}
+    }
+  ]
+}

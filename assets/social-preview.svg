@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">InkBrush Motion Skill</title>
+  <desc id="desc">Knowledge painted at human speed, with a vertical ink-wash knowledge journey.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5efdf"/><stop offset="1" stop-color="#d8cbb3"/></linearGradient>
+    <filter id="mist"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" seed="19"/><feComponentTransfer><feFuncA type="table" tableValues="0 .09"/></feComponentTransfer></filter>
+    <clipPath id="scroll"><rect x="875" y="40" width="320" height="568" rx="4"/></clipPath>
+  </defs>
+  <rect width="1280" height="640" fill="url(#paper)"/>
+  <rect width="1280" height="640" filter="url(#grain)" opacity=".45"/>
+  <path d="M46 88H830M46 563H830" fill="none" stroke="#413b30" stroke-width="1" opacity=".2"/>
+  <rect x="54" y="56" width="58" height="58" fill="#98372f"/>
+  <text x="68" y="98" fill="#f5efdf" font-family="serif" font-size="32" font-weight="700">墨</text>
+  <text x="132" y="92" fill="#202620" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="1">INKBRUSH MOTION</text>
+  <text x="56" y="188" fill="#98372f" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="3">OPEN-SOURCE AI SKILL · NATIVE 9:16</text>
+  <text x="52" y="276" fill="#171b18" font-family="Georgia, serif" font-size="73">Knowledge,</text>
+  <text x="52" y="355" fill="#98372f" font-family="Georgia, serif" font-size="73" font-style="italic">painted</text>
+  <text x="337" y="355" fill="#171b18" font-family="Georgia, serif" font-size="73">at</text>
+  <text x="52" y="434" fill="#171b18" font-family="Georgia, serif" font-size="73">human speed.</text>
+  <text x="56" y="497" fill="#4f5953" font-family="Arial, sans-serif" font-size="19">Static-first · Exact text · Brush-led motion · MIT</text>
+  <text x="56" y="596" fill="#68716b" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2">VIVI911 / GOASKVIVI · 2026</text>
+
+  <g clip-path="url(#scroll)">
+    <rect x="875" y="40" width="320" height="568" fill="#eee5d2"/>
+    <path d="M852 319L919 226L972 290L1032 194L1085 298L1130 237L1174 302L1224 218L1262 302V390H852Z" fill="#6f7b74" opacity=".2"/>
+    <path d="M856 359L923 294L982 344L1032 269L1091 351L1144 283L1187 345L1244 281L1280 345V410H856Z" fill="#34423b" opacity=".26"/>
+    <path d="M847 340C935 307 1006 359 1084 332S1211 305 1273 337M850 384C940 359 1004 404 1093 377S1200 354 1269 380" fill="none" stroke="#fffdf4" stroke-width="28" opacity=".55" filter="url(#mist)"/>
+    <path d="M932 570C939 514 982 492 999 451C1018 405 988 370 1022 334C1053 302 1092 319 1114 280C1134 244 1097 211 1127 171C1141 152 1159 141 1170 122" fill="none" stroke="#1d2925" stroke-width="31" stroke-linecap="round" opacity=".15" filter="url(#mist)"/>
+    <path d="M932 570C939 514 982 492 999 451C1018 405 988 370 1022 334C1053 302 1092 319 1114 280C1134 244 1097 211 1127 171C1141 152 1159 141 1170 122" fill="none" stroke="#19211d" stroke-width="13" stroke-linecap="round"/>
+    <circle cx="991" cy="471" r="4" fill="#98372f"/><circle cx="1023" cy="333" r="4" fill="#98372f"/><circle cx="1120" cy="270" r="4" fill="#98372f"/>
+    <text x="914" y="92" fill="#171b18" font-family="Georgia, serif" font-size="25" font-weight="600">AI Collaboration</text>
+    <text x="1011" y="469" fill="#171b18" font-family="Georgia, serif" font-size="20">Observe</text>
+    <text x="1041" y="329" fill="#171b18" font-family="Georgia, serif" font-size="20">Decide</text>
+    <text x="1044" y="257" fill="#171b18" font-family="Georgia, serif" font-size="20">Deliver</text>
+    <text x="1128" y="530" fill="#202823" font-family="serif" font-size="45">知</text>
+    <text x="1128" y="578" fill="#202823" font-family="serif" font-size="45" opacity=".55">行</text>
+    <path d="M1179 101L1187 54" fill="none" stroke="#704b2d" stroke-width="10" stroke-linecap="round"/>
+    <path d="M1177 108L1182 82" fill="none" stroke="#b59864" stroke-width="14" stroke-linecap="round"/>
+    <path d="M1170 122L1173 101L1183 103Z" fill="#151b18"/>
+  </g>
+  <rect x="875" y="40" width="320" height="568" rx="4" fill="none" stroke="#534936" stroke-width="2" opacity=".35"/>
+  <rect x="863" y="30" width="344" height="15" fill="#8e765d" stroke="#45392d"/><rect x="863" y="603" width="344" height="15" fill="#8e765d" stroke="#45392d"/>
+</svg>

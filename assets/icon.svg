@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="InkBrush Motion seal">
+  <rect width="256" height="256" rx="40" fill="#ede5d4"/>
+  <path d="M45 181C68 158 83 159 99 135C112 115 105 96 124 78C143 60 163 70 178 48" fill="none" stroke="#1c2521" stroke-width="18" stroke-linecap="round"/>
+  <path d="M47 185C74 166 91 166 107 141C120 120 112 101 132 84" fill="none" stroke="#1c2521" stroke-width="36" stroke-linecap="round" opacity=".12"/>
+  <rect x="152" y="151" width="62" height="62" rx="4" fill="#98372f"/>
+  <text x="167" y="194" fill="#f4eddf" font-family="serif" font-size="34" font-weight="700">墨</text>
+</svg>

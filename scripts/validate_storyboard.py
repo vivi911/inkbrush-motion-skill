@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""Validate InkBrush Motion storyboard state and supplied artifact evidence."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import re
+import sys
+from pathlib import Path
+from typing import Any
+
+from artifact_checks import png_dimensions, sha256_file, svg_viewbox_and_flat_text
+
+
+STATES = {"PLAN_ONLY", "STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED", "HOLD"}
+STATIC_STATES = {"STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED"}
+STYLE_RECIPES = {"shan-shui-scroll", "minimal-calligraphy", "seal-diagram"}
+RENDERER_LANES = {"svg-js", "gsap-svg", "remotion-svg", "after-effects"}
+HEX64 = re.compile(r"^[a-f0-9]{64}$")
+REQUIRED_FIELDS = {
+    "version", "status", "title", "summary", "aspectRatio", "width", "height", "fps",
+    "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "beats",
+}
+TOP_LEVEL_FIELDS = REQUIRED_FIELDS | {"$schema", "staticArtifact", "motionEvidence"}
+BEAT_FIELDS = {"id", "label", "zhLabel", "startSecond", "endSecond"}
+MOTION_FIELDS = {"rendererLane", "rendererOwner", "reviewer", "staticApprovalSha256", "frames"}
+FRAME_FIELDS = {"role", "frame", "path", "sha256"}
+
+
+def _finite_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))
+
+
+def _reject_json_constant(token: str) -> None:
+    raise ValueError(f"non-finite JSON number is forbidden: {token}")
+
+
+def _artifact(root: Path, raw_path: Any, field: str, errors: list[str]) -> Path | None:
+    if not isinstance(raw_path, str) or not raw_path.strip():
+        errors.append(f"{field} must be a non-empty package-relative path")
+        return None
+    path = (root / raw_path).resolve()
+    try:
+        path.relative_to(root.resolve())
+    except ValueError:
+        errors.append(f"{field} escapes the package root")
+        return None
+    if not path.is_file():
+        errors.append(f"{field} does not exist: {raw_path}")
+        return None
+    return path
+
+
+def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
+    if not isinstance(plan, dict):
+        return ["storyboard plan must be a JSON object"]
+    errors: list[str] = []
+    missing = sorted(REQUIRED_FIELDS - plan.keys())
+    if missing:
+        errors.append(f"missing required fields: {', '.join(missing)}")
+    unknown = sorted(plan.keys() - TOP_LEVEL_FIELDS)
+    if unknown:
+        errors.append(f"unknown top-level fields: {', '.join(unknown)}")
+
+    status = plan.get("status")
+    if plan.get("version") != "1.0": errors.append("version must be 1.0")
+    if status not in STATES: errors.append(f"status must be one of {sorted(STATES)}")
+    if not isinstance(plan.get("title"), str) or not plan.get("title", "").strip(): errors.append("title must be non-empty")
+    if not isinstance(plan.get("summary"), str) or not plan.get("summary", "").strip(): errors.append("summary must be non-empty")
+    if plan.get("aspectRatio") != "9:16": errors.append("aspectRatio must be 9:16")
+
+    width, height = plan.get("width"), plan.get("height")
+    valid_dimensions = not isinstance(width, bool) and not isinstance(height, bool) and (width, height) in {(720, 1280), (1080, 1920)}
+    if not valid_dimensions:
+        errors.append("dimensions must be 720x1280 or 1080x1920")
+    if isinstance(plan.get("fps"), bool) or plan.get("fps") != 30: errors.append("fps must be 30")
+    preview = plan.get("previewSeconds")
+    if not _finite_number(preview) or not 6 <= preview <= 10: errors.append("previewSeconds must be a finite number between 6 and 10")
+    if not isinstance(plan.get("finalHoldFrames"), int) or isinstance(plan.get("finalHoldFrames"), bool) or plan.get("finalHoldFrames", 0) < 30: errors.append("finalHoldFrames must be an integer of at least 30")
+    margin = plan.get("safeMarginPercent")
+    if not _finite_number(margin) or not 8 <= margin <= 15: errors.append("safeMarginPercent must be a finite number between 8 and 15")
+    if plan.get("styleRecipe") not in STYLE_RECIPES: errors.append(f"styleRecipe must be one of {sorted(STYLE_RECIPES)}")
+    if plan.get("textMode") != "code-native": errors.append("textMode must be code-native")
+    if status == "PLAN_ONLY" and "staticArtifact" in plan: errors.append("PLAN_ONLY must not claim a staticArtifact")
+
+    beats = plan.get("beats")
+    if not isinstance(beats, list) or not 3 <= len(beats) <= 6:
+        errors.append("beats must contain 3 to 6 items")
+        beats = []
+    seen_ids: set[str] = set()
+    previous_end = 0.0
+    for index, beat in enumerate(beats):
+        prefix = f"beats[{index}]"
+        if not isinstance(beat, dict):
+            errors.append(f"{prefix} must be an object")
+            continue
+        unknown_beat = sorted(beat.keys() - BEAT_FIELDS)
+        if unknown_beat: errors.append(f"{prefix} has unknown fields: {', '.join(unknown_beat)}")
+        beat_id = beat.get("id")
+        if not isinstance(beat_id, str) or not re.match(r"^[a-z][a-z0-9-]*$", beat_id): errors.append(f"{prefix}.id must be kebab-case")
+        elif beat_id in seen_ids: errors.append(f"{prefix}.id must be unique")
+        else: seen_ids.add(beat_id)
+        if not isinstance(beat.get("label"), str) or not beat.get("label", "").strip(): errors.append(f"{prefix}.label must be non-empty")
+        start, end = beat.get("startSecond"), beat.get("endSecond")
+        if not _finite_number(start) or not _finite_number(end) or start < 0 or end <= start:
+            errors.append(f"{prefix} requires 0 <= finite startSecond < finite endSecond")
+            continue
+        if start < previous_end: errors.append(f"{prefix} overlaps the previous beat")
+        if _finite_number(preview) and end > preview: errors.append(f"{prefix}.endSecond exceeds previewSeconds")
+        previous_end = end
+
+    if status in STATIC_STATES and base_dir is None:
+        errors.append("artifact-bearing states require a base_dir; evidence cannot be verified from JSON alone")
+
+    static_path: Path | None = None
+    if status in STATIC_STATES and base_dir is not None:
+        static_path = _artifact(base_dir, plan.get("staticArtifact"), "staticArtifact", errors)
+        if static_path is not None:
+            if static_path.suffix.lower() != ".svg":
+                errors.append("staticArtifact must be an SVG")
+            else:
+                try:
+                    viewbox, flat_text = svg_viewbox_and_flat_text(static_path)
+                    if valid_dimensions and viewbox != (0.0, 0.0, float(width), float(height)):
+                        errors.append(f"staticArtifact viewBox must be 0 0 {width} {height}")
+                    visible = {text: size for text, size in flat_text}
+                    required_text = [plan.get("title", "")] + [beat.get("label", "") for beat in beats]
+                    required_text += [beat["zhLabel"] for beat in beats if isinstance(beat.get("zhLabel"), str)]
+                    for text in required_text:
+                        if text not in visible: errors.append(f"staticArtifact is missing exact flat text: {text!r}")
+                        elif visible[text] < 18: errors.append(f"staticArtifact text is too small for mobile review: {text!r}")
+                except ValueError as exc:
+                    errors.append(str(exc))
+
+    motion = plan.get("motionEvidence")
+    if status == "MOTION_PROOF_READY":
+        if not isinstance(motion, dict):
+            errors.append("MOTION_PROOF_READY requires motionEvidence")
+        elif base_dir is not None and static_path is not None:
+            unknown_motion = sorted(motion.keys() - MOTION_FIELDS)
+            if unknown_motion: errors.append(f"motionEvidence has unknown fields: {', '.join(unknown_motion)}")
+            if motion.get("rendererLane") not in RENDERER_LANES: errors.append(f"rendererLane must be one of {sorted(RENDERER_LANES)}")
+            owner, reviewer = motion.get("rendererOwner"), motion.get("reviewer")
+            if not isinstance(owner, str) or not owner.strip(): errors.append("rendererOwner must be non-empty")
+            if not isinstance(reviewer, str) or not reviewer.strip(): errors.append("reviewer must be non-empty")
+            if isinstance(owner, str) and isinstance(reviewer, str) and owner.strip() and reviewer.strip() and owner.strip().casefold() == reviewer.strip().casefold(): errors.append("reviewer must be independent from rendererOwner")
+            approval_hash = motion.get("staticApprovalSha256")
+            if not isinstance(approval_hash, str) or not HEX64.match(approval_hash): errors.append("staticApprovalSha256 must be 64 lowercase hex characters")
+            elif approval_hash != sha256_file(static_path): errors.append("staticApprovalSha256 does not match staticArtifact")
+
+            frames = motion.get("frames")
+            if not isinstance(frames, list) or len(frames) != 3:
+                errors.append("motionEvidence.frames must contain exactly three items")
+            else:
+                roles, indices, paths, hashes = [], [], [], []
+                for index, frame in enumerate(frames):
+                    prefix = f"motionEvidence.frames[{index}]"
+                    if not isinstance(frame, dict):
+                        errors.append(f"{prefix} must be an object")
+                        continue
+                    unknown_frame = sorted(frame.keys() - FRAME_FIELDS)
+                    if unknown_frame: errors.append(f"{prefix} has unknown fields: {', '.join(unknown_frame)}")
+                    roles.append(frame.get("role")); indices.append(frame.get("frame")); paths.append(frame.get("path")); hashes.append(frame.get("sha256"))
+                    frame_path = _artifact(base_dir, frame.get("path"), f"{prefix}.path", errors)
+                    if frame_path is not None:
+                        try:
+                            if valid_dimensions and png_dimensions(frame_path) != (width, height): errors.append(f"{prefix} PNG dimensions must be {width}x{height}")
+                            elif not valid_dimensions: png_dimensions(frame_path)
+                            if frame.get("sha256") != sha256_file(frame_path): errors.append(f"{prefix}.sha256 does not match the file")
+                        except ValueError as exc: errors.append(str(exc))
+                if roles != ["start", "middle", "end"]: errors.append("frame roles must be ordered start, middle, end")
+                if not all(isinstance(value, int) and not isinstance(value, bool) for value in indices) or indices != sorted(indices) or len(set(indices)) != 3: errors.append("frame indices must be three unique increasing integers")
+                if not all(isinstance(value, str) for value in paths) or len(set(paths)) != 3: errors.append("frame paths must be three unique strings")
+                if not all(isinstance(value, str) for value in hashes) or len(set(hashes)) != 3: errors.append("frame hashes must be three unique strings")
+    elif motion is not None:
+        errors.append("motionEvidence is only allowed for MOTION_PROOF_READY")
+
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("plan", type=Path)
+    parser.add_argument("--base-dir", type=Path, default=Path(__file__).resolve().parents[1])
+    args = parser.parse_args()
+    try:
+        plan = json.loads(args.plan.read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        print(f"FAIL: cannot read plan: {exc}")
+        return 1
+    errors = validate(plan, args.base_dir.resolve())
+    if errors:
+        print("FAIL: storyboard evidence is not ready")
+        for error in errors: print(f"- {error}")
+        return 1
+    print(f"PASS: {args.plan} is {plan['status']} with verified supplied evidence")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

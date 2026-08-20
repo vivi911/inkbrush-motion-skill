@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ede5d4">
+    <meta name="description" content="An open-source AI Skill and zero-dependency SVG demo for 9:16 Chinese ink-wash knowledge animations.">
+    <meta property="og:title" content="InkBrush Motion Skill">
+    <meta property="og:description" content="Turn structured knowledge into calm, human-paced Chinese ink-wash motion.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/social-preview.png">
+    <title>InkBrush Motion Skill — Knowledge, painted at human speed</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "InkBrush Motion Skill",
+        "description": "An open-source AI Skill and SVG demo for 9:16 Chinese ink-wash knowledge animations.",
+        "codeRepository": "https://github.com/vivi911/inkbrush-motion-skill",
+        "license": "https://opensource.org/license/mit",
+        "programmingLanguage": ["HTML", "CSS", "JavaScript", "Python"]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="InkBrush Motion home">
+        <span class="brand-seal" aria-hidden="true">墨</span>
+        <span>InkBrush Motion</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#demo">Demo</a>
+        <a href="#delivery">Delivery</a>
+        <a href="#license">License</a>
+        <a class="nav-github" href="https://github.com/vivi911/inkbrush-motion-skill">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow">Open-source AI Skill · 9:16 by default</p>
+          <h1>Knowledge,<br><em>painted</em> at<br>human speed.</h1>
+          <p class="lede">Turn a lesson, framework, or idea into a quiet Chinese ink-wash animation—where the brush reveals the thinking instead of decorating it.</p>
+          <div class="hero-actions">
+            <button class="button button-primary" id="replay" type="button">Replay the brush <span aria-hidden="true">↻</span></button>
+            <a class="button button-secondary" href="SKILL.md">Read the Skill</a>
+          </div>
+          <p class="proof-line"><span aria-hidden="true">✓</span> Zero runtime dependencies · MIT licensed · Static-first workflow</p>
+        </div>
+
+        <div class="stage-shell" id="demo" aria-label="Animated ink-wash knowledge map">
+          <div class="stage-label"><span>LIVE SVG DEMO</span><span id="motion-status" aria-live="polite">Painting…</span></div>
+          <div class="scroll-wrap">
+            <svg id="ink-stage" viewBox="0 0 720 1280" role="img" aria-labelledby="stage-title stage-desc">
+              <title id="stage-title">A brush paints a three-step knowledge path</title>
+              <desc id="stage-desc">An animated Chinese brush travels through Observe, Decide, and Deliver in a mountain-and-river landscape.</desc>
+              <defs>
+                <linearGradient id="paper-wash" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#f5efdf"/>
+                  <stop offset="0.56" stop-color="#e9dfc9"/>
+                  <stop offset="1" stop-color="#d9cbb2"/>
+                </linearGradient>
+                <linearGradient id="ink-gradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#121614"/>
+                  <stop offset="0.72" stop-color="#24302d"/>
+                  <stop offset="1" stop-color="#5a211b"/>
+                </linearGradient>
+                <filter id="paper-grain" x="-10%" y="-10%" width="120%" height="120%">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="17" result="noise"/>
+                  <feColorMatrix in="noise" type="saturate" values="0" result="mono"/>
+                  <feComponentTransfer in="mono"><feFuncA type="table" tableValues="0 0.12"/></feComponentTransfer>
+                </filter>
+                <filter id="ink-bloom" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="10"/>
+                </filter>
+                <filter id="mist-blur" x="-30%" y="-100%" width="160%" height="300%">
+                  <feGaussianBlur stdDeviation="24"/>
+                </filter>
+                <filter id="brush-shadow" x="-100%" y="-100%" width="300%" height="300%">
+                  <feDropShadow dx="0" dy="10" stdDeviation="7" flood-color="#171b18" flood-opacity="0.22"/>
+                </filter>
+                <mask id="soft-mask">
+                  <rect width="720" height="1280" fill="white"/>
+                  <ellipse cx="360" cy="668" rx="340" ry="120" fill="#bbb" filter="url(#mist-blur)"/>
+                </mask>
+              </defs>
+
+              <rect width="720" height="1280" rx="16" fill="url(#paper-wash)"/>
+              <rect width="720" height="1280" rx="16" filter="url(#paper-grain)" opacity="0.36"/>
+              <path class="paper-fiber" d="M40 160C178 136 293 179 420 150S618 112 686 138M28 870C195 844 334 890 491 858S635 822 700 841M90 1110C248 1090 359 1134 627 1085"/>
+
+              <g class="distant-mountains" mask="url(#soft-mask)">
+                <path d="M-30 565L116 394L192 501L304 329L396 518L489 419L576 530L652 382L758 558V722H-30Z"/>
+                <path d="M-20 625L85 514L191 598L274 468L373 612L476 488L555 593L659 477L744 598V747H-20Z"/>
+                <path class="ridge-line" d="M38 561L119 450L185 520L304 373L391 539M457 531L490 467L568 547L648 425L707 535"/>
+              </g>
+
+              <g class="mist">
+                <path d="M-30 592C144 541 239 623 385 585S605 535 756 590"/>
+                <path d="M-24 655C123 620 237 690 378 644S601 609 744 657"/>
+                <path d="M26 733C203 691 316 764 484 719S641 690 735 718"/>
+              </g>
+
+              <g class="bamboo" aria-hidden="true">
+                <path d="M102 934C122 785 133 646 147 492M167 933C168 803 180 687 202 579"/>
+                <path d="M127 724C88 694 73 658 72 630M139 641C176 620 197 590 205 558M178 760C219 736 238 706 244 675M159 833C120 810 103 781 99 752"/>
+                <path class="leaf" d="M73 631C92 630 112 644 128 671C99 663 78 651 73 631ZM204 559C183 566 164 585 149 615C178 602 199 582 204 559ZM244 675C218 681 199 700 181 730C214 718 239 696 244 675ZM99 752C122 756 143 777 156 806C129 794 104 775 99 752Z"/>
+              </g>
+
+              <path id="river-diffusion" class="river river-diffusion" d="M148 1027C151 947 218 909 256 849C299 781 260 710 315 650C359 603 433 621 465 559C497 497 438 429 483 356C512 308 562 292 588 236"/>
+              <path id="river-path" class="river river-path" d="M148 1027C151 947 218 909 256 849C299 781 260 710 315 650C359 603 433 621 465 559C497 497 438 429 483 356C512 308 562 292 588 236"/>
+              <g class="waypoint waypoint-one" data-threshold="0.18">
+                <circle cx="220" cy="894" r="6"/>
+                <text x="250" y="879">01</text>
+                <text class="waypoint-main" x="250" y="920">Observe</text>
+                <text class="waypoint-sub" x="250" y="955">看見問題</text>
+              </g>
+              <g class="waypoint waypoint-two" data-threshold="0.49">
+                <circle cx="322" cy="652" r="6"/>
+                <text x="344" y="643">02</text>
+                <text class="waypoint-main" x="344" y="684">Decide</text>
+                <text class="waypoint-sub" x="344" y="718">找到取捨</text>
+              </g>
+              <g class="waypoint waypoint-three" data-threshold="0.79">
+                <circle cx="478" cy="424" r="6"/>
+                <text x="370" y="395">03</text>
+                <text class="waypoint-main" x="308" y="437">Deliver</text>
+                <text class="waypoint-sub" x="348" y="473">完成交付</text>
+              </g>
+
+              <g id="brush" filter="url(#brush-shadow)" aria-hidden="true">
+                <g transform="translate(-8 -72)">
+                  <path class="brush-handle" d="M0 8L-2 -88C-2 -101 3 -110 9 -110C15 -110 20 -101 20 -88L18 8Z"/>
+                  <path class="brush-ferrule" d="M-3 9C4 4 13 4 21 9L19 27C12 32 5 32-1 27Z"/>
+                  <path class="brush-tip" d="M-1 27C5 36 7 51 8 70C14 52 17 38 19 27C11 31 5 31-1 27Z"/>
+                  <circle class="ink-drop" cx="8" cy="72" r="5"/>
+                </g>
+              </g>
+
+              <text class="scroll-title" x="78" y="168">AI Collaboration</text>
+              <text class="scroll-kicker" x="80" y="210">A KNOWLEDGE JOURNEY</text>
+              <text class="calligraphy" x="585" y="1000">知</text>
+              <text class="calligraphy calligraphy-two" x="585" y="1082">行</text>
+              <g class="seal" aria-hidden="true"><rect x="578" y="1122" width="64" height="64" rx="3"/><text x="590" y="1167">問問</text></g>
+              <text class="edition" x="80" y="1192">INKBRUSH MOTION · 2026</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="manifesto" aria-labelledby="manifesto-title">
+        <p class="section-number">01 / INTENT</p>
+        <h2 id="manifesto-title">The motion is not the message.<br><em>The motion reveals the message.</em></h2>
+        <p>Instead of glossy AI particles and dashboard theatrics, InkBrush Motion uses one restrained metaphor: a human brush moving through thought. Each stroke earns its place by clarifying sequence, hierarchy, or change.</p>
+      </section>
+
+      <section class="delivery" id="delivery" aria-labelledby="delivery-title">
+        <div class="section-heading">
+          <div><p class="section-number">02 / DELIVERY</p><h2 id="delivery-title">A proof-first package.</h2></div>
+          <p>The Skill stops early when evidence is missing. A beautiful still is never mislabeled as a finished motion render.</p>
+        </div>
+        <div class="delivery-grid">
+          <article><span class="card-index">A</span><h3>Static board</h3><p>One 9:16 composition locks the hierarchy, safe zones, text, and ink language before motion begins.</p><code>STATIC_REVIEW_READY</code></article>
+          <article><span class="card-index">B</span><h3>Motion proof</h3><p>Three distinct frames prove the brush journey: beginning, development, and resolved hold.</p><code>MOTION_PROOF_READY</code></article>
+          <article><span class="card-index">C</span><h3>Evidence packet</h3><p>Dimensions, duration, renderer lane, frame hashes, and review ownership stay checkable.</p><code>FAIL-CLOSED QA</code></article>
+        </div>
+      </section>
+
+      <section class="principles" aria-labelledby="principles-title">
+        <div class="principles-visual" aria-hidden="true">
+          <span class="ink-orbit orbit-one"></span><span class="ink-orbit orbit-two"></span><span class="ink-dot"></span>
+          <strong>少<br>即<br>是<br>多</strong>
+        </div>
+        <div class="principles-copy">
+          <p class="section-number">03 / PRINCIPLES</p>
+          <h2 id="principles-title">Built to feel made,<br>not generated.</h2>
+          <ul>
+            <li><span>01</span><div><strong>Static first</strong><p>Approve the visual sentence before animating its grammar.</p></div></li>
+            <li><span>02</span><div><strong>One living stroke</strong><p>Use one primary ink journey instead of a field of competing effects.</p></div></li>
+            <li><span>03</span><div><strong>Text stays exact</strong><p>Knowledge text remains code-native, selectable, and reviewable.</p></div></li>
+            <li><span>04</span><div><strong>9:16 is native</strong><p>The composition is authored for vertical viewing—not cropped into it later.</p></div></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="license-panel" id="license" aria-labelledby="license-title">
+        <div>
+          <p class="section-number">04 / RIGHTS</p>
+          <h2 id="license-title">Use it. Adapt it.<br>Credit the license.</h2>
+        </div>
+        <div class="license-copy">
+          <p>The repository code, Skill instructions, documentation, schemas, tests, and code-authored demo visuals are released under the <a href="LICENSE">MIT License</a>.</p>
+          <p>GoAskVivi and Vivi names are identifiers of origin, not an endorsement license. The package does not claim copyright over purely machine-generated material where the law does not recognize it.</p>
+          <a href="COPYRIGHT.md">Read the full copyright and provenance statement →</a>
+        </div>
+      </section>
+
+      <section class="star-cta" aria-labelledby="star-title">
+        <span class="seal-large" aria-hidden="true">開源</span>
+        <p class="section-number">MAKE KNOWLEDGE FEEL HUMAN AGAIN</p>
+        <h2 id="star-title">If this gives your next idea<br>a quieter way to move—</h2>
+        <a class="star-link" href="https://github.com/vivi911/inkbrush-motion-skill">Star InkBrush Motion on GitHub <span aria-hidden="true">★</span></a>
+      </section>
+    </main>
+
+    <footer><span>InkBrush Motion Skill · GoAskVivi</span><span>MIT · 2026</span></footer>
+    <script src="app.js" defer></script>
+  </body>
+</html>

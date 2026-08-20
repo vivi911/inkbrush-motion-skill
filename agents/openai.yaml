@@ -1,0 +1,4 @@
+interface:
+  display_name: "InkBrush Motion"
+  short_description: "Turn knowledge into calm 9:16 ink-wash motion"
+  default_prompt: "Use $inkbrush-motion-skill to turn this knowledge into a static-first 9:16 ink-wash motion package."
