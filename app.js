@@ -4,6 +4,8 @@
   const stage = document.querySelector("#ink-stage");
   const path = document.querySelector("#river-path");
   const diffusion = document.querySelector("#river-diffusion");
+  const dryPath = document.querySelector("#river-dry");
+  const dryMask = document.querySelector("#river-dry-mask");
   const brush = document.querySelector("#brush");
   const movingBrush = document.querySelector("#moving-brush");
   const wetEdge = document.querySelector(".wet-edge");
@@ -17,27 +19,29 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const previewMode = new URLSearchParams(window.location.search).get("preview");
 
-  if (!stage || !path || !diffusion || !brush || !movingBrush || !wetEdge || !replayButton || !status || !journeyFrame) return;
+  if (!stage || !path || !diffusion || !dryPath || !dryMask || !brush || !movingBrush || !wetEdge || !replayButton || !status || !journeyFrame) return;
 
   const duration = 9200;
-  const diffusionDelay = 0.025;
+  const totalFrames = duration / 1000 * 30;
+  const diffusionDelay = 5 / totalFrames;
+  const dryingDelay = 12 / totalFrames;
   const pathLength = path.getTotalLength();
   let frameId = 0;
   let loopTimer = 0;
   let activePose = -1;
 
   const brushPoses = [
-    { src: "assets/brush-poses-v2/pose-01.png", anchor: [315, 584] },
-    { src: "assets/brush-poses-v2/pose-02.png", anchor: [309, 606] },
-    { src: "assets/brush-poses-v2/pose-03.png", anchor: [324, 605] },
-    { src: "assets/brush-poses-v2/pose-04.png", anchor: [186, 599] },
-    { src: "assets/brush-poses-v2/pose-05.png", anchor: [269, 590] },
-    { src: "assets/brush-poses-v2/pose-06.png", anchor: [310, 609] },
-    { src: "assets/brush-poses-v2/pose-07.png", anchor: [290, 581] },
-    { src: "assets/brush-poses-v2/pose-08.png", anchor: [326, 637] },
+    { src: "assets/brush-poses-v3/pose-01.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v3/pose-02.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v3/pose-03.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v3/pose-04.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v3/pose-05.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v3/pose-06.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v3/pose-07.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v3/pose-08.png", anchor: [315, 620] },
     // LEAVE uses its own clean lifted pose and keeps the bristles
     // 40 px above the completed stroke so the final hold reads as off-paper.
-    { src: "assets/brush-poses-v2/pose-09.png", anchor: [315, 629] },
+    { src: "assets/brush-poses-v3/pose-09.png", anchor: [315, 662] },
   ];
   brushPoses.forEach(({ src }) => { const image = new Image(); image.src = src; });
 
@@ -82,10 +86,18 @@
   function paint(progress) {
     const stroke = strokeProgress(progress);
     const bloomProgress = clamp((stroke - diffusionDelay) / (1 - diffusionDelay), 0, 1);
+    const dryProgress = clamp((stroke - dryingDelay) / (1 - dryingDelay), 0, 1);
     const poseIndex = poseIndexFor(progress);
+    const distance = stroke * pathLength;
+    const activeSpan = pathLength * 0.075;
+    const activeLength = Math.max(0.01, Math.min(distance, activeSpan));
+    const activeStart = Math.max(0, distance - activeSpan);
 
-    path.style.strokeDashoffset = String(pathLength * (1 - stroke));
+    path.style.strokeDasharray = `${activeLength} ${pathLength + activeSpan}`;
+    path.style.strokeDashoffset = String(-activeStart);
+    path.style.opacity = String(0.78 * (1 - clamp((progress - 0.96) / 0.04, 0, 1)));
     diffusion.style.strokeDashoffset = String(pathLength * (1 - ease(bloomProgress)));
+    dryMask.style.strokeDashoffset = String(pathLength * (1 - ease(dryProgress)));
     placeBrush(stroke, poseIndex);
 
     reveals.forEach((reveal) => {
@@ -117,10 +129,13 @@
     cancelAnimationFrame(frameId);
     clearTimeout(loopTimer);
     journeyFrame.classList.add("is-resetting");
-    [path, diffusion].forEach((line) => {
+    [diffusion, dryMask].forEach((line) => {
       line.style.strokeDasharray = `${pathLength} ${pathLength}`;
       line.style.strokeDashoffset = String(pathLength);
     });
+    path.style.strokeDasharray = `0.01 ${pathLength}`;
+    path.style.strokeDashoffset = "0";
+    path.style.opacity = "0.78";
     reveals.forEach((reveal) => reveal.classList.remove("is-visible"));
     journeyFrame.dataset.motionState = "reset";
     journeyFrame.getBoundingClientRect();

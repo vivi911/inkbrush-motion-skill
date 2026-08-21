@@ -75,19 +75,28 @@
                 <desc id="stage-desc">Context, Action, and Evidence appear along an ink-wash river.</desc>
                 <defs>
                   <linearGradient id="live-ink" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#5b211c"/>
-                    <stop offset="0.18" stop-color="#171b18"/>
-                    <stop offset="1" stop-color="#050706"/>
+                    <stop offset="0" stop-color="#5b3a31"/>
+                    <stop offset="0.3" stop-color="#303630"/>
+                    <stop offset="1" stop-color="#1f2521"/>
                   </linearGradient>
                   <filter id="live-bloom" x="-70%" y="-70%" width="240%" height="240%">
-                    <feGaussianBlur stdDeviation="10"/>
+                    <feGaussianBlur stdDeviation="5"/>
                   </filter>
+                  <filter id="dry-fibre" x="-35%" y="-35%" width="170%" height="170%">
+                    <feTurbulence type="fractalNoise" baseFrequency=".018 .11" numOctaves="2" seed="11" result="paper-noise"/>
+                    <feDisplacementMap in="SourceGraphic" in2="paper-noise" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+                    <feGaussianBlur stdDeviation=".35"/>
+                  </filter>
+                  <mask id="dry-reveal">
+                    <path id="river-dry-mask" d="M318 304C295 326 278 350 300 392C325 439 391 445 355 497C326 540 259 554 317 620C365 675 492 679 494 748C496 813 424 817 383 867C342 918 390 958 456 1000" fill="none" stroke="#fff" stroke-width="42" stroke-linecap="round"/>
+                  </mask>
                 </defs>
                 <path id="river-diffusion" class="river river-diffusion" d="M318 304C295 326 278 350 300 392C325 439 391 445 355 497C326 540 259 554 317 620C365 675 492 679 494 748C496 813 424 817 383 867C342 918 390 958 456 1000"/>
+                <path id="river-dry" class="river river-dry" mask="url(#dry-reveal)" d="M318 304C295 326 278 350 300 392C325 439 391 445 355 497C326 540 259 554 317 620C365 675 492 679 494 748C496 813 424 817 383 867C342 918 390 958 456 1000"/>
                 <path id="river-path" class="river river-path" d="M318 304C295 326 278 350 300 392C325 439 391 445 355 497C326 540 259 554 317 620C365 675 492 679 494 748C496 813 424 817 383 867C342 918 390 958 456 1000"/>
                 <g id="brush" aria-hidden="true">
                   <circle class="wet-edge" r="14"/>
-                  <image id="moving-brush" class="brush-sprite" href="assets/brush-poses-v2/pose-01.png" x="-315" y="-584" width="720" height="1280" preserveAspectRatio="xMidYMid meet"/>
+                  <image id="moving-brush" class="brush-sprite" href="assets/brush-poses-v3/pose-01.png" x="-315" y="-620" width="720" height="1280" preserveAspectRatio="xMidYMid meet"/>
                 </g>
               </svg>
 

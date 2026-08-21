@@ -13,8 +13,12 @@ from urllib.parse import unquote, urlsplit
 from artifact_checks import gif_metadata, png_dimensions, sha256_file, validate_svg_safety
 from validate_storyboard import (
     BEAT_FIELDS,
+    BRUSH_MODES,
     FRAME_FIELDS,
+    INK_PHYSICS_FIELDS,
     MOTION_FIELDS,
+    NINE_ACTIONS,
+    REAL_HAND_FIELDS,
     RENDERER_LANES,
     REQUIRED_FIELDS,
     STATES,
@@ -26,35 +30,39 @@ from validate_storyboard import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-README_GIF_SHA256 = "996fca6cb98cbaa94bb8bb65d85cccb5b4b964e57276856f2f1abc2a90838194"
+README_GIF_SHA256 = "61f71b7c6185b76b67540956d79447f96e17dcd79727cc80c7b86dee933a48c5"
 README_SOURCE_SHA256 = {
-    "index.html": "a70ed1a398a017c518730061193ea10eb0c80b60922c563d9dee92ee04d833e5",
-    "styles.css": "3d4cd52a499ae9c48311a98bc363422fad7264db96a7cc5388069fc33c061252",
-    "app.js": "66fa06127bfa951739364c8fa4552932eae628bb305a1320b30bee206b4d42cd",
+    "index.html": "39ce27ddd8dfda291dbca376d0a0bcdca1b47d7e4ae999f11547454c3ec2666b",
+    "styles.css": "b1eb0c1a21338bacc65e596d92598f6eca0a24af4d5f237f006ae57b62ac9a54",
+    "app.js": "08b8f4d6bc04eed2824fdafe1e4ab014c58f3e2e071ab6811f5b0373317dd930",
+    "scripts/render_readme_gif.py": "e8b80773e601cae7a822b5dfcc729091456f271bce0909d84cc889966e574819",
 }
 BRUSH_ASSET_SHA256 = {
-    "assets/brush-poses-v2/pose-01.png": "7cb1b6e47eab38f5294d08fb1b51ff256466a97667973a867ae616a6da0bb429",
-    "assets/brush-poses-v2/pose-02.png": "700d83a95e5446753156b83d5d0cb5a4c035e11f5ee27628a447d39cc0248752",
-    "assets/brush-poses-v2/pose-03.png": "a8141623bf31bd41a877094b19bc5ce259bd3603f60503ed9d111afb6a9a371a",
-    "assets/brush-poses-v2/pose-04.png": "43c5c9df05d6f16e10b93c7ea7bef6eabf43296bd9a3c8687e6a73380b51bc31",
-    "assets/brush-poses-v2/pose-05.png": "041a7542a138d679927ff8a17c4a89c2965f7ed55cfbe1e4fa8f0581f5e947e2",
-    "assets/brush-poses-v2/pose-06.png": "e5f86d96a3162d775cd636adedd996af9ab48023813a3a30a52bd8b6990df259",
-    "assets/brush-poses-v2/pose-07.png": "485711d794e1226b4998030146b369f399fc8a2c3cc8a69b28c5ae4a21fb1eaa",
-    "assets/brush-poses-v2/pose-08.png": "7ccf6b02f089410fb140de231dc2535208ec432e15598ca2e3e240929dd92000",
-    "assets/brush-poses-v2/pose-09.png": "8d7ae7052800f11be0acece156ea83e379d1135ca09a14fbaf90ffc7b71a1872",
+    "assets/brush-poses-v3/pose-01.png": "4bb53d10c827c59cf3542632e57d78a209a9d187e97047a04b7ae923b75eac92",
+    "assets/brush-poses-v3/pose-02.png": "5e825a3eaf858603787417810a5d9d77178a6eb228059190e4ab32eea817829c",
+    "assets/brush-poses-v3/pose-03.png": "21535db0230d5d096921d2999d242175b4f66cee9c220ab4195d0eed26204cfc",
+    "assets/brush-poses-v3/pose-04.png": "a183c74c530a5a28c8ff2f9189e325d1ba9504f57c75f2fd9d26d307d7a2d823",
+    "assets/brush-poses-v3/pose-05.png": "5927e49445362ea1a1e49ed743e8ee587ba3e072476996d37aa410401c3c7924",
+    "assets/brush-poses-v3/pose-06.png": "805812a945f34cb3db27e1b289cfcd1be7d27d7bbd5696794d908a28e121f9f5",
+    "assets/brush-poses-v3/pose-07.png": "3f7f1e077de59f5a84484ee39bb0338ef3a320b7b6fda980fe8c9e4206ad89cb",
+    "assets/brush-poses-v3/pose-08.png": "63dc0996a9ac75e4b0cb5a283249c1d3b5c00f2097b4aa6261c1e33b63eed311",
+    "assets/brush-poses-v3/pose-09.png": "a9f8a713feffd92e911aa6d5e52b8716f641a48d34f7f73c32c2588bace68b00",
 }
-FINAL_BRUSH_SHA256 = BRUSH_ASSET_SHA256["assets/brush-poses-v2/pose-09.png"]
+FINAL_BRUSH_SHA256 = BRUSH_ASSET_SHA256["assets/brush-poses-v3/pose-09.png"]
 CLEAN_PLATE_SHA256 = "37e16d24d69537bcdbb88dcee8307b78ae77a02c05fec79d82bc77a8a5f2e658"
+REAL_BRUSH_REFERENCE_SHA256 = "49153b50a9a56539430099af1aa6475957b9bc7b9630075bdebc9927fcb6f85d"
+NINE_ACTION_PROOF_SHA256 = "912ee31fec01566df0fec8eb0b60c86487e11803b2cfc1da17f2feaa5819b6de"
 REQUIRED = [
     ".gitignore", ".nojekyll", ".github/workflows/validate.yml",
     "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md",
     "SECURITY.md", "index.html", "styles.css", "app.js", "agents/openai.yaml",
     "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png", "assets/inkbrush-motion-demo.gif",
     "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png",
-    "assets/brush-pose-final.png", *BRUSH_ASSET_SHA256, "assets/demo-plan.json",
+    "assets/brush-pose-final.png", *BRUSH_ASSET_SHA256, "assets/reference/real-brush-gray-linen.png",
+    "assets/nine-action-proof.png", "assets/evidence/start.png", "assets/evidence/middle.png", "assets/evidence/end.png", "assets/demo-plan.json",
     "references/style-contract.md", "references/motion-contract.md", "references/qa-rubric.md",
-    "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/readme-animation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
-    "scripts/generate_social_preview.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
+    "references/real-brush-contract.md", "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/readme-animation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
+    "scripts/generate_social_preview.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
 ]
 
 
@@ -186,7 +194,7 @@ def main() -> int:
         errors.append("README.md must lead with the animated delivery demo")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8")
-    for element_id in ["replay", "motion-status", "ink-stage", "river-path", "river-diffusion", "brush", "moving-brush"]:
+    for element_id in ["replay", "motion-status", "ink-stage", "river-path", "river-diffusion", "river-dry", "river-dry-mask", "brush", "moving-brush"]:
         if f'id="{element_id}"' not in html: errors.append(f"index.html missing required id: {element_id}")
     errors.extend(audit_html_runtime(html))
     css = (ROOT / "styles.css").read_text(encoding="utf-8")
@@ -209,6 +217,14 @@ def main() -> int:
         if set(schema.get("required", [])) != REQUIRED_FIELDS: errors.append("schema required fields drift from the Python validator")
         if set(schema_properties.get("status", {}).get("enum", [])) != STATES: errors.append("schema status enum drifts from the Python validator")
         if set(schema_properties.get("styleRecipe", {}).get("enum", [])) != STYLE_RECIPES: errors.append("schema styleRecipe enum drifts from the Python validator")
+        if set(schema_properties.get("brushMode", {}).get("enum", [])) != BRUSH_MODES: errors.append("schema brushMode enum drifts from the Python validator")
+        hand_schema = schema_properties.get("realHandProfile", {})
+        if hand_schema.get("additionalProperties") is not False or set(hand_schema.get("properties", {})) != REAL_HAND_FIELDS: errors.append("schema realHandProfile fields drift from the Python validator")
+        if set(hand_schema.get("required", [])) != REAL_HAND_FIELDS: errors.append("schema required realHandProfile fields drift from the Python validator")
+        if hand_schema.get("properties", {}).get("actions", {}).get("const") != NINE_ACTIONS: errors.append("schema nine-action sequence drifts from the Python validator")
+        ink_schema = hand_schema.get("properties", {}).get("inkPhysics", {})
+        if ink_schema.get("additionalProperties") is not False or set(ink_schema.get("properties", {})) != INK_PHYSICS_FIELDS: errors.append("schema inkPhysics fields drift from the Python validator")
+        if set(ink_schema.get("required", [])) != INK_PHYSICS_FIELDS: errors.append("schema required inkPhysics fields drift from the Python validator")
         beat_schema = schema_properties.get("beats", {}).get("items", {})
         if beat_schema.get("additionalProperties") is not False or set(beat_schema.get("properties", {})) != BEAT_FIELDS: errors.append("schema beat fields drift from the Python validator")
         if set(beat_schema.get("required", [])) != {"id", "label", "copy", "startSecond", "endSecond"}: errors.append("schema required beat fields drift from the Python validator")
@@ -225,6 +241,8 @@ def main() -> int:
             {"if": {"properties": {"status": {"enum": sorted(["STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED"])}}}, "then": {"required": ["staticArtifact", "staticArtifactSha256"]}},
             {"if": {"properties": {"status": {"const": "MOTION_PROOF_READY"}}}, "then": {"required": ["motionEvidence"]}, "else": {"not": {"required": ["motionEvidence"]}}},
             {"if": {"properties": {"status": {"const": "PLAN_ONLY"}}}, "then": {"not": {"anyOf": [{"required": ["staticArtifact"]}, {"required": ["staticArtifactSha256"]}]}}},
+            {"if": {"properties": {"brushMode": {"const": "real-hand-nine-action"}}, "required": ["brushMode"]}, "then": {"required": ["realHandProfile"]}, "else": {"not": {"required": ["realHandProfile"]}}},
+            {"if": {"properties": {"status": {"const": "MOTION_PROOF_READY"}, "brushMode": {"const": "real-hand-nine-action"}}, "required": ["status", "brushMode"]}, "then": {"properties": {"motionEvidence": {"required": ["nineActionProof", "nineActionProofSha256"]}}}},
         ]
         if schema.get("allOf") != expected_schema_gates: errors.append("schema state and dimension gates drift from the Python validator")
         plan = json.loads((ROOT / "assets/demo-plan.json").read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
@@ -251,6 +269,12 @@ def main() -> int:
             brush_asset = ROOT / relative
             if png_dimensions(brush_asset) != (720, 1280): errors.append(f"{relative} must be 720x1280")
             if sha256_file(brush_asset) != expected_hash: errors.append(f"{relative} does not match the approved provenance hash")
+        real_brush_reference = ROOT / "assets/reference/real-brush-gray-linen.png"
+        if png_dimensions(real_brush_reference) != (720, 1280): errors.append("assets/reference/real-brush-gray-linen.png must be 720x1280")
+        if sha256_file(real_brush_reference) != REAL_BRUSH_REFERENCE_SHA256: errors.append("assets/reference/real-brush-gray-linen.png does not match the approved provenance hash")
+        nine_action_proof = ROOT / "assets/nine-action-proof.png"
+        if png_dimensions(nine_action_proof) != (1080, 1920): errors.append("assets/nine-action-proof.png must be 1080x1920")
+        if sha256_file(nine_action_proof) != NINE_ACTION_PROOF_SHA256: errors.append("assets/nine-action-proof.png does not match the approved provenance hash")
         # The exact approved hash below binds the compressed pixels. Structural parsing
         # stays fast in repeated negative suites; full LZW decoding is covered directly
         # by artifact_checks tests and the published capture record.
@@ -274,7 +298,7 @@ def main() -> int:
             errors.append("readme animation record must contain one exact capture source identity line")
         gif_rows = [line for line in animation_record.splitlines() if line.startswith("| `assets/inkbrush-motion-demo.gif` |")]
         expected_gif_row = [
-            "`assets/inkbrush-motion-demo.gif`", "292×519", "103", "10.3 seconds", f"`{README_GIF_SHA256}`",
+            "`assets/inkbrush-motion-demo.gif`", "292×519", "83", "10.3 seconds", f"`{README_GIF_SHA256}`",
         ]
         parsed_gif_row = [cell.strip() for cell in gif_rows[0].strip().strip("|").split("|")] if len(gif_rows) == 1 else []
         if parsed_gif_row != expected_gif_row:

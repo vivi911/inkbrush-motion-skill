@@ -17,15 +17,25 @@ from artifact_checks import png_dimensions, sha256_file, sha256_static_artifact,
 STATES = {"PLAN_ONLY", "STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED", "HOLD"}
 STATIC_STATES = {"STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED"}
 STYLE_RECIPES = {"shan-shui-scroll", "minimal-calligraphy", "seal-diagram"}
+BRUSH_MODES = {"none", "brush-only", "real-hand-nine-action"}
 RENDERER_LANES = {"svg-js", "gsap-svg", "remotion-svg", "after-effects"}
+NINE_ACTIONS = ["hover", "touch", "press", "travel", "turn", "lift", "return", "finish", "leave"]
 HEX64 = re.compile(r"^[a-f0-9]{64}$")
 REQUIRED_FIELDS = {
     "version", "status", "title", "summary", "aspectRatio", "width", "height", "fps",
-    "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "beats",
+    "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "brushMode", "beats",
 }
-TOP_LEVEL_FIELDS = REQUIRED_FIELDS | {"$schema", "staticArtifact", "staticArtifactSha256", "motionEvidence"}
+TOP_LEVEL_FIELDS = REQUIRED_FIELDS | {"$schema", "realHandProfile", "staticArtifact", "staticArtifactSha256", "motionEvidence"}
 BEAT_FIELDS = {"id", "label", "copy", "zhLabel", "startSecond", "endSecond"}
-MOTION_FIELDS = {"rendererLane", "rendererOwner", "reviewer", "staticApprovalSha256", "frames"}
+REAL_HAND_FIELDS = {"profile", "brushAngleRange", "armEntry", "cropBoundary", "sleeveStyle", "actions", "inkPhysics"}
+INK_PHYSICS_FIELDS = {
+    "paper", "freshCoreOpacity", "wetEdgeOpacity", "dryTrailOpacity", "dryBrushGapPercent",
+    "dryingDelayFrames", "diffusionDelayFrames",
+}
+MOTION_FIELDS = {
+    "rendererLane", "rendererOwner", "reviewer", "staticApprovalSha256", "frames",
+    "nineActionProof", "nineActionProofSha256",
+}
 FRAME_FIELDS = {"role", "frame", "path", "sha256"}
 
 
@@ -83,6 +93,46 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
     if not _finite_number(margin) or not 8 <= margin <= 15: errors.append("safeMarginPercent must be a finite number between 8 and 15")
     if plan.get("styleRecipe") not in STYLE_RECIPES: errors.append(f"styleRecipe must be one of {sorted(STYLE_RECIPES)}")
     if plan.get("textMode") != "code-native": errors.append("textMode must be code-native")
+    brush_mode = plan.get("brushMode")
+    if brush_mode not in BRUSH_MODES: errors.append(f"brushMode must be one of {sorted(BRUSH_MODES)}")
+    real_hand = plan.get("realHandProfile")
+    if brush_mode == "real-hand-nine-action":
+        if not isinstance(real_hand, dict):
+            errors.append("real-hand-nine-action requires realHandProfile")
+        else:
+            unknown_hand = sorted(real_hand.keys() - REAL_HAND_FIELDS)
+            missing_hand = sorted(REAL_HAND_FIELDS - real_hand.keys())
+            if unknown_hand: errors.append(f"realHandProfile has unknown fields: {', '.join(unknown_hand)}")
+            if missing_hand: errors.append(f"realHandProfile is missing fields: {', '.join(missing_hand)}")
+            if real_hand.get("profile") != "gray-linen-xuan": errors.append("realHandProfile.profile must be gray-linen-xuan")
+            if real_hand.get("brushAngleRange") != [80, 85]: errors.append("realHandProfile.brushAngleRange must be [80, 85]")
+            if real_hand.get("armEntry") not in {"right", "lower-right"}: errors.append("realHandProfile.armEntry must be right or lower-right")
+            if real_hand.get("cropBoundary") != "fabric-only": errors.append("realHandProfile.cropBoundary must be fabric-only")
+            if real_hand.get("sleeveStyle") not in {"gray-linen", "project-defined"}: errors.append("realHandProfile.sleeveStyle is invalid")
+            if real_hand.get("actions") != NINE_ACTIONS: errors.append("realHandProfile.actions must contain the nine ordered calligraphy actions")
+            ink = real_hand.get("inkPhysics")
+            if not isinstance(ink, dict):
+                errors.append("realHandProfile.inkPhysics must be an object")
+            else:
+                unknown_ink = sorted(ink.keys() - INK_PHYSICS_FIELDS)
+                missing_ink = sorted(INK_PHYSICS_FIELDS - ink.keys())
+                if unknown_ink: errors.append(f"realHandProfile.inkPhysics has unknown fields: {', '.join(unknown_ink)}")
+                if missing_ink: errors.append(f"realHandProfile.inkPhysics is missing fields: {', '.join(missing_ink)}")
+                if ink.get("paper") != "xuan": errors.append("inkPhysics.paper must be xuan")
+                ranges = {
+                    "freshCoreOpacity": (0.7, 0.85), "wetEdgeOpacity": (0.15, 0.25),
+                    "dryTrailOpacity": (0.35, 0.5), "dryBrushGapPercent": (15, 35),
+                }
+                for field, (minimum, maximum) in ranges.items():
+                    value = ink.get(field)
+                    if not _finite_number(value) or not minimum <= value <= maximum:
+                        errors.append(f"inkPhysics.{field} must be between {minimum:g} and {maximum:g}")
+                for field, minimum, maximum in [("dryingDelayFrames", 12, 24), ("diffusionDelayFrames", 2, 6)]:
+                    value = ink.get(field)
+                    if not isinstance(value, int) or isinstance(value, bool) or not minimum <= value <= maximum:
+                        errors.append(f"inkPhysics.{field} must be an integer between {minimum} and {maximum}")
+    elif real_hand is not None:
+        errors.append("realHandProfile is only allowed for real-hand-nine-action")
     if status == "PLAN_ONLY" and ({"staticArtifact", "staticArtifactSha256"} & plan.keys()): errors.append("PLAN_ONLY must not claim a static artifact or hash")
 
     beats = plan.get("beats")
@@ -190,8 +240,28 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
                         except ValueError as exc: errors.append(str(exc))
                 if roles != ["start", "middle", "end"]: errors.append("frame roles must be ordered start, middle, end")
                 if not all(isinstance(value, int) and not isinstance(value, bool) for value in indices) or indices != sorted(indices) or len(set(indices)) != 3: errors.append("frame indices must be three unique increasing integers")
+                elif _finite_number(preview) and isinstance(plan.get("fps"), int) and isinstance(plan.get("finalHoldFrames"), int):
+                    animation_end_frame = round(float(preview) * plan["fps"])
+                    final_frame = animation_end_frame + plan["finalHoldFrames"] - 1
+                    if indices[-1] < animation_end_frame:
+                        errors.append("end evidence frame must be at or after the animation end frame")
+                    if any(frame < 0 or frame > final_frame for frame in indices):
+                        errors.append(f"evidence frame indices must be between 0 and {final_frame}")
                 if not all(isinstance(value, str) for value in paths) or len(set(paths)) != 3: errors.append("frame paths must be three unique strings")
                 if not all(isinstance(value, str) for value in hashes) or len(set(hashes)) != 3: errors.append("frame hashes must be three unique strings")
+
+            proof_path_raw = motion.get("nineActionProof")
+            proof_hash = motion.get("nineActionProofSha256")
+            if brush_mode == "real-hand-nine-action":
+                proof_path = _artifact(base_dir, proof_path_raw, "motionEvidence.nineActionProof", errors)
+                if proof_path is not None:
+                    try:
+                        if png_dimensions(proof_path) != (1080, 1920): errors.append("motionEvidence.nineActionProof must be 1080x1920")
+                        if proof_hash != sha256_file(proof_path): errors.append("motionEvidence.nineActionProofSha256 does not match the file")
+                    except ValueError as exc: errors.append(str(exc))
+                if not isinstance(proof_hash, str) or not HEX64.match(proof_hash): errors.append("motionEvidence.nineActionProofSha256 must be 64 lowercase hex characters")
+            elif proof_path_raw is not None or proof_hash is not None:
+                errors.append("nine-action proof is only allowed for real-hand-nine-action")
     elif motion is not None:
         errors.append("motionEvidence is only allowed for MOTION_PROOF_READY")
 

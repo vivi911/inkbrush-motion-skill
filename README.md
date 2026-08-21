@@ -4,7 +4,7 @@
   </a>
   <h1>InkBrush Motion</h1>
   <p><strong>An open-source AI Skill for calm, brush-led 9:16 knowledge animation.</strong></p>
-  <p><em>The animation above is the actual zero-dependency delivery demo. Click it for the full-size replay.</em></p>
+  <p><em>The animation above is a proof render of the same assets, timing, and knowledge shown by the zero-dependency live demo. Click it for the full-size replay.</em></p>
   <p>
     <a href="https://vivi911.github.io/inkbrush-motion-skill/">Live demo</a> ·
     <a href="SKILL.md">Use the Skill</a> ·
@@ -19,7 +19,7 @@
 
 Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. The live demo teaches one reliable AI-agent loop—**Context → Action → Evidence**—as an AI-assisted real-hand brush study moves through nine calligraphy actions: hover, touch, press, travel, turn, lift, return, finish, and leave. Give AI the right context, ask for one clear next step, and check the result before you trust it. Exact knowledge text stays code-native while the brush tip leads every visible millimetre of ink.
 
-The repository includes both the reusable Skill and a zero-dependency SVG/CSS/JavaScript delivery demo. The README preview is a direct capture of that same live animation, not a separate concept still.
+The repository includes both the reusable Skill and a zero-dependency SVG/CSS/JavaScript delivery demo. The README preview is a deterministic proof render of that same motion contract, not a separate concept still.
 
 ## What you get
 

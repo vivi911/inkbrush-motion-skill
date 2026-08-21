@@ -21,6 +21,8 @@ Inspect the static board and evidence frames at full size and at a 360×640 mobi
 - There is no rectangular wipe pretending to be handwriting.
 - Camera movement, if any, does not fight the brush direction.
 - The last frame holds long enough to read.
+- Real-hand mode keeps the shaft at 80–85°, crops only through sleeve fabric, and shows all nine ordered actions from the same hand identity.
+- Fresh ink is darkest at the touching tip; the older trail visibly fades and breaks into xuan-paper fibres.
 
 ## Truthfulness gate
 

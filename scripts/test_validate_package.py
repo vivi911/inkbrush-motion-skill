@@ -104,7 +104,7 @@ def main() -> None:
 
         source_record_case = clone_candidate(parent, "misbound-readme-capture-source")
         source_record_path = source_record_case / "references/readme-animation-record.md"
-        approved_app_hash = "66fa06127bfa951739364c8fa4552932eae628bb305a1320b30bee206b4d42cd"
+        approved_app_hash = "08b8f4d6bc04eed2824fdafe1e4ab014c58f3e2e071ab6811f5b0373317dd930"
         source_record_text = source_record_path.read_text(encoding="utf-8").replace(
             f"`app.js` SHA-256 `{approved_app_hash}`",
             f"`app.js` SHA-256 `{'0' * 64}`",
@@ -149,6 +149,12 @@ def main() -> None:
         result = run_validator(schema_beat_case)
         expect("reject schema required beat drift", result.returncode == 1 and "required beat fields drift" in result.stdout)
 
+        schema_hand_case = clone_candidate(parent, "schema-real-hand-drift")
+        schema_path = schema_hand_case / "references/storyboard.schema.json"
+        schema_path.write_text(schema_path.read_text(encoding="utf-8").replace('"sleeveStyle": {"enum": ["gray-linen", "project-defined"]}', '"sleeveStyle": {"enum": ["gray-linen", "project-defined"]}, "unexpected": {"type": "string"}', 1), encoding="utf-8")
+        result = run_validator(schema_hand_case)
+        expect("reject real-hand schema drift", result.returncode == 1 and "realHandProfile fields drift" in result.stdout)
+
         schema_gate_case = clone_candidate(parent, "schema-gate-drift")
         schema_path = schema_gate_case / "references/storyboard.schema.json"
         schema_path.write_text(schema_path.read_text(encoding="utf-8").replace('{"const": 1280}', '{"const": 1920}', 1), encoding="utf-8")
@@ -171,7 +177,7 @@ def main() -> None:
             return ""
 
         real_gif = ROOT / "assets/inkbrush-motion-demo.gif"
-        expect("fully decode approved animated README demo", gif_metadata(real_gif) == (292, 519, 103, 10_300))
+        expect("fully decode approved animated README demo", gif_metadata(real_gif) == (292, 519, 83, 10_300))
         expect("reject truncated animated README demo", "GIF" in gif_error("truncated.gif", real_gif.read_bytes()[:40]))
 
         empty_gif = b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff"
@@ -209,15 +215,15 @@ def main() -> None:
 
         brush_pose_case = clone_candidate(parent, "changed-brush-pose")
         shutil.copyfile(
-            brush_pose_case / "assets/brush-poses-v2/pose-02.png",
-            brush_pose_case / "assets/brush-poses-v2/pose-01.png",
+            brush_pose_case / "assets/brush-poses-v3/pose-02.png",
+            brush_pose_case / "assets/brush-poses-v3/pose-01.png",
         )
         result = run_validator(brush_pose_case)
         expect("reject changed nine-action brush pose", result.returncode == 1 and "pose-01.png does not match" in result.stdout)
 
         final_brush_case = clone_candidate(parent, "changed-final-brush")
         shutil.copyfile(
-            final_brush_case / "assets/brush-poses-v2/pose-08.png",
+            final_brush_case / "assets/brush-poses-v3/pose-08.png",
             final_brush_case / "assets/brush-pose-final.png",
         )
         result = run_validator(final_brush_case)
@@ -227,11 +233,11 @@ def main() -> None:
         record_path = record_case / "references/readme-animation-record.md"
         record_text = record_path.read_text(encoding="utf-8")
         record_text = record_text.replace(
-            "`996fca6cb98cbaa94bb8bb65d85cccb5b4b964e57276856f2f1abc2a90838194` |",
+            "`61f71b7c6185b76b67540956d79447f96e17dcd79727cc80c7b86dee933a48c5` |",
             f"`{'0' * 64}` |",
             1,
         )
-        record_text += "\n<!-- 996fca6cb98cbaa94bb8bb65d85cccb5b4b964e57276856f2f1abc2a90838194 -->\n"
+        record_text += "\n<!-- 61f71b7c6185b76b67540956d79447f96e17dcd79727cc80c7b86dee933a48c5 -->\n"
         record_path.write_text(record_text, encoding="utf-8")
         result = run_validator(record_case)
         expect("reject GIF hash hidden outside provenance table row", result.returncode == 1 and "exact approved GIF table row" in result.stdout)
@@ -256,10 +262,10 @@ def main() -> None:
         expect("reject oversized GIF before parsing", "16 MiB" in oversized_error)
 
         manifest_case = clone_candidate(parent, "missing-manifest")
-        for relative in [".nojekyll", ".github/workflows/validate.yml", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v2/pose-09.png", "assets/inkbrush-motion-demo.gif", "references/image-generation-record.md", "references/readme-animation-record.md"]:
+        for relative in [".nojekyll", ".github/workflows/validate.yml", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v3/pose-09.png", "assets/reference/real-brush-gray-linen.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
             (manifest_case / relative).unlink()
         result = run_validator(manifest_case)
-        expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 11)
+        expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 15)
 
         print("PASS: all public-package negative tests")
 

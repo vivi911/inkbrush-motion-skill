@@ -6,7 +6,7 @@ Copyright © 2026 Vivi (GoAskVivi).
 
 ## License scope
 
-The repository's source code, `SKILL.md`, documentation, schemas, tests, code-authored SVG/CSS/JavaScript visuals, the published preview renditions (`assets/social-preview.png` and `assets/inkbrush-motion-demo.gif`), the selected AI-assisted demo backgrounds (`assets/ai-agent-knowledge-journey.png`, `assets/ai-agent-knowledge-prestroke.png`, and `assets/ai-agent-knowledge-cleanplate.png`), and the published nine-action brush sprites (`assets/brush-poses-v2/pose-01.png` through `pose-09.png` plus the byte-identical static-evidence copy `assets/brush-pose-final.png`) are licensed under the MIT License in `LICENSE`, to the extent those materials are copyrightable and controlled by the publisher.
+The repository's source code, `SKILL.md`, documentation, schemas, tests, code-authored SVG/CSS/JavaScript visuals, the published preview renditions (`assets/social-preview.png`, `assets/inkbrush-motion-demo.gif`, `assets/nine-action-proof.png`, and the three `assets/evidence/*.png` frames), the selected AI-assisted demo backgrounds (`assets/ai-agent-knowledge-journey.png`, `assets/ai-agent-knowledge-prestroke.png`, and `assets/ai-agent-knowledge-cleanplate.png`), the approved real-brush reference (`assets/reference/real-brush-gray-linen.png`), and the published nine-action brush sprites (`assets/brush-poses-v3/pose-01.png` through `pose-09.png` plus the byte-identical static-evidence copy `assets/brush-pose-final.png`) are licensed under the MIT License in `LICENSE`, to the extent those materials are copyrightable and controlled by the publisher.
 
 The MIT License allows commercial use, copying, modification, distribution, sublicensing, and sale. Copies or substantial portions must retain the copyright and license notice. The work is provided without warranty.
 
@@ -30,9 +30,9 @@ The current local rendition used macOS-provided Georgia, Arial, and Songti typef
 
 ## Animated README preview provenance
 
-`assets/inkbrush-motion-demo.gif` is a direct capture of the repository's live 9:16 demo. It contains the disclosed AI-assisted clean plate and nine-action hand/brush sprites, exact code-native English knowledge text, and SVG/CSS/JavaScript motion shown on GitHub Pages. The source-file hashes, frame count, dimensions, output hash, and capture recipe are recorded in [`references/readme-animation-record.md`](references/readme-animation-record.md).
+`assets/inkbrush-motion-demo.gif` is a deterministic proof render of the repository's live 9:16 demo contract. It contains the disclosed AI-assisted clean plate and nine-action hand/brush sprites, exact code-native English knowledge text, and the same route and timing used by the SVG/CSS/JavaScript motion shown on GitHub Pages. The source-file hashes, frame count, dimensions, output hash, and render recipe are recorded in [`references/readme-animation-record.md`](references/readme-animation-record.md).
 
-The maintainer-only capture used [Playwright](https://github.com/microsoft/playwright/blob/main/LICENSE) and an [FFmpeg](https://ffmpeg.org/legal.html) build. Neither tool nor its source code is included in this repository, and neither is required to view or reuse the GIF.
+The maintainer-only proof renderer used [Pillow](https://github.com/python-pillow/Pillow). Pillow and the macOS system fonts used to flatten the English text are not included in the repository and are not required to view or reuse the GIF.
 
 ## Third-party material
 

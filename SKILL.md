@@ -15,6 +15,7 @@ Turn knowledge into a quiet visual journey built from brush, ink, paper, and del
 - Lock exact wording before visual work. Render final text as code-native SVG or licensed font text, never image-model lettering.
 - Keep the first proof silent unless audio is explicitly requested.
 - When a visible hand is requested, use nine readable calligraphy actions in order: hover, touch, press, travel, turn, lift pressure, return tip, finish, and leave paper. A floating brush or one rigid sprite does not satisfy this contract.
+- Default real-hand work to the `gray-linen-xuan` profile: an upright brush, a continuous sleeve entering from the right or lower-right, and ink that visibly dries into the paper instead of staying as a solid black ribbon.
 
 ## Workflow
 
@@ -22,9 +23,10 @@ Turn knowledge into a quiet visual journey built from brush, ink, paper, and del
 2. Reduce the knowledge into 3–6 ordered beats. Give each beat one idea and one landscape metaphor.
 3. Read `references/style-contract.md` and build a native portrait static board.
 4. Return `STATIC_REVIEW_READY`. Hash the exact static artifact bundle—including any linked local PNG—and wait for human visual approval before motion.
-5. Read `references/motion-contract.md`. Build a 6–10 second proof in which the brush leads the ink and diffusion follows with a delay. For real-hand mode, prove all nine calligraphy actions and keep the forearm connected to a frame edge.
-6. Export unique start, middle, and end evidence frames. Run `scripts/validate_storyboard.py` and inspect the frames at 360×640.
-7. Return `MOTION_PROOF_READY` only after an independent visual review. If no approved renderer exists, return `RENDERER_REQUIRED`.
+5. Read `references/motion-contract.md`. For visible-hand work, also read `references/real-brush-contract.md` and use its low-freedom hand, sleeve, and ink gates.
+6. Build a 6–10 second proof in which the brush leads the ink and diffusion follows with a delay. For real-hand mode, prove all nine calligraphy actions and keep the sleeve connected to a frame edge.
+7. Export unique start, middle, and end evidence frames. Real-hand work also exports a hash-bound 3×3 action proof. Run `scripts/validate_storyboard.py` and inspect every proof at 360×640.
+8. Return `MOTION_PROOF_READY` only after an independent visual review. If no approved renderer exists, return `RENDERER_REQUIRED`.
 
 ## Style recipes
 
@@ -62,6 +64,7 @@ Read `references/qa-rubric.md` before calling any visual ready. The validators v
 - Do not call a static board an animation or a plan an MP4.
 - Do not use wipes, rectangular masks, or opacity fades as the primary writing illusion.
 - Do not call a floating brush, detached hand, pencil grip, or rigid single-pose translation a real-hand calligraphy animation.
+- Do not let bare skin touch a frame boundary, let the brush fall outside 80–85°, or leave a uniform opaque trail after the brush has moved on.
 - Do not publish, deploy, spend generation credits, or install third-party code without authorization.
 - Read `COPYRIGHT.md` and `references/copyright-and-provenance.md` before adding external assets.
 - This repository is MIT-licensed. Preserve the copyright and license notice in redistributed copies.

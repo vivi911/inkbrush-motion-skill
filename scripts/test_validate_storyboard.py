@@ -31,7 +31,7 @@ def base_plan() -> dict:
         "version": "1.0", "status": "STATIC_REVIEW_READY", "title": "Human AI",
         "summary": "A three-beat journey", "aspectRatio": "9:16", "width": 720, "height": 1280,
         "fps": 30, "previewSeconds": 9, "finalHoldFrames": 30, "safeMarginPercent": 8,
-        "styleRecipe": "shan-shui-scroll", "textMode": "code-native", "staticArtifact": "board.svg",
+        "styleRecipe": "shan-shui-scroll", "textMode": "code-native", "brushMode": "none", "staticArtifact": "board.svg",
         "beats": [
             {"id": "observe", "label": "Observe", "copy": "See the whole task.", "startSecond": 0.5, "endSecond": 3},
             {"id": "decide", "label": "Decide", "copy": "Choose one next step.", "startSecond": 3, "endSecond": 6},
@@ -76,6 +76,30 @@ def main() -> None:
         expect("reject non-portrait ratio", any("aspectRatio" in error for error in validate(bad, root)))
         bad = copy.deepcopy(plan); bad["textMode"] = "image-model"
         expect("reject image-model text", any("textMode" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(plan); bad["brushMode"] = "floating-marker"
+        expect("reject unknown brush mode", any("brushMode" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(plan); bad["brushMode"] = "real-hand-nine-action"
+        expect("reject real hand without hard profile", any("realHandProfile" in error for error in validate(bad, root)))
+
+        real_hand = copy.deepcopy(plan)
+        real_hand["brushMode"] = "real-hand-nine-action"
+        real_hand["realHandProfile"] = {
+            "profile": "gray-linen-xuan", "brushAngleRange": [80, 85], "armEntry": "lower-right",
+            "cropBoundary": "fabric-only", "sleeveStyle": "gray-linen",
+            "actions": ["hover", "touch", "press", "travel", "turn", "lift", "return", "finish", "leave"],
+            "inkPhysics": {
+                "paper": "xuan", "freshCoreOpacity": 0.78, "wetEdgeOpacity": 0.2,
+                "dryTrailOpacity": 0.42, "dryBrushGapPercent": 20,
+                "dryingDelayFrames": 12, "diffusionDelayFrames": 5,
+            },
+        }
+        expect("accept gray-linen xuan real-hand profile", validate(real_hand, root) == [])
+        bad = copy.deepcopy(real_hand); bad["realHandProfile"]["brushAngleRange"] = [72, 85]
+        expect("reject non-calligraphic brush angle", any("brushAngleRange" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(real_hand); bad["realHandProfile"]["cropBoundary"] = "bare-skin"
+        expect("reject bare-skin frame crop", any("cropBoundary" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(real_hand); bad["realHandProfile"]["inkPhysics"]["dryTrailOpacity"] = 0.9
+        expect("reject opaque undried trail profile", any("dryTrailOpacity" in error for error in validate(bad, root)))
         bad = copy.deepcopy(plan); del bad["beats"][0]["copy"]
         expect("reject missing beat copy", any("copy must be non-empty" in error for error in validate(bad, root)))
         bad = copy.deepcopy(plan); bad["staticArtifact"] = "missing.svg"
@@ -142,7 +166,7 @@ def main() -> None:
             "staticApprovalSha256": sha256_static_artifact(root / "board.svg"),
             "frames": [
                 {"role": role, "frame": frame, "path": f"frame-{index}.png", "sha256": sha256_file(root / f"frame-{index}.png")}
-                for index, (role, frame) in enumerate([("start", 0), ("middle", 120), ("end", 240)])
+                for index, (role, frame) in enumerate([("start", 0), ("middle", 120), ("end", 270)])
             ],
         }
         expect("valid motion evidence", validate(motion, root) == [])
@@ -154,6 +178,10 @@ def main() -> None:
         expect("reject mismatched approval hash", any("does not match" in error for error in validate(bad, root)))
         bad = copy.deepcopy(motion); bad["motionEvidence"]["frames"][2] = copy.deepcopy(bad["motionEvidence"]["frames"][1]); bad["motionEvidence"]["frames"][2]["role"] = "end"
         expect("reject duplicate frame evidence", any("unique" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(motion); bad["motionEvidence"]["frames"][2]["frame"] = 269
+        expect("reject end evidence before final hold", any("animation end" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(motion); bad["motionEvidence"]["frames"][2]["frame"] = 300
+        expect("reject evidence frame beyond final hold", any("between 0 and" in error for error in validate(bad, root)))
 
         fake_png = root / "fake.png"
         fake_png.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 16)
@@ -161,6 +189,17 @@ def main() -> None:
         bad["motionEvidence"]["frames"][0]["path"] = "fake.png"
         bad["motionEvidence"]["frames"][0]["sha256"] = sha256_file(fake_png)
         expect("reject header-only fake PNG evidence", any("complete PNG" in error for error in validate(bad, root)))
+
+        write_png(root / "nine-actions.png", 1080, 1920, (236, 226, 207, 255))
+        real_motion = copy.deepcopy(real_hand); real_motion["status"] = "MOTION_PROOF_READY"
+        real_motion["motionEvidence"] = copy.deepcopy(motion["motionEvidence"])
+        real_motion["motionEvidence"]["nineActionProof"] = "nine-actions.png"
+        real_motion["motionEvidence"]["nineActionProofSha256"] = sha256_file(root / "nine-actions.png")
+        expect("accept hash-bound nine-action proof", validate(real_motion, root) == [])
+        bad = copy.deepcopy(real_motion); del bad["motionEvidence"]["nineActionProof"]
+        expect("reject real-hand motion without nine-action proof", any("nineActionProof" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(real_motion); bad["motionEvidence"]["nineActionProofSha256"] = "0" * 64
+        expect("reject changed nine-action proof", any("nineActionProofSha256" in error for error in validate(bad, root)))
 
         print("PASS: all storyboard validator tests")
 

@@ -4,7 +4,7 @@
   "title": "InkBrush Motion Storyboard",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "status", "title", "summary", "aspectRatio", "width", "height", "fps", "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "beats"],
+  "required": ["version", "status", "title", "summary", "aspectRatio", "width", "height", "fps", "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "brushMode", "beats"],
   "properties": {
     "$schema": {"type": "string"},
     "version": {"const": "1.0"},
@@ -20,6 +20,34 @@
     "safeMarginPercent": {"type": "number", "minimum": 8, "maximum": 15},
     "styleRecipe": {"enum": ["shan-shui-scroll", "minimal-calligraphy", "seal-diagram"]},
     "textMode": {"const": "code-native"},
+    "brushMode": {"enum": ["none", "brush-only", "real-hand-nine-action"]},
+    "realHandProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "brushAngleRange", "armEntry", "cropBoundary", "sleeveStyle", "actions", "inkPhysics"],
+      "properties": {
+        "profile": {"const": "gray-linen-xuan"},
+        "brushAngleRange": {"const": [80, 85]},
+        "armEntry": {"enum": ["right", "lower-right"]},
+        "cropBoundary": {"const": "fabric-only"},
+        "sleeveStyle": {"enum": ["gray-linen", "project-defined"]},
+        "actions": {"const": ["hover", "touch", "press", "travel", "turn", "lift", "return", "finish", "leave"]},
+        "inkPhysics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["paper", "freshCoreOpacity", "wetEdgeOpacity", "dryTrailOpacity", "dryBrushGapPercent", "dryingDelayFrames", "diffusionDelayFrames"],
+          "properties": {
+            "paper": {"const": "xuan"},
+            "freshCoreOpacity": {"type": "number", "minimum": 0.7, "maximum": 0.85},
+            "wetEdgeOpacity": {"type": "number", "minimum": 0.15, "maximum": 0.25},
+            "dryTrailOpacity": {"type": "number", "minimum": 0.35, "maximum": 0.5},
+            "dryBrushGapPercent": {"type": "number", "minimum": 15, "maximum": 35},
+            "dryingDelayFrames": {"type": "integer", "minimum": 12, "maximum": 24},
+            "diffusionDelayFrames": {"type": "integer", "minimum": 2, "maximum": 6}
+          }
+        }
+      }
+    },
     "staticArtifact": {"type": "string", "pattern": "\\.svg$"},
     "staticArtifactSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "beats": {
@@ -49,6 +77,8 @@
         "rendererOwner": {"type": "string", "minLength": 1},
         "reviewer": {"type": "string", "minLength": 1},
         "staticApprovalSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "nineActionProof": {"type": "string", "pattern": "\\.png$"},
+        "nineActionProofSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
         "frames": {
           "type": "array",
           "minItems": 3,
@@ -87,6 +117,18 @@
     {
       "if": {"properties": {"status": {"const": "PLAN_ONLY"}}},
       "then": {"not": {"anyOf": [{"required": ["staticArtifact"]}, {"required": ["staticArtifactSha256"]}]}}
+    },
+    {
+      "if": {"properties": {"brushMode": {"const": "real-hand-nine-action"}}, "required": ["brushMode"]},
+      "then": {"required": ["realHandProfile"]},
+      "else": {"not": {"required": ["realHandProfile"]}}
+    },
+    {
+      "if": {
+        "properties": {"status": {"const": "MOTION_PROOF_READY"}, "brushMode": {"const": "real-hand-nine-action"}},
+        "required": ["status", "brushMode"]
+      },
+      "then": {"properties": {"motionEvidence": {"required": ["nineActionProof", "nineActionProofSha256"]}}}
     }
   ]
 }

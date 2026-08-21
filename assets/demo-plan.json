@@ -1,7 +1,7 @@
 {
   "$schema": "../references/storyboard.schema.json",
   "version": "1.0",
-  "status": "STATIC_REVIEW_READY",
+  "status": "MOTION_PROOF_READY",
   "title": "How Reliable AI Agents Work",
   "summary": "A brush-led ink journey reveals the Context, Action, and Evidence loop for dependable AI work.",
   "aspectRatio": "9:16",
@@ -13,8 +13,39 @@
   "safeMarginPercent": 8,
   "styleRecipe": "shan-shui-scroll",
   "textMode": "code-native",
+  "brushMode": "real-hand-nine-action",
+  "realHandProfile": {
+    "profile": "gray-linen-xuan",
+    "brushAngleRange": [80, 85],
+    "armEntry": "lower-right",
+    "cropBoundary": "fabric-only",
+    "sleeveStyle": "gray-linen",
+    "actions": ["hover", "touch", "press", "travel", "turn", "lift", "return", "finish", "leave"],
+    "inkPhysics": {
+      "paper": "xuan",
+      "freshCoreOpacity": 0.78,
+      "wetEdgeOpacity": 0.2,
+      "dryTrailOpacity": 0.42,
+      "dryBrushGapPercent": 20,
+      "dryingDelayFrames": 12,
+      "diffusionDelayFrames": 5
+    }
+  },
   "staticArtifact": "assets/static-board.svg",
-  "staticArtifactSha256": "95d1c64379e6698cf477172a3bbe0b4714b9cfd6280b66f92c1cb7a9bd5d4163",
+  "staticArtifactSha256": "680a4dd16c45e57d53573c14f525b47e166c72a72c456a153bc570aec1cf16fa",
+  "motionEvidence": {
+    "rendererLane": "svg-js",
+    "rendererOwner": "Vivi / GoAskVivi",
+    "reviewer": "independent visual director",
+    "staticApprovalSha256": "680a4dd16c45e57d53573c14f525b47e166c72a72c456a153bc570aec1cf16fa",
+    "nineActionProof": "assets/nine-action-proof.png",
+    "nineActionProofSha256": "912ee31fec01566df0fec8eb0b60c86487e11803b2cfc1da17f2feaa5819b6de",
+    "frames": [
+      {"role": "start", "frame": 9, "path": "assets/evidence/start.png", "sha256": "2d00e598528a1c0d21f5a7cfa474ae75854f750fbea216d0e28b189d5cf67511"},
+      {"role": "middle", "frame": 165, "path": "assets/evidence/middle.png", "sha256": "df1ca1b9f8e3d5f796bf7b914d0cddb46992e256ab317f06e53c7c432b5a3e74"},
+      {"role": "end", "frame": 276, "path": "assets/evidence/end.png", "sha256": "944c0143edb56719aa42247294e0634f18e013afbbb01b89c919c9009e997a11"}
+    ]
+  },
   "beats": [
     {"id": "context", "label": "Context", "copy": "Give the goal, audience, and boundaries.", "startSecond": 0.7, "endSecond": 3.2},
     {"id": "action", "label": "Action", "copy": "Ask for one clear next step.", "startSecond": 3.2, "endSecond": 5.9},

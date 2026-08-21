@@ -109,41 +109,40 @@ Constraints: the lower-right repair must be seamless at full resolution; no hand
 
 - Service: OpenAI ImageGen, built-in generation and image-editing tool.
 - Creation date: 2026-08-21.
-- Human direction and selection: Vivi / GoAskVivi; the nine-action direction was approved before production integration.
-- Identity reference: approved 3×3 art-direction proof SHA-256 `16204cb69a6f5f818fbc18255d9e2253a7d5ea001f7719613d67fef5a7d7c4f8`.
-- Workflow reference: project-owned Vivi Whiteboard v3 nine-pose proof SHA-256 `2a01c9b4c87b3b87cb9d1054137acc8628dc3dacc675f3ae7bf01a6119f16be2`; it supplied contact-sheet discipline only, not shipped pixels, text, or marker graphics.
-- Visual reference: `assets/ai-agent-knowledge-prestroke.png` SHA-256 `d4fda3d048c8bfde95290cd5289530cb09b43f43cd085e62e552243ddd0189cd`.
+- Human direction and selection: Vivi / GoAskVivi. Vivi approved the gray-linen, xuan-paper art-direction sample before the nine poses were integrated.
+- Approved visual reference source: `output/art-direction/recommended-a-ink-absorption-v2.png` SHA-256 `facc00ed79b46a52343ba46ef60714856aa2680866c3de6af6462e52c645fac1` (941×1672, local review source).
+- Published visual reference: `assets/reference/real-brush-gray-linen.png` SHA-256 `49153b50a9a56539430099af1aa6475957b9bc7b9630075bdebc9927fcb6f85d` (720×1280).
+- Action-layout reference: project-owned earlier nine-action proof SHA-256 `16204cb69a6f5f818fbc18255d9e2253a7d5ea001f7719613d67fef5a7d7c4f8`. It supplied action order and contact-sheet discipline only; no pixels from that sheet are published in v3.
 
-### Shared production prompt
+### Production prompt record
 
 ```text
-Use case: precise-object-edit
-Asset type: full-frame animation sprite on native 9:16 portrait.
-Input Image 1 is the exact composition and identity base. Input Image 2 is the approved nine-action reference.
-Preserve exactly from Image 1: canvas, uniform #00ff00 background, same adult East Asian woman's right hand, five fingers, skin, nails, 80–85° upright traditional three-finger grip, same brush, subject position, hand scale, lighting, and forearm extending through the right frame edge.
-Change only the brush-contact action described below. Keep the entire hand and wrist identical. No background shadow, texture, text, labels, grid, logo, watermark, extra hand, extra brush, stray mark, or green on the subject.
+Create one production-ready 3×3 sprite sheet for a 9:16 Chinese ink-wash knowledge animation. Use the supplied nine-action contact sheet for action order and the approved gray-linen sample for the final hand, sleeve, brush, paper relationship, and quiet human realism.
+
+Every cell must show the same believable adult right hand, the same traditional Chinese calligraphy brush, the same hand scale, the same gray natural-linen sleeve, and the same warm natural lighting. Keep the brush shaft nearly upright at 80–85 degrees and use a traditional calligraphy grip. The sleeve and forearm must continue naturally through the right edge; never cut bare skin at the frame boundary. No rings, jewelry, nail polish, logos, text, extra fingers, extra hands, extra brushes, or detached ink.
+
+Arrange exactly nine equal cells in reading order: 01 HOVER with a visible paper gap; 02 TOUCH with first bristle contact; 03 PRESS with compressed bristles; 04 TRAVEL with attached moving bristles; 05 TURN with a controlled corner; 06 LIFT with pressure reduced but the tip still touching; 07 RETURN with a compact reverse hook; 08 FINISH with a tapered ending; 09 LEAVE with a clear gap between the lifted tip and completed ink.
+
+Use one perfectly flat, uniform bright chroma-green background #00FF00 in every cell, edge to edge, with no paper, landscape, grid, labels, shadows, texture, gradient, watermark, or other object. Preserve clean complete hand and sleeve silhouettes for chroma keying. Output one 3×3 sheet only.
 ```
 
-The per-pose additions were: HOVER (clean gap, no ink), TOUCH DOWN (tiny contact point), PRESS (compressed spread), TRAVEL (short attached trail), TURN (compact attached corner), LIFT PRESSURE (narrow taper while touching), RETURN TIP (compact reverse hook), FINISH (paused tapered end), and LEAVE PAPER (clear lifted gap). Pose 01 used the same requirements directly as a full prompt; poses 02–09 used the shared prompt plus their named addition.
+The prompt describes the intended production asset. It must not be read as a claim that an identified person performed the action.
 
 ### Published sprite identity
 
-| Pose | Generated chroma source SHA-256 | Published RGBA SHA-256 |
-|---|---|---|
-| 01 HOVER | `3dc41c13a30220a8d6a78271135307cea0dfc35daf47e3176e93e9d2cecab122` | `7cb1b6e47eab38f5294d08fb1b51ff256466a97667973a867ae616a6da0bb429` |
-| 02 TOUCH DOWN | `6a70d611609ec20663766c1a18ac1f7e55ad1c5da2dc767a96e03bb3391f9fe0` | `700d83a95e5446753156b83d5d0cb5a4c035e11f5ee27628a447d39cc0248752` |
-| 03 PRESS | `5210e55c4fae9d610203a9a947d2b3c6f420e43cd76a6831a1e581ab29018881` | `a8141623bf31bd41a877094b19bc5ce259bd3603f60503ed9d111afb6a9a371a` |
-| 04 TRAVEL | `7c2fa6c420229cfcf12601603a4655d0e8eca7bfb2bea8ad7f54ea0c330cf490` | `43c5c9df05d6f16e10b93c7ea7bef6eabf43296bd9a3c8687e6a73380b51bc31` |
-| 05 TURN | `0c8da34f98409227c13073dfd44346463d406208d538cf5569126010840036ad` | `041a7542a138d679927ff8a17c4a89c2965f7ed55cfbe1e4fa8f0581f5e947e2` |
-| 06 LIFT PRESSURE | `a80f4ed700e064cf8a57e34baffb7d04fadd7e67073bbb0758b9102d5e6b1650` | `e5f86d96a3162d775cd636adedd996af9ab48023813a3a30a52bd8b6990df259` |
-| 07 RETURN TIP | `18afb008d47a0df59c51359b5c88feecb1e646155f2427ca85155dd26893a2c8` | `485711d794e1226b4998030146b369f399fc8a2c3cc8a69b28c5ae4a21fb1eaa` |
-| 08 FINISH | `12de1d603b0051bfdb6f58887680383ad7d40bf11480a9078e2d09da499147b1` | `7ccf6b02f089410fb140de231dc2535208ec432e15598ca2e3e240929dd92000` |
-| 09 LEAVE PAPER, cleaned | `0ed045d4e3f9b67efb217c9224bc1391e63d17f061f06c9750c5d79d3f0defe1` | `8d7ae7052800f11be0acece156ea83e379d1135ca09a14fbaf90ffc7b71a1872` |
+| Asset | SHA-256 |
+|---|---|
+| Generated 3×3 chroma source, 941×1672 | `05846c4ddab353b3ff888d852bb64c64b8702ebcf7910cccc72079c002c669ba` |
+| 01 HOVER | `4bb53d10c827c59cf3542632e57d78a209a9d187e97047a04b7ae923b75eac92` |
+| 02 TOUCH | `5e825a3eaf858603787417810a5d9d77178a6eb228059190e4ab32eea817829c` |
+| 03 PRESS | `21535db0230d5d096921d2999d242175b4f66cee9c220ab4195d0eed26204cfc` |
+| 04 TRAVEL | `a183c74c530a5a28c8ff2f9189e325d1ba9504f57c75f2fd9d26d307d7a2d823` |
+| 05 TURN | `5927e49445362ea1a1e49ed743e8ee587ba3e072476996d37aa410401c3c7924` |
+| 06 LIFT | `805812a945f34cb3db27e1b289cfcd1be7d27d7bbd5696794d908a28e121f9f5` |
+| 07 RETURN | `3f7f1e077de59f5a84484ee39bb0338ef3a320b7b6fda980fe8c9e4206ad89cb` |
+| 08 FINISH | `63dc0996a9ac75e4b0cb5a283249c1d3b5c00f2097b4aa6261c1e33b63eed311` |
+| 09 LEAVE | `a9f8a713feffd92e911aa6d5e52b8716f641a48d34f7f73c32c2588bace68b00` |
 
-Poses 01–08 were resized to 720×1280 with Lanczos filtering, then converted to RGBA with the repository-used ImageGen chroma-key helper (`--auto-key border --soft-matte --transparent-threshold 12 --opaque-threshold 220 --despill`). Pose 09 was re-edited to remove a detached ink fleck, resized to 720×1280, then converted with the same helper using `#00ff00`, soft matte thresholds 24/112, edge feather 0.4, and spill cleanup. Its exact cleanup prompt was:
+`scripts/prepare_nine_action_sprites.py` crops the 3×3 sheet, removes the chroma background, suppresses green spill, locks every detected bristle tip to canvas coordinate (315,620), scales all subjects equally, extends only sleeve texture through the right frame boundary, and writes nine 720×1280 RGBA sprites. The generated chroma source is retained in ignored production output and is not distributed; the script and published sprites are included for review.
 
-```text
-Create a clean chroma-key production version of this same asset. Preserve the same adult right hand, five-finger anatomy, upright traditional Chinese calligraphy brush, grip, proportions, lighting, scale, and placement. The brush must remain visibly lifted. Remove the small detached dark comma-shaped ink fleck below the bristle tip completely. There must be a clear empty gap below the intact bristles. Replace every transparent/checkerboard/background area with one perfectly flat uniform bright chroma green #00FF00, edge to edge, with no texture, gradient, shadow, checkerboard, paper, or other object. No text, no ink marks, no extra fingers, no extra brush. Output one vertical sprite image.
-```
-
-`assets/brush-pose-final.png` is a byte-identical copy of the approved pose 09 (`8d7ae7052800f11be0acece156ea83e379d1135ca09a14fbaf90ffc7b71a1872`) placed beside `static-board.svg` so the fail-closed SVG evidence validator can keep local image references sibling-only.
+`assets/brush-pose-final.png` is byte-identical to approved v3 pose 09 (`a9f8a713feffd92e911aa6d5e52b8716f641a48d34f7f73c32c2588bace68b00`) so the static SVG evidence validator can bind the same lifted final hand used by motion.

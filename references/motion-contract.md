@@ -12,11 +12,12 @@ brush tip advances → active stroke appears → local diffusion blooms → labe
 - Diffusion must lag the active stroke by 2–6 frames at 30 fps.
 - Diffusion should remain local. A global opacity fade is not ink behavior.
 - Pressure variation may change stroke width by roughly 15–35%; do not pulse mechanically.
+- For xuan paper, the newest contact stays darkest while older ink becomes warmer, lighter, and visibly broken by paper fibres. Read `real-brush-contract.md` for the numeric profile.
 - The final composition must hold for at least 30 frames.
 
 ## Nine-action real-hand sequence
 
-When the delivery shows a hand, the motion must use these ordered states. The hand keeps five-finger anatomy, a credible upright three-finger calligraphy grip, one consistent identity and scale, and a forearm that exits the right or lower-right frame edge.
+When the delivery shows a hand, the motion must use these ordered states. The hand keeps five-finger anatomy, a credible upright three-finger calligraphy grip, one consistent identity and scale, and a sleeved forearm that exits the right or lower-right frame edge. Bare skin must never meet the frame boundary.
 
 | State | Visible proof |
 |---|---|
@@ -61,6 +62,7 @@ For `MOTION_PROOF_READY`, record:
 - renderer lane and reviewer names;
 - duration, frame rate, dimensions, and final hold;
 - three unique PNG evidence frames at start, middle, and end;
+- for `real-hand-nine-action`, one 1080×1920 PNG proof containing all nine ordered action states;
 - frame index and SHA-256 for each evidence image.
 
 The reviewer must be different from the renderer owner. The validator checks evidence structure; a human reviewer checks taste, causality, and readability.
