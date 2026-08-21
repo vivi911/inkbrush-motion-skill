@@ -45,6 +45,18 @@ The final LEAVE frame must show paper between the bristle tip and the completed 
 
 Treat these as defaults, not an excuse to stretch weak content.
 
+### Public-repository preview override
+
+When the motion is the repository's first visual proof, use a faster opening without deleting any brush state:
+
+- show the first visible ink by `0.8 s`;
+- complete hover, touch, and press in `1.2–1.4 s`;
+- reveal the first knowledge beat by `2.5 s`;
+- retain all nine ordered actions; and
+- hold the complete frame without motion for at least `1.1 s`.
+
+The README preview must be at least `360×640`. Directly below it, show labeled start, middle, and end crops so a visitor can verify `Tip leads → Ink absorbs → Evidence holds` without opening the live site.
+
 ## Acceptable implementation lanes
 
 - `svg-js`: SVG paths, masks, filters, and browser JavaScript.

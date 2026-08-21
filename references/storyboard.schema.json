@@ -16,7 +16,7 @@
     "height": {"enum": [1280, 1920]},
     "fps": {"const": 30},
     "previewSeconds": {"type": "number", "minimum": 6, "maximum": 10},
-    "finalHoldFrames": {"type": "integer", "minimum": 30},
+    "finalHoldFrames": {"type": "integer", "minimum": 33},
     "safeMarginPercent": {"type": "number", "minimum": 8, "maximum": 15},
     "styleRecipe": {"enum": ["shan-shui-scroll", "minimal-calligraphy", "seal-diagram"]},
     "textMode": {"const": "code-native"},

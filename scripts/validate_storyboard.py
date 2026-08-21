@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from artifact_checks import png_dimensions, sha256_file, sha256_static_artifact, svg_viewbox_and_flat_text
+from motion_timing import load_motion_timing, minimum_final_hold_frames
 
 
 STATES = {"PLAN_ONLY", "STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED", "HOLD"}
@@ -67,6 +68,12 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
     if not isinstance(plan, dict):
         return ["storyboard plan must be a JSON object"]
     errors: list[str] = []
+    try:
+        timing = load_motion_timing(Path(__file__).resolve().parents[1] / "motion-timing.js")
+        min_final_hold_frames = minimum_final_hold_frames(timing)
+    except (OSError, ValueError) as exc:
+        errors.append(f"motion timing contract cannot be loaded: {exc}")
+        min_final_hold_frames = None
     missing = sorted(REQUIRED_FIELDS - plan.keys())
     if missing:
         errors.append(f"missing required fields: {', '.join(missing)}")
@@ -88,7 +95,11 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
     if isinstance(plan.get("fps"), bool) or plan.get("fps") != 30: errors.append("fps must be 30")
     preview = plan.get("previewSeconds")
     if not _finite_number(preview) or not 6 <= preview <= 10: errors.append("previewSeconds must be a finite number between 6 and 10")
-    if not isinstance(plan.get("finalHoldFrames"), int) or isinstance(plan.get("finalHoldFrames"), bool) or plan.get("finalHoldFrames", 0) < 30: errors.append("finalHoldFrames must be an integer of at least 30")
+    final_hold = plan.get("finalHoldFrames")
+    if not isinstance(final_hold, int) or isinstance(final_hold, bool):
+        errors.append("finalHoldFrames must be an integer")
+    elif min_final_hold_frames is not None and final_hold < min_final_hold_frames:
+        errors.append(f"finalHoldFrames must be an integer of at least {min_final_hold_frames}")
     margin = plan.get("safeMarginPercent")
     if not _finite_number(margin) or not 8 <= margin <= 15: errors.append("safeMarginPercent must be a finite number between 8 and 15")
     if plan.get("styleRecipe") not in STYLE_RECIPES: errors.append(f"styleRecipe must be one of {sorted(STYLE_RECIPES)}")

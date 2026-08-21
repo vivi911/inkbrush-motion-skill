@@ -8,17 +8,23 @@ import math
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from motion_timing import load_motion_timing, stroke_progress
 
 
 ROOT = Path(__file__).resolve().parents[1]
+TIMING = load_motion_timing(ROOT / "motion-timing.js")
 WIDTH, HEIGHT = 720, 1280
-GIF_SIZE = (292, 519)
+GIF_SIZE = (TIMING["gif"]["width"], TIMING["gif"]["height"])
+GIF_TIMELINE_SAMPLES = TIMING["gif"]["timelineSamples"]
+GIF_ACTIVE_LAST_INDEX = TIMING["gif"]["activeLastIndex"]
+GIF_FRAME_DURATION_MS = TIMING["gif"]["frameDurationMs"]
 GEORGIA = "/System/Library/Fonts/Supplemental/Georgia.ttf"
 ARIAL = "/System/Library/Fonts/Supplemental/Arial.ttf"
 ARIAL_BOLD = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 ACTIONS = ["HOVER", "TOUCH", "PRESS", "TRAVEL", "TURN", "LIFT", "RETURN", "FINISH", "LEAVE"]
-BREAKS = [0.08, 0.14, 0.22, 0.58, 0.68, 0.78, 0.88, 0.96]
-ACTION_PROGRESS = [0.03, 0.105, 0.175, 0.42, 0.63, 0.73, 0.83, 0.92, 1.0]
+BREAKS = TIMING["breaks"]
+ACTION_PROGRESS = TIMING["actionProgress"]
+KNOWLEDGE_THRESHOLDS = TIMING["knowledgeThresholds"]
 
 
 def font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -61,30 +67,6 @@ PATH_LENGTH = PATH_DISTANCES[-1]
 def ease(value: float) -> float:
     value = max(0.0, min(1.0, value))
     return value * value * (3 - 2 * value)
-
-
-def segment(value: float, start: float, end: float, source: float, target: float) -> float:
-    return source + (target - source) * ease((value - start) / (end - start))
-
-
-def stroke_progress(progress: float) -> float:
-    if progress < 0.08:
-        return 0
-    if progress < 0.14:
-        return segment(progress, 0.08, 0.14, 0, 0.01)
-    if progress < 0.22:
-        return segment(progress, 0.14, 0.22, 0.01, 0.04)
-    if progress < 0.58:
-        return segment(progress, 0.22, 0.58, 0.04, 0.60)
-    if progress < 0.68:
-        return segment(progress, 0.58, 0.68, 0.60, 0.72)
-    if progress < 0.78:
-        return segment(progress, 0.68, 0.78, 0.72, 0.86)
-    if progress < 0.88:
-        return segment(progress, 0.78, 0.88, 0.86, 0.94)
-    if progress < 0.96:
-        return segment(progress, 0.88, 0.96, 0.94, 1)
-    return 1
 
 
 def pose_index(progress: float) -> int:
@@ -168,9 +150,9 @@ def add_text_and_cards(frame: Image.Image, stroke: float, progress: float) -> No
     draw.text((38, 173), "ONE DECISION AT A TIME", font=font(ARIAL_BOLD, 12), fill=(77, 87, 80, 255))
 
     cards = [
-        (0.20, (72, 397, 217, 468), "01", "Context"),
-        (0.47, (238, 608, 383, 679), "02", "Action"),
-        (0.74, (505, 506, 684, 577), "03", "Evidence"),
+        (KNOWLEDGE_THRESHOLDS["context"], (72, 397, 217, 468), "01", "Context"),
+        (KNOWLEDGE_THRESHOLDS["action"], (238, 608, 383, 679), "02", "Action"),
+        (KNOWLEDGE_THRESHOLDS["evidence"], (505, 506, 684, 577), "03", "Evidence"),
     ]
     for threshold, box, number, label in cards:
         if stroke < threshold:
@@ -181,9 +163,9 @@ def add_text_and_cards(frame: Image.Image, stroke: float, progress: float) -> No
         draw.text((box[0] + 18, box[1] + 33), label, font=font(GEORGIA, 23), fill=(28, 33, 29, 255))
 
     captions = [
-        (0.20, 0.47, "CONTEXT", "Give the goal, audience, and boundaries."),
-        (0.47, 0.74, "ACTION", "Ask for one clear next step."),
-        (0.74, 0.94, "EVIDENCE", "Check the result before calling it done."),
+        (KNOWLEDGE_THRESHOLDS["context"], KNOWLEDGE_THRESHOLDS["action"], "CONTEXT", "Give the goal, audience, and boundaries."),
+        (KNOWLEDGE_THRESHOLDS["action"], KNOWLEDGE_THRESHOLDS["evidence"], "ACTION", "Ask for one clear next step."),
+        (KNOWLEDGE_THRESHOLDS["evidence"], KNOWLEDGE_THRESHOLDS["result"], "EVIDENCE", "Check the result before calling it done."),
     ]
     for start, end, label, copy in captions:
         if not start <= stroke < end:
@@ -191,7 +173,7 @@ def add_text_and_cards(frame: Image.Image, stroke: float, progress: float) -> No
         round_rect(draw, (58, 940, 492, 1038), (27, 33, 29, 224), 4)
         draw.text((78, 958), label, font=font(ARIAL_BOLD, 12), fill=(207, 118, 107, 255))
         draw.text((78, 984), copy, font=font(ARIAL_BOLD, 15), fill=(244, 238, 222, 255))
-    if stroke >= 0.94:
+    if stroke >= KNOWLEDGE_THRESHOLDS["result"]:
         round_rect(draw, (58, 1085, 430, 1177), (27, 33, 29, 228), 4)
         draw.text((78, 1103), "RELIABLE AI", font=font(ARIAL_BOLD, 12), fill=(207, 118, 107, 255))
         draw.text((78, 1134), "Context + Action + Evidence", font=font(GEORGIA, 20), fill=(244, 238, 222, 255))
@@ -199,10 +181,12 @@ def add_text_and_cards(frame: Image.Image, stroke: float, progress: float) -> No
 
 def render_frame(background: Image.Image, sprites: list[Image.Image], progress: float) -> Image.Image:
     frame = background.copy().convert("RGBA")
-    stroke = stroke_progress(progress)
-    total_frames = 9.2 * 30
-    diffusion_progress = max(0.0, (stroke - 5 / total_frames) / (1 - 5 / total_frames))
-    dry_progress = max(0.0, (stroke - 12 / total_frames) / (1 - 12 / total_frames))
+    stroke = stroke_progress(progress, TIMING)
+    total_frames = TIMING["durationMs"] / 1000 * TIMING["fps"]
+    diffusion_frames = TIMING["inkDelays"]["diffusionFrames"]
+    drying_frames = TIMING["inkDelays"]["dryingFrames"]
+    diffusion_progress = max(0.0, (stroke - diffusion_frames / total_frames) / (1 - diffusion_frames / total_frames))
+    dry_progress = max(0.0, (stroke - drying_frames / total_frames) / (1 - drying_frames / total_frames))
 
     diffusion = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     diffusion_points = points_between(0, ease(diffusion_progress))
@@ -219,7 +203,7 @@ def render_frame(background: Image.Image, sprites: list[Image.Image], progress: 
     active_start = max(0.0, stroke - active_span)
     active = points_between(active_start, stroke)
     if len(active) >= 2 and stroke > 0:
-        opacity = 198 if progress < 0.96 else round(198 * max(0, 1 - (progress - 0.96) / 0.04))
+        opacity = 198 if progress < BREAKS[-1] else round(198 * max(0, 1 - (progress - BREAKS[-1]) / (1 - BREAKS[-1])))
         pose = pose_index(progress)
         widths = [6, 7, 15, 12, 14, 9, 10, 7, 0]
         if opacity and widths[pose]:
@@ -250,19 +234,19 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
-    full_frames: list[Image.Image] = []
     gif_rgb_frames: list[Image.Image] = []
-    for index in range(103):
-        progress = min(1.0, index / 92)
+    for index in range(GIF_TIMELINE_SAMPLES):
+        progress = min(1.0, index / GIF_ACTIVE_LAST_INDEX)
         rendered = render_frame(background, sprites, progress)
-        full_frames.append(rendered)
         gif_rgb_frames.append(rendered.resize(GIF_SIZE, Image.Resampling.LANCZOS))
+    # Each frame gets its own restrained palette. This avoids the coarse skin
+    # blocks of one global palette while keeping the 360x640 proof below 16 MiB.
     gif_frames = [
         frame.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
         for frame in gif_rgb_frames
     ]
     gif_path = ROOT / "assets/inkbrush-motion-demo.gif"
-    gif_frames[0].save(gif_path, save_all=True, append_images=gif_frames[1:], duration=100, loop=0, disposal=2, optimize=True)
+    gif_frames[0].save(gif_path, save_all=True, append_images=gif_frames[1:], duration=GIF_FRAME_DURATION_MS, loop=0, disposal=2, optimize=True)
 
     proof = Image.new("RGB", (1080, 1920), (237, 229, 214))
     proof_draw = ImageDraw.Draw(proof, "RGBA")
@@ -275,14 +259,27 @@ def main() -> None:
     proof_path = ROOT / "assets/nine-action-proof.png"
     proof.save(proof_path, optimize=True)
 
-    # Evidence labels use 10 fps sample positions; the storyboard records the
-    # equivalent 30 fps composition frames (9, 165, 276).
-    for label, frame_index in [("start", 3), ("middle", 55), ("end", 92)]:
-        full_frames[frame_index].save(output_dir / f"{label}.png", optimize=True)
-        full_frames[frame_index].save(evidence_dir / f"{label}.png", optimize=True)
+    # Evidence uses exact composition progress, independent of README sampling.
+    # The storyboard records the equivalent 30 fps frames (9, 165, 276).
+    total_frames = TIMING["durationMs"] / 1000 * TIMING["fps"]
+    evidence_frames = {
+        "start": render_frame(background, sprites, 9 / total_frames),
+        "middle": render_frame(background, sprites, 165 / total_frames),
+        "end": render_frame(background, sprites, 1.0),
+    }
+    for label, frame in evidence_frames.items():
+        frame.save(output_dir / f"{label}.png", optimize=True)
+        frame.save(evidence_dir / f"{label}.png", optimize=True)
+    hero_crops = {
+        "hero-start": (render_frame(background, sprites, 21 / total_frames), (160, 220, 520, 460)),
+        "hero-middle": (evidence_frames["middle"], (230, 560, 590, 800)),
+        "hero-end": (evidence_frames["end"], (360, 360, 720, 600)),
+    }
+    for label, (frame, box) in hero_crops.items():
+        frame.crop(box).save(evidence_dir / f"{label}.png", optimize=True)
     with Image.open(gif_path) as rendered_gif:
         stored_frames = rendered_gif.n_frames
-    print(f"wrote {gif_path} ({len(gif_frames)} timeline samples, {stored_frames} stored frames, 10.3 seconds)")
+    print(f"wrote {gif_path} ({len(gif_frames)} timeline samples, {stored_frames} stored frames)")
     print(f"wrote {proof_path} (1080x1920)")
 
 

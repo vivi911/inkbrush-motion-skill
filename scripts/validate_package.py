@@ -11,6 +11,12 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from artifact_checks import gif_metadata, png_dimensions, sha256_file, validate_svg_safety
+from motion_timing import (
+    load_motion_timing,
+    minimum_final_hold_frames,
+    preview_metrics,
+    validate_motion_timing,
+)
 from validate_storyboard import (
     BEAT_FIELDS,
     BRUSH_MODES,
@@ -30,12 +36,19 @@ from validate_storyboard import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-README_GIF_SHA256 = "61f71b7c6185b76b67540956d79447f96e17dcd79727cc80c7b86dee933a48c5"
+README_GIF_SHA256 = "134f5de0ea0b0912ccb446143f309dd815e33a5825ab81790e1ede86738080db"
 README_SOURCE_SHA256 = {
-    "index.html": "39ce27ddd8dfda291dbca376d0a0bcdca1b47d7e4ae999f11547454c3ec2666b",
+    "index.html": "1a1ce030606fe4202690d5456555e5709ed4a5434cff15deecf87e1d083f2512",
     "styles.css": "b1eb0c1a21338bacc65e596d92598f6eca0a24af4d5f237f006ae57b62ac9a54",
-    "app.js": "08b8f4d6bc04eed2824fdafe1e4ab014c58f3e2e071ab6811f5b0373317dd930",
-    "scripts/render_readme_gif.py": "e8b80773e601cae7a822b5dfcc729091456f271bce0909d84cc889966e574819",
+    "motion-timing.js": "f94ca2241f70ea2136c69a959f4b6d445f0b8e45c556e867f7cc37aaf3937e67",
+    "app.js": "a825eb56fbd811caded2eb0f7bc46dab1232a0ccf356c2719e14fb80a1b49ff0",
+    "scripts/motion_timing.py": "66875a9090f0c787fb2af4bb0ced7f04d984db066f5466e098d4e2fb786ea5a8",
+    "scripts/render_readme_gif.py": "46ce6f7ec083881867304e9ace8e45e2b5fab2e52b0746f56dff6a2327fbae03",
+}
+HERO_EVIDENCE_SHA256 = {
+    "assets/evidence/hero-start.png": "817175a46a6ead09274dd5204c03affe5aeb5e42c39321c63dedcb96728c3a70",
+    "assets/evidence/hero-middle.png": "1a629acff5c9aa8513b78d3e017b01979358610b4735c8e837711270427aeca4",
+    "assets/evidence/hero-end.png": "eb00913a32c54a2c03767071eb33903bbe859d57ae12f1ab85b438142ba58288",
 }
 BRUSH_ASSET_SHA256 = {
     "assets/brush-poses-v3/pose-01.png": "4bb53d10c827c59cf3542632e57d78a209a9d187e97047a04b7ae923b75eac92",
@@ -51,18 +64,18 @@ BRUSH_ASSET_SHA256 = {
 FINAL_BRUSH_SHA256 = BRUSH_ASSET_SHA256["assets/brush-poses-v3/pose-09.png"]
 CLEAN_PLATE_SHA256 = "37e16d24d69537bcdbb88dcee8307b78ae77a02c05fec79d82bc77a8a5f2e658"
 REAL_BRUSH_REFERENCE_SHA256 = "49153b50a9a56539430099af1aa6475957b9bc7b9630075bdebc9927fcb6f85d"
-NINE_ACTION_PROOF_SHA256 = "912ee31fec01566df0fec8eb0b60c86487e11803b2cfc1da17f2feaa5819b6de"
+NINE_ACTION_PROOF_SHA256 = "dd573eac7a25162b8ae93cb38b899667120e7a97c536516294e23439df75e4d8"
 REQUIRED = [
     ".gitignore", ".nojekyll", ".github/workflows/validate.yml",
     "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md",
-    "SECURITY.md", "index.html", "styles.css", "app.js", "agents/openai.yaml",
+    "SECURITY.md", "index.html", "styles.css", "motion-timing.js", "app.js", "agents/openai.yaml",
     "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png", "assets/inkbrush-motion-demo.gif",
     "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png",
     "assets/brush-pose-final.png", *BRUSH_ASSET_SHA256, "assets/reference/real-brush-gray-linen.png",
-    "assets/nine-action-proof.png", "assets/evidence/start.png", "assets/evidence/middle.png", "assets/evidence/end.png", "assets/demo-plan.json",
+    "assets/nine-action-proof.png", "assets/evidence/start.png", "assets/evidence/middle.png", "assets/evidence/end.png", *HERO_EVIDENCE_SHA256, "assets/demo-plan.json",
     "references/style-contract.md", "references/motion-contract.md", "references/qa-rubric.md",
     "references/real-brush-contract.md", "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/readme-animation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
-    "scripts/generate_social_preview.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
+    "scripts/generate_social_preview.py", "scripts/motion_timing.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
 ]
 
 
@@ -134,7 +147,7 @@ class RuntimeHTMLAudit(HTMLParser):
 
         if tag == "script":
             if values.get("src"):
-                if values["src"] != "app.js": self.errors.append("index.html only allows the local app.js runtime")
+                if values["src"] not in {"motion-timing.js", "app.js"}: self.errors.append("index.html only allows the local timing and app runtimes")
             elif values.get("type", "").lower() == "application/ld+json":
                 if self.json_ld is not None: self.errors.append("nested JSON-LD scripts are invalid")
                 self.json_ld = []
@@ -190,17 +203,33 @@ def main() -> int:
         if marker not in copyright_text: errors.append(f"COPYRIGHT.md missing section: {marker}")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    if '<img src="assets/inkbrush-motion-demo.gif"' not in readme:
-        errors.append("README.md must lead with the animated delivery demo")
+    if '<img src="assets/inkbrush-motion-demo.gif"' not in readme or 'width="360"' not in readme.split("</a>", 1)[0]:
+        errors.append("README.md must lead with the 360-pixel animated delivery demo")
+    if "Tip leads → Ink absorbs → Evidence holds" not in readme:
+        errors.append("README.md must state the three-part first-screen proof")
+    for relative in HERO_EVIDENCE_SHA256:
+        if f'src="{relative}"' not in readme:
+            errors.append(f"README.md is missing first-screen evidence: {relative}")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     for element_id in ["replay", "motion-status", "ink-stage", "river-path", "river-diffusion", "river-dry", "river-dry-mask", "brush", "moving-brush"]:
         if f'id="{element_id}"' not in html: errors.append(f"index.html missing required id: {element_id}")
     errors.extend(audit_html_runtime(html))
+    if html.find('src="motion-timing.js"') > html.find('src="app.js"') or html.find('src="motion-timing.js"') < 0:
+        errors.append("index.html must load motion-timing.js before app.js")
     css = (ROOT / "styles.css").read_text(encoding="utf-8")
     if re.search(r"@import\b|url\(\s*[\"']?(?:https?:)?//", css, re.IGNORECASE): errors.append("styles.css must not import external runtime resources")
     javascript = (ROOT / "app.js").read_text(encoding="utf-8")
     if re.search(r"\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\b|navigator\.sendBeacon|import\s*\(\s*[\"'](?:https?:)?//", javascript): errors.append("app.js must not make runtime network requests")
+    try:
+        timing = load_motion_timing(ROOT / "motion-timing.js")
+        errors.extend(validate_motion_timing(timing))
+    except (OSError, ValueError) as exc:
+        errors.append(str(exc))
+        timing = None
+    for timing_key in ["context", "action", "evidence", "result"]:
+        if f'data-threshold-key="{timing_key}"' not in html:
+            errors.append(f"index.html is missing semantic timing key: {timing_key}")
     for relative in BRUSH_ASSET_SHA256:
         if relative not in javascript: errors.append(f"app.js is missing the nine-action brush asset: {relative}")
     for svg_name in ["assets/icon.svg", "assets/social-preview.svg", "assets/static-board.svg"]:
@@ -215,6 +244,7 @@ def main() -> int:
         schema_properties = schema.get("properties", {})
         if schema.get("additionalProperties") is not False or set(schema_properties) != TOP_LEVEL_FIELDS: errors.append("schema top-level fields drift from the Python validator")
         if set(schema.get("required", [])) != REQUIRED_FIELDS: errors.append("schema required fields drift from the Python validator")
+        if timing is not None and schema_properties.get("finalHoldFrames", {}).get("minimum") != minimum_final_hold_frames(timing): errors.append("schema final hold minimum drifts from the motion timing contract")
         if set(schema_properties.get("status", {}).get("enum", [])) != STATES: errors.append("schema status enum drifts from the Python validator")
         if set(schema_properties.get("styleRecipe", {}).get("enum", [])) != STYLE_RECIPES: errors.append("schema styleRecipe enum drifts from the Python validator")
         if set(schema_properties.get("brushMode", {}).get("enum", [])) != BRUSH_MODES: errors.append("schema brushMode enum drifts from the Python validator")
@@ -247,6 +277,12 @@ def main() -> int:
         if schema.get("allOf") != expected_schema_gates: errors.append("schema state and dimension gates drift from the Python validator")
         plan = json.loads((ROOT / "assets/demo-plan.json").read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
         errors.extend(f"demo-plan: {error}" for error in validate(plan, ROOT))
+        plan_ink = plan.get("realHandProfile", {}).get("inkPhysics", {})
+        if timing is not None and (
+            plan_ink.get("diffusionDelayFrames") != timing["inkDelays"]["diffusionFrames"]
+            or plan_ink.get("dryingDelayFrames") != timing["inkDelays"]["dryingFrames"]
+        ):
+            errors.append("demo-plan ink delays drift from the shared motion timing contract")
         for beat in plan.get("beats", []):
             for field in ("label", "copy"):
                 exact_text = beat.get(field)
@@ -275,13 +311,21 @@ def main() -> int:
         nine_action_proof = ROOT / "assets/nine-action-proof.png"
         if png_dimensions(nine_action_proof) != (1080, 1920): errors.append("assets/nine-action-proof.png must be 1080x1920")
         if sha256_file(nine_action_proof) != NINE_ACTION_PROOF_SHA256: errors.append("assets/nine-action-proof.png does not match the approved provenance hash")
+        for relative, expected_hash in HERO_EVIDENCE_SHA256.items():
+            hero_evidence = ROOT / relative
+            if png_dimensions(hero_evidence) != (360, 240): errors.append(f"{relative} must be 360x240")
+            if sha256_file(hero_evidence) != expected_hash: errors.append(f"{relative} does not match the approved provenance hash")
         # The exact approved hash below binds the compressed pixels. Structural parsing
         # stays fast in repeated negative suites; full LZW decoding is covered directly
         # by artifact_checks tests and the published capture record.
         gif_width, gif_height, gif_frames, gif_duration_ms = gif_metadata(ROOT / "assets/inkbrush-motion-demo.gif", validate_lzw=False)
-        if abs(gif_width * 16 - gif_height * 9) > 16: errors.append("assets/inkbrush-motion-demo.gif must be native 9:16")
-        if gif_frames < 80: errors.append("assets/inkbrush-motion-demo.gif must contain at least 80 animation frames")
-        if not 9_000 <= gif_duration_ms <= 12_000: errors.append("assets/inkbrush-motion-demo.gif must run for 9 to 12 seconds")
+        if timing is None:
+            raise ValueError("motion timing contract is unavailable")
+        expected_gif = timing["gif"]
+        if (gif_width, gif_height) != (expected_gif["width"], expected_gif["height"]): errors.append("assets/inkbrush-motion-demo.gif dimensions drift from the motion timing contract")
+        if gif_frames < 55: errors.append("assets/inkbrush-motion-demo.gif must contain at least 55 animation frames")
+        expected_duration_ms = round(preview_metrics(timing)["gifDurationMs"])
+        if gif_duration_ms != expected_duration_ms: errors.append("assets/inkbrush-motion-demo.gif duration drifts from the motion timing contract")
         actual_gif_hash = sha256_file(ROOT / "assets/inkbrush-motion-demo.gif")
         if actual_gif_hash != README_GIF_SHA256: errors.append("assets/inkbrush-motion-demo.gif does not match the approved provenance hash")
         animation_record = (ROOT / "references/readme-animation-record.md").read_text(encoding="utf-8")
@@ -298,7 +342,7 @@ def main() -> int:
             errors.append("readme animation record must contain one exact capture source identity line")
         gif_rows = [line for line in animation_record.splitlines() if line.startswith("| `assets/inkbrush-motion-demo.gif` |")]
         expected_gif_row = [
-            "`assets/inkbrush-motion-demo.gif`", "292×519", "83", "10.3 seconds", f"`{README_GIF_SHA256}`",
+            "`assets/inkbrush-motion-demo.gif`", "360×640", "60", "10.22 seconds", f"`{README_GIF_SHA256}`",
         ]
         parsed_gif_row = [cell.strip() for cell in gif_rows[0].strip().strip("|").split("|")] if len(gif_rows) == 1 else []
         if parsed_gif_row != expected_gif_row:

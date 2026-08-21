@@ -1,10 +1,10 @@
 <div align="center">
   <a href="https://vivi911.github.io/inkbrush-motion-skill/">
-    <img src="assets/inkbrush-motion-demo.gif" alt="Animated Chinese ink-wash lesson in which a real-hand brush study paints Context, Action, and Evidence" width="292">
+    <img src="assets/inkbrush-motion-demo.gif" alt="Animated Chinese ink-wash lesson in which a real-hand brush study paints Context, Action, and Evidence" width="360">
   </a>
   <h1>InkBrush Motion</h1>
   <p><strong>An open-source AI Skill for calm, brush-led 9:16 knowledge animation.</strong></p>
-  <p><em>The animation above is a proof render of the same assets, timing, and knowledge shown by the zero-dependency live demo. Click it for the full-size replay.</em></p>
+  <p><em>Actual delivery motion. Click to replay.</em></p>
   <p>
     <a href="https://vivi911.github.io/inkbrush-motion-skill/">Live demo</a> ·
     <a href="SKILL.md">Use the Skill</a> ·
@@ -16,6 +16,21 @@
     <img alt="Native 9:16" src="https://img.shields.io/badge/canvas-9%3A16-c6a15b">
   </p>
 </div>
+
+<table>
+  <tr>
+    <td align="center"><img src="assets/evidence/hero-start.png" alt="Brush tip touching xuan paper before the ink line advances" width="240"><br><sub><b>Tip leads</b></sub></td>
+    <td align="center"><img src="assets/evidence/hero-middle.png" alt="Wet ink absorbing into the paper behind the moving brush" width="240"><br><sub><b>Ink absorbs</b></sub></td>
+    <td align="center"><img src="assets/evidence/hero-end.png" alt="Evidence knowledge card held over the completed dry ink journey" width="240"><br><sub><b>Evidence holds</b></sub></td>
+  </tr>
+</table>
+
+<p align="center"><strong>Tip leads → Ink absorbs → Evidence holds</strong></p>
+
+<details>
+  <summary><strong>See all nine calligraphy actions</strong></summary>
+  <p><img src="assets/nine-action-proof.png" alt="Nine-action proof from hover through leave paper" width="720"></p>
+</details>
 
 Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. The live demo teaches one reliable AI-agent loop—**Context → Action → Evidence**—as an AI-assisted real-hand brush study moves through nine calligraphy actions: hover, touch, press, travel, turn, lift, return, finish, and leave. Give AI the right context, ask for one clear next step, and check the result before you trust it. Exact knowledge text stays code-native while the brush tip leads every visible millimetre of ink.
 

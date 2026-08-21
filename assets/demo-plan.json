@@ -39,16 +39,16 @@
     "reviewer": "independent visual director",
     "staticApprovalSha256": "680a4dd16c45e57d53573c14f525b47e166c72a72c456a153bc570aec1cf16fa",
     "nineActionProof": "assets/nine-action-proof.png",
-    "nineActionProofSha256": "912ee31fec01566df0fec8eb0b60c86487e11803b2cfc1da17f2feaa5819b6de",
+    "nineActionProofSha256": "dd573eac7a25162b8ae93cb38b899667120e7a97c536516294e23439df75e4d8",
     "frames": [
       {"role": "start", "frame": 9, "path": "assets/evidence/start.png", "sha256": "2d00e598528a1c0d21f5a7cfa474ae75854f750fbea216d0e28b189d5cf67511"},
-      {"role": "middle", "frame": 165, "path": "assets/evidence/middle.png", "sha256": "df1ca1b9f8e3d5f796bf7b914d0cddb46992e256ab317f06e53c7c432b5a3e74"},
+      {"role": "middle", "frame": 165, "path": "assets/evidence/middle.png", "sha256": "0b9febb891a44564d8f394c779c2826efd5eddfa7af0bd3bdd438f8b2d87ad20"},
       {"role": "end", "frame": 276, "path": "assets/evidence/end.png", "sha256": "944c0143edb56719aa42247294e0634f18e013afbbb01b89c919c9009e997a11"}
     ]
   },
   "beats": [
-    {"id": "context", "label": "Context", "copy": "Give the goal, audience, and boundaries.", "startSecond": 0.7, "endSecond": 3.2},
-    {"id": "action", "label": "Action", "copy": "Ask for one clear next step.", "startSecond": 3.2, "endSecond": 5.9},
-    {"id": "evidence", "label": "Evidence", "copy": "Check the result before calling it done.", "startSecond": 5.9, "endSecond": 8.9}
+    {"id": "context", "label": "Context", "copy": "Give the goal, audience, and boundaries.", "startSecond": 2.4, "endSecond": 4.1},
+    {"id": "action", "label": "Action", "copy": "Ask for one clear next step.", "startSecond": 4.1, "endSecond": 6.1},
+    {"id": "evidence", "label": "Evidence", "copy": "Check the result before calling it done.", "startSecond": 6.1, "endSecond": 7.8}
   ]
 }

@@ -30,7 +30,7 @@ def base_plan() -> dict:
     return {
         "version": "1.0", "status": "STATIC_REVIEW_READY", "title": "Human AI",
         "summary": "A three-beat journey", "aspectRatio": "9:16", "width": 720, "height": 1280,
-        "fps": 30, "previewSeconds": 9, "finalHoldFrames": 30, "safeMarginPercent": 8,
+        "fps": 30, "previewSeconds": 9, "finalHoldFrames": 33, "safeMarginPercent": 8,
         "styleRecipe": "shan-shui-scroll", "textMode": "code-native", "brushMode": "none", "staticArtifact": "board.svg",
         "beats": [
             {"id": "observe", "label": "Observe", "copy": "See the whole task.", "startSecond": 0.5, "endSecond": 3},
@@ -65,6 +65,9 @@ def main() -> None:
         write_svg(root / "board.svg")
         plan["staticArtifactSha256"] = sha256_static_artifact(root / "board.svg")
         expect("valid static evidence", validate(plan, root) == [])
+        for too_short in (30, 32):
+            bad = copy.deepcopy(plan); bad["finalHoldFrames"] = too_short
+            expect(f"reject {too_short}-frame final hold", any("at least 33" in error for error in validate(bad, root)))
         expect("artifact states fail closed without base_dir", any("base_dir" in error for error in validate(plan, None)))
 
         unsafe_margin = root / "unsafe-margin.svg"
@@ -180,7 +183,7 @@ def main() -> None:
         expect("reject duplicate frame evidence", any("unique" in error for error in validate(bad, root)))
         bad = copy.deepcopy(motion); bad["motionEvidence"]["frames"][2]["frame"] = 269
         expect("reject end evidence before final hold", any("animation end" in error for error in validate(bad, root)))
-        bad = copy.deepcopy(motion); bad["motionEvidence"]["frames"][2]["frame"] = 300
+        bad = copy.deepcopy(motion); bad["motionEvidence"]["frames"][2]["frame"] = 303
         expect("reject evidence frame beyond final hold", any("between 0 and" in error for error in validate(bad, root)))
 
         fake_png = root / "fake.png"

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import copy
+import json
 import os
 import shutil
 import subprocess
@@ -11,6 +13,7 @@ import tempfile
 from pathlib import Path
 
 from artifact_checks import gif_metadata
+from motion_timing import PREFIX, load_motion_timing
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +42,11 @@ def clone_candidate(parent: Path, name: str) -> Path:
     destination = parent / name
     shutil.copytree(ROOT, destination, ignore=shutil.ignore_patterns(".git", "output", "__pycache__"))
     return destination
+
+
+def write_timing(path: Path, timing: dict) -> None:
+    payload = json.dumps(timing, separators=(",", ":"), ensure_ascii=False)
+    path.write_text(f"{PREFIX}{payload};\n", encoding="utf-8")
 
 
 def main() -> None:
@@ -97,6 +105,65 @@ def main() -> None:
         result = run_validator(js_case)
         expect("reject JavaScript network call", result.returncode == 1 and "network requests" in result.stdout)
 
+        timing_case = clone_candidate(parent, "late-first-ink")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["breaks"][0] = 0.09; timing["strokeSegments"][0][0] = 0.09
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject first ink after 0.8 seconds", result.returncode == 1 and "first visible ink" in result.stdout)
+
+        timing_case = clone_candidate(parent, "late-first-three")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["breaks"][2] = 0.16; timing["strokeSegments"][1][1] = 0.16; timing["strokeSegments"][2][0] = 0.16
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject hover-touch-press after 1.4 seconds", result.returncode == 1 and "hover-touch-press" in result.stdout)
+
+        timing_case = clone_candidate(parent, "rushed-first-three")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["breaks"][2] = 0.12; timing["strokeSegments"][1][1] = 0.12; timing["strokeSegments"][2][0] = 0.12
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject hover-touch-press before 1.2 seconds", result.returncode == 1 and "hover-touch-press" in result.stdout)
+
+        timing_case = clone_candidate(parent, "late-context")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["knowledgeThresholds"]["context"] = 0.25
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject Context after 2.5 seconds", result.returncode == 1 and "Context reveal" in result.stdout)
+
+        timing_case = clone_candidate(parent, "short-gif-hold")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["gif"]["frameDurationMs"] = 120
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject GIF final hold under 1.1 seconds", result.returncode == 1 and "GIF final hold" in result.stdout)
+
+        ink_delay_case = clone_candidate(parent, "drifted-ink-delay")
+        plan_path = ink_delay_case / "assets/demo-plan.json"
+        plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        plan["realHandProfile"]["inkPhysics"]["diffusionDelayFrames"] = 6
+        plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        result = run_validator(ink_delay_case)
+        expect("reject demo-plan ink delay drift", result.returncode == 1 and "ink delays drift" in result.stdout)
+
+        proof_case = clone_candidate(parent, "missing-first-screen-proof")
+        proof_path = proof_case / "README.md"
+        proof_path.write_text(proof_path.read_text(encoding="utf-8").replace("Tip leads → Ink absorbs → Evidence holds", "Tip leads", 1), encoding="utf-8")
+        result = run_validator(proof_case)
+        expect("reject README without three-part first-screen proof", result.returncode == 1 and "three-part first-screen proof" in result.stdout)
+
+        hero_hash_case = clone_candidate(parent, "changed-first-screen-evidence")
+        shutil.copyfile(hero_hash_case / "assets/evidence/hero-end.png", hero_hash_case / "assets/evidence/hero-start.png")
+        result = run_validator(hero_hash_case)
+        expect("reject changed first-screen evidence hash", result.returncode == 1 and "hero-start.png does not match" in result.stdout)
+
         source_hash_case = clone_candidate(parent, "changed-readme-capture-source")
         (source_hash_case / "app.js").write_text((source_hash_case / "app.js").read_text(encoding="utf-8") + "\n// harmless source drift\n", encoding="utf-8")
         result = run_validator(source_hash_case)
@@ -104,7 +171,7 @@ def main() -> None:
 
         source_record_case = clone_candidate(parent, "misbound-readme-capture-source")
         source_record_path = source_record_case / "references/readme-animation-record.md"
-        approved_app_hash = "08b8f4d6bc04eed2824fdafe1e4ab014c58f3e2e071ab6811f5b0373317dd930"
+        approved_app_hash = "a825eb56fbd811caded2eb0f7bc46dab1232a0ccf356c2719e14fb80a1b49ff0"
         source_record_text = source_record_path.read_text(encoding="utf-8").replace(
             f"`app.js` SHA-256 `{approved_app_hash}`",
             f"`app.js` SHA-256 `{'0' * 64}`",
@@ -161,6 +228,12 @@ def main() -> None:
         result = run_validator(schema_gate_case)
         expect("reject schema state/dimension gate drift", result.returncode == 1 and "state and dimension gates drift" in result.stdout)
 
+        schema_hold_case = clone_candidate(parent, "schema-final-hold-drift")
+        schema_path = schema_hold_case / "references/storyboard.schema.json"
+        schema_path.write_text(schema_path.read_text(encoding="utf-8").replace('"finalHoldFrames": {"type": "integer", "minimum": 33}', '"finalHoldFrames": {"type": "integer", "minimum": 30}', 1), encoding="utf-8")
+        result = run_validator(schema_hold_case)
+        expect("reject schema final hold below 33 frames", result.returncode == 1 and "final hold minimum" in result.stdout)
+
         icon_case = clone_candidate(parent, "active-icon")
         icon_path = icon_case / "assets/icon.svg"
         icon_path.write_text(icon_path.read_text(encoding="utf-8").replace("</svg>", "<script>alert(1)</script></svg>"), encoding="utf-8")
@@ -177,7 +250,7 @@ def main() -> None:
             return ""
 
         real_gif = ROOT / "assets/inkbrush-motion-demo.gif"
-        expect("fully decode approved animated README demo", gif_metadata(real_gif) == (292, 519, 83, 10_300))
+        expect("fully decode approved animated README demo", gif_metadata(real_gif) == (360, 640, 60, 10_220))
         expect("reject truncated animated README demo", "GIF" in gif_error("truncated.gif", real_gif.read_bytes()[:40]))
 
         empty_gif = b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff"
@@ -233,11 +306,11 @@ def main() -> None:
         record_path = record_case / "references/readme-animation-record.md"
         record_text = record_path.read_text(encoding="utf-8")
         record_text = record_text.replace(
-            "`61f71b7c6185b76b67540956d79447f96e17dcd79727cc80c7b86dee933a48c5` |",
+            "`134f5de0ea0b0912ccb446143f309dd815e33a5825ab81790e1ede86738080db` |",
             f"`{'0' * 64}` |",
             1,
         )
-        record_text += "\n<!-- 61f71b7c6185b76b67540956d79447f96e17dcd79727cc80c7b86dee933a48c5 -->\n"
+        record_text += "\n<!-- 134f5de0ea0b0912ccb446143f309dd815e33a5825ab81790e1ede86738080db -->\n"
         record_path.write_text(record_text, encoding="utf-8")
         result = run_validator(record_case)
         expect("reject GIF hash hidden outside provenance table row", result.returncode == 1 and "exact approved GIF table row" in result.stdout)
@@ -262,7 +335,7 @@ def main() -> None:
         expect("reject oversized GIF before parsing", "16 MiB" in oversized_error)
 
         manifest_case = clone_candidate(parent, "missing-manifest")
-        for relative in [".nojekyll", ".github/workflows/validate.yml", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v3/pose-09.png", "assets/reference/real-brush-gray-linen.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
+        for relative in [".nojekyll", ".github/workflows/validate.yml", "motion-timing.js", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v3/pose-09.png", "assets/reference/real-brush-gray-linen.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/evidence/hero-middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
             (manifest_case / relative).unlink()
         result = run_validator(manifest_case)
         expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 15)

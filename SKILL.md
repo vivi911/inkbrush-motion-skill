@@ -16,6 +16,7 @@ Turn knowledge into a quiet visual journey built from brush, ink, paper, and del
 - Keep the first proof silent unless audio is explicitly requested.
 - When a visible hand is requested, use nine readable calligraphy actions in order: hover, touch, press, travel, turn, lift pressure, return tip, finish, and leave paper. A floating brush or one rigid sprite does not satisfy this contract.
 - Default real-hand work to the `gray-linen-xuan` profile: an upright brush, a continuous sleeve entering from the right or lower-right, and ink that visibly dries into the paper instead of staying as a solid black ribbon.
+- For a public repository showcase, prove the result above the fold: render the README loop at no less than `360×640`, show the first visible ink by `0.8 s`, reveal the first knowledge beat by `2.5 s`, and place labeled start / middle / end evidence directly below the preview.
 
 ## Workflow
 
@@ -24,7 +25,7 @@ Turn knowledge into a quiet visual journey built from brush, ink, paper, and del
 3. Read `references/style-contract.md` and build a native portrait static board.
 4. Return `STATIC_REVIEW_READY`. Hash the exact static artifact bundle—including any linked local PNG—and wait for human visual approval before motion.
 5. Read `references/motion-contract.md`. For visible-hand work, also read `references/real-brush-contract.md` and use its low-freedom hand, sleeve, and ink gates.
-6. Build a 6–10 second proof in which the brush leads the ink and diffusion follows with a delay. For real-hand mode, prove all nine calligraphy actions and keep the sleeve connected to a frame edge.
+6. Build a 6–10 second proof in which the brush leads the ink and diffusion follows with a delay. For real-hand mode, prove all nine calligraphy actions, complete hover / touch / press in `1.2–1.4 s`, keep the sleeve connected to a frame edge, and hold the finished frame for at least `1.1 s`.
 7. Export unique start, middle, and end evidence frames. Real-hand work also exports a hash-bound 3×3 action proof. Run `scripts/validate_storyboard.py` and inspect every proof at 360×640.
 8. Return `MOTION_PROOF_READY` only after an independent visual review. If no approved renderer exists, return `RENDERER_REQUIRED`.
 

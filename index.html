@@ -100,25 +100,25 @@
                 </g>
               </svg>
 
-              <article class="waypoint waypoint-one" data-threshold="0.2">
+              <article class="waypoint waypoint-one" data-threshold-key="context">
                 <span>01</span><strong>Context</strong>
               </article>
-              <article class="waypoint waypoint-two" data-threshold="0.47">
+              <article class="waypoint waypoint-two" data-threshold-key="action">
                 <span>02</span><strong>Action</strong>
               </article>
-              <article class="waypoint waypoint-three" data-threshold="0.74">
+              <article class="waypoint waypoint-three" data-threshold-key="evidence">
                 <span>03</span><strong>Evidence</strong>
               </article>
-              <article class="lesson-caption" data-threshold="0.2" data-end-threshold="0.47">
+              <article class="lesson-caption" data-threshold-key="context" data-end-threshold-key="action">
                 <span>CONTEXT</span><p>Give the goal, audience, and boundaries.</p>
               </article>
-              <article class="lesson-caption" data-threshold="0.47" data-end-threshold="0.74">
+              <article class="lesson-caption" data-threshold-key="action" data-end-threshold-key="evidence">
                 <span>ACTION</span><p>Ask for one clear next step.</p>
               </article>
-              <article class="lesson-caption" data-threshold="0.74" data-end-threshold="0.94">
+              <article class="lesson-caption" data-threshold-key="evidence" data-end-threshold-key="result">
                 <span>EVIDENCE</span><p>Check the result before calling it done.</p>
               </article>
-              <div class="journey-result" data-threshold="0.94">
+              <div class="journey-result" data-threshold-key="result">
                 <span>RELIABLE AI</span>
                 <strong>Context + Action + Evidence</strong>
               </div>
@@ -189,6 +189,7 @@
     </main>
 
     <footer><span>InkBrush Motion Skill · GoAskVivi</span><span>MIT · 2026</span></footer>
+    <script src="motion-timing.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>

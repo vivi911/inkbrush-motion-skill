@@ -18,13 +18,14 @@
   const reveals = [...waypoints, ...captions, result].filter(Boolean);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const previewMode = new URLSearchParams(window.location.search).get("preview");
+  const timing = window.INKBRUSH_TIMING;
 
-  if (!stage || !path || !diffusion || !dryPath || !dryMask || !brush || !movingBrush || !wetEdge || !replayButton || !status || !journeyFrame) return;
+  if (!stage || !path || !diffusion || !dryPath || !dryMask || !brush || !movingBrush || !wetEdge || !replayButton || !status || !journeyFrame || !timing) return;
 
-  const duration = 9200;
-  const totalFrames = duration / 1000 * 30;
-  const diffusionDelay = 5 / totalFrames;
-  const dryingDelay = 12 / totalFrames;
+  const duration = timing.durationMs;
+  const totalFrames = duration / 1000 * timing.fps;
+  const diffusionDelay = timing.inkDelays.diffusionFrames / totalFrames;
+  const dryingDelay = timing.inkDelays.dryingFrames / totalFrames;
   const pathLength = path.getTotalLength();
   let frameId = 0;
   let loopTimer = 0;
@@ -49,21 +50,15 @@
   const ease = (value) => value * value * (3 - 2 * value);
 
   function poseIndexFor(progress) {
-    const breaks = [0.08, 0.14, 0.22, 0.58, 0.68, 0.78, 0.88, 0.96];
-    const index = breaks.findIndex((threshold) => progress < threshold);
+    const index = timing.breaks.findIndex((threshold) => progress < threshold);
     return index === -1 ? brushPoses.length - 1 : index;
   }
 
   function strokeProgress(progress) {
-    const segment = (start, end, from, to) => from + (to - from) * ease(clamp((progress - start) / (end - start), 0, 1));
-    if (progress < 0.08) return 0;
-    if (progress < 0.14) return segment(0.08, 0.14, 0, 0.01);
-    if (progress < 0.22) return segment(0.14, 0.22, 0.01, 0.04);
-    if (progress < 0.58) return segment(0.22, 0.58, 0.04, 0.60);
-    if (progress < 0.68) return segment(0.58, 0.68, 0.60, 0.72);
-    if (progress < 0.78) return segment(0.68, 0.78, 0.72, 0.86);
-    if (progress < 0.88) return segment(0.78, 0.88, 0.86, 0.94);
-    if (progress < 0.96) return segment(0.88, 0.96, 0.94, 1);
+    if (progress < timing.strokeSegments[0][0]) return 0;
+    for (const [start, end, from, to] of timing.strokeSegments) {
+      if (progress < end) return from + (to - from) * ease(clamp((progress - start) / (end - start), 0, 1));
+    }
     return 1;
   }
 
@@ -95,14 +90,14 @@
 
     path.style.strokeDasharray = `${activeLength} ${pathLength + activeSpan}`;
     path.style.strokeDashoffset = String(-activeStart);
-    path.style.opacity = String(0.78 * (1 - clamp((progress - 0.96) / 0.04, 0, 1)));
+    path.style.opacity = String(0.78 * (1 - clamp((progress - timing.breaks.at(-1)) / (1 - timing.breaks.at(-1)), 0, 1)));
     diffusion.style.strokeDashoffset = String(pathLength * (1 - ease(bloomProgress)));
     dryMask.style.strokeDashoffset = String(pathLength * (1 - ease(dryProgress)));
     placeBrush(stroke, poseIndex);
 
     reveals.forEach((reveal) => {
-      const threshold = Number(reveal.dataset.threshold || 0);
-      const endThreshold = Number(reveal.dataset.endThreshold || 1.01);
+      const threshold = timing.knowledgeThresholds[reveal.dataset.thresholdKey] ?? 0;
+      const endThreshold = timing.knowledgeThresholds[reveal.dataset.endThresholdKey] ?? 1.01;
       reveal.classList.toggle("is-visible", stroke >= threshold && stroke < endThreshold);
     });
 
@@ -112,11 +107,11 @@
       stage.dataset.motionState = "complete";
       journeyFrame.dataset.motionState = "complete";
     } else {
-      status.textContent = progress < 0.08
+      status.textContent = progress < timing.breaks[0]
         ? "Poising the brush…"
-        : progress < 0.22
+        : progress < timing.breaks[2]
           ? "Setting the ink…"
-          : progress < 0.58
+          : progress < timing.breaks[3]
             ? "Painting context and action…"
             : "Checking evidence…";
       brush.style.opacity = "1";
