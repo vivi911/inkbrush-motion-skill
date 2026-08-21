@@ -14,6 +14,7 @@ from xml.etree import ElementTree
 
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+GIF_SIGNATURES = {b"GIF87a", b"GIF89a"}
 
 
 def sha256_file(path: Path) -> str:
@@ -96,6 +97,196 @@ def png_dimensions(path: Path) -> tuple[int, int]:
         if decoded[row * (row_bytes + 1)] > 4:
             raise ValueError(f"PNG contains an invalid row filter: {path}")
     return width, height
+
+
+def gif_metadata(path: Path, *, validate_lzw: bool = True) -> tuple[int, int, int, int]:
+    """Return width, height, frame count, and duration in milliseconds."""
+    try:
+        file_size = path.stat().st_size
+    except OSError as exc:
+        raise ValueError(f"cannot stat GIF {path}: {exc}") from exc
+    if file_size > 16 * 1024 * 1024:
+        raise ValueError(f"GIF exceeds the 16 MiB README limit: {path}")
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        raise ValueError(f"cannot read GIF {path}: {exc}") from exc
+    if len(data) < 14 or data[:6] not in GIF_SIGNATURES:
+        raise ValueError(f"not a complete GIF: {path}")
+    if len(data) != file_size:
+        raise ValueError(f"GIF size changed while reading: {path}")
+
+    width, height = struct.unpack("<HH", data[6:10])
+    if not width or not height or width * height > 2_000_000:
+        raise ValueError(f"GIF dimensions are empty or exceed the README limit: {path}")
+    offset = 13
+    packed = data[10]
+    global_palette_entries = 0
+    if packed & 0x80:
+        global_palette_entries = 2 ** ((packed & 0x07) + 1)
+        offset += 3 * global_palette_entries
+    if offset > len(data):
+        raise ValueError(f"truncated GIF color table in {path}")
+
+    def sub_blocks() -> list[bytes]:
+        nonlocal offset
+        blocks: list[bytes] = []
+        while True:
+            if offset >= len(data):
+                raise ValueError(f"truncated GIF data blocks in {path}")
+            size = data[offset]
+            offset += 1
+            if size == 0:
+                return blocks
+            end = offset + size
+            if end > len(data):
+                raise ValueError(f"truncated GIF data block in {path}")
+            blocks.append(data[offset:end])
+            offset = end
+
+    frame_count = 0
+    duration_ms = 0
+    pending_delay_cs = 0
+    found_trailer = False
+    while offset < len(data):
+        introducer = data[offset]
+        offset += 1
+        if introducer == 0x3B:
+            if offset != len(data):
+                raise ValueError(f"GIF trailer must be final in {path}")
+            found_trailer = True
+            break
+        if introducer == 0x21:
+            if offset >= len(data):
+                raise ValueError(f"truncated GIF extension in {path}")
+            label = data[offset]
+            offset += 1
+            blocks = sub_blocks()
+            if label == 0xF9:
+                if len(blocks) != 1 or len(blocks[0]) != 4:
+                    raise ValueError(f"invalid GIF graphics control extension in {path}")
+                pending_delay_cs = struct.unpack("<H", blocks[0][1:3])[0]
+            continue
+        if introducer == 0x2C:
+            end = offset + 9
+            if end > len(data):
+                raise ValueError(f"truncated GIF image descriptor in {path}")
+            descriptor = data[offset:end]
+            offset = end
+            left, top, frame_width, frame_height = struct.unpack("<HHHH", descriptor[:8])
+            if not frame_width or not frame_height or left + frame_width > width or top + frame_height > height:
+                raise ValueError(f"GIF frame rectangle exceeds the logical screen in {path}")
+            palette_entries = global_palette_entries
+            if descriptor[8] & 0x80:
+                palette_entries = 2 ** ((descriptor[8] & 0x07) + 1)
+                offset += 3 * palette_entries
+            if palette_entries == 0:
+                raise ValueError(f"GIF frame has no active color table in {path}")
+            if offset >= len(data):
+                raise ValueError(f"truncated GIF image data in {path}")
+            minimum_code_size = data[offset]
+            offset += 1
+            if not 2 <= minimum_code_size <= 8:
+                raise ValueError(f"GIF LZW minimum code size must be 2 to 8 in {path}")
+            image_blocks = sub_blocks()
+            if not image_blocks:
+                raise ValueError(f"GIF image data cannot be empty in {path}")
+            if validate_lzw:
+                _validate_gif_lzw(
+                    b"".join(image_blocks),
+                    minimum_code_size,
+                    frame_width * frame_height,
+                    palette_entries,
+                    path,
+                )
+            frame_count += 1
+            if frame_count > 300:
+                raise ValueError(f"GIF exceeds the 300-frame README limit: {path}")
+            duration_ms += pending_delay_cs * 10
+            pending_delay_cs = 0
+            continue
+        raise ValueError(f"unsupported GIF block 0x{introducer:02x} in {path}")
+
+    if not found_trailer or frame_count == 0:
+        raise ValueError(f"GIF requires image frames and a final trailer: {path}")
+    return width, height, frame_count, duration_ms
+
+
+def _validate_gif_lzw(
+    compressed: bytes,
+    minimum_code_size: int,
+    expected_pixels: int,
+    palette_entries: int,
+    path: Path,
+) -> None:
+    """Decode one GIF image stream and prove it yields exactly its pixel rectangle."""
+    clear_code = 1 << minimum_code_size
+    end_code = clear_code + 1
+    code_size = minimum_code_size + 1
+    next_code = end_code + 1
+    # Dictionary entries are (first palette index, decoded length, maximum palette index).
+    # Tracking metadata instead of materializing strings keeps validation bounded.
+    dictionary: dict[int, tuple[int, int, int]] = {index: (index, 1, index) for index in range(clear_code)}
+    byte_offset = 0
+    bit_buffer = 0
+    buffered_bits = 0
+    decoded_pixels = 0
+    previous: tuple[int, int, int] | None = None
+    saw_clear = False
+    saw_end = False
+
+    def reset_dictionary() -> None:
+        nonlocal dictionary, code_size, next_code, previous
+        dictionary = {index: (index, 1, index) for index in range(clear_code)}
+        code_size = minimum_code_size + 1
+        next_code = end_code + 1
+        previous = None
+
+    while True:
+        while buffered_bits < code_size and byte_offset < len(compressed):
+            bit_buffer |= compressed[byte_offset] << buffered_bits
+            buffered_bits += 8
+            byte_offset += 1
+        if buffered_bits < code_size:
+            break
+        code = bit_buffer & ((1 << code_size) - 1)
+        bit_buffer >>= code_size
+        buffered_bits -= code_size
+
+        if code == clear_code:
+            saw_clear = True
+            reset_dictionary()
+            continue
+        if not saw_clear:
+            raise ValueError(f"GIF LZW stream must begin with a clear code in {path}")
+        if code == end_code:
+            saw_end = True
+            break
+
+        if code in dictionary:
+            entry = dictionary[code]
+        elif code == next_code and previous is not None:
+            entry = (previous[0], previous[1] + 1, previous[2])
+        else:
+            raise ValueError(f"GIF LZW stream contains an invalid code in {path}")
+
+        if entry[2] >= palette_entries:
+            raise ValueError(f"GIF pixel index exceeds its active color table in {path}")
+        decoded_pixels += entry[1]
+        if decoded_pixels > expected_pixels:
+            raise ValueError(f"GIF LZW stream decodes beyond its frame rectangle in {path}")
+
+        if previous is not None and next_code < 4096:
+            dictionary[next_code] = (previous[0], previous[1] + 1, max(previous[2], entry[0]))
+            next_code += 1
+            if next_code == (1 << code_size) and code_size < 12:
+                code_size += 1
+        previous = entry
+
+    if not saw_end:
+        raise ValueError(f"GIF LZW stream is missing an end code in {path}")
+    if decoded_pixels != expected_pixels:
+        raise ValueError(f"GIF LZW stream does not fill its frame rectangle in {path}")
 
 
 def _local_name(tag: str) -> str:

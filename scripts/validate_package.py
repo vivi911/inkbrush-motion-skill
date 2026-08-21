@@ -9,7 +9,7 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
-from artifact_checks import png_dimensions, validate_svg_safety
+from artifact_checks import gif_metadata, png_dimensions, sha256_file, validate_svg_safety
 from validate_storyboard import (
     BEAT_FIELDS,
     FRAME_FIELDS,
@@ -25,14 +25,15 @@ from validate_storyboard import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
+README_GIF_SHA256 = "282149ab0beae16c291f7a08fbcce0b2ae57d2e8e6ba01509ff438ca75f153a7"
 REQUIRED = [
     ".gitignore", ".nojekyll", ".github/workflows/validate.yml",
     "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md",
     "SECURITY.md", "index.html", "styles.css", "app.js", "agents/openai.yaml",
-    "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png",
+    "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png", "assets/inkbrush-motion-demo.gif",
     "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/demo-plan.json",
     "references/style-contract.md", "references/motion-contract.md", "references/qa-rubric.md",
-    "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
+    "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/readme-animation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
     "scripts/generate_social_preview.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
 ]
 
@@ -132,6 +133,10 @@ def main() -> int:
     for marker in ["AI-assistance disclosure", "Third-party material", "Names and endorsement"]:
         if marker not in copyright_text: errors.append(f"COPYRIGHT.md missing section: {marker}")
 
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    if '<img src="assets/inkbrush-motion-demo.gif"' not in readme:
+        errors.append("README.md must lead with the animated delivery demo")
+
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     for element_id in ["replay", "motion-status", "ink-stage", "river-path", "river-diffusion", "brush"]:
         if f'id="{element_id}"' not in html: errors.append(f"index.html missing required id: {element_id}")
@@ -186,6 +191,23 @@ def main() -> int:
         if png_dimensions(ROOT / "assets/social-preview.png") != (1280, 640): errors.append("assets/social-preview.png must be 1280x640")
         if png_dimensions(ROOT / "assets/ai-agent-knowledge-journey.png") != (1080, 1920): errors.append("assets/ai-agent-knowledge-journey.png must be 1080x1920")
         if png_dimensions(ROOT / "assets/ai-agent-knowledge-prestroke.png") != (1080, 1920): errors.append("assets/ai-agent-knowledge-prestroke.png must be 1080x1920")
+        # The exact approved hash below binds the compressed pixels. Structural parsing
+        # stays fast in repeated negative suites; full LZW decoding is covered directly
+        # by artifact_checks tests and the published capture record.
+        gif_width, gif_height, gif_frames, gif_duration_ms = gif_metadata(ROOT / "assets/inkbrush-motion-demo.gif", validate_lzw=False)
+        if abs(gif_width * 16 - gif_height * 9) > 16: errors.append("assets/inkbrush-motion-demo.gif must be native 9:16")
+        if gif_frames < 80: errors.append("assets/inkbrush-motion-demo.gif must contain at least 80 animation frames")
+        if not 9_000 <= gif_duration_ms <= 12_000: errors.append("assets/inkbrush-motion-demo.gif must run for 9 to 12 seconds")
+        actual_gif_hash = sha256_file(ROOT / "assets/inkbrush-motion-demo.gif")
+        if actual_gif_hash != README_GIF_SHA256: errors.append("assets/inkbrush-motion-demo.gif does not match the approved provenance hash")
+        animation_record = (ROOT / "references/readme-animation-record.md").read_text(encoding="utf-8")
+        gif_rows = [line for line in animation_record.splitlines() if line.startswith("| `assets/inkbrush-motion-demo.gif` |")]
+        expected_gif_row = [
+            "`assets/inkbrush-motion-demo.gif`", "292×519", "103", "10.3 seconds", f"`{README_GIF_SHA256}`",
+        ]
+        parsed_gif_row = [cell.strip() for cell in gif_rows[0].strip().strip("|").split("|")] if len(gif_rows) == 1 else []
+        if parsed_gif_row != expected_gif_row:
+            errors.append("readme animation record must contain one exact approved GIF table row")
     except ValueError as exc:
         errors.append(str(exc))
 

@@ -6,7 +6,7 @@ Copyright © 2026 Vivi (GoAskVivi).
 
 ## License scope
 
-The repository's source code, `SKILL.md`, documentation, schemas, tests, code-authored SVG/CSS/JavaScript visuals, the published `assets/social-preview.png` rendition, and the selected AI-assisted demo backgrounds (`assets/ai-agent-knowledge-journey.png` and `assets/ai-agent-knowledge-prestroke.png`) are licensed under the MIT License in `LICENSE`, to the extent those materials are copyrightable and controlled by the publisher.
+The repository's source code, `SKILL.md`, documentation, schemas, tests, code-authored SVG/CSS/JavaScript visuals, the published preview renditions (`assets/social-preview.png` and `assets/inkbrush-motion-demo.gif`), and the selected AI-assisted demo backgrounds (`assets/ai-agent-knowledge-journey.png` and `assets/ai-agent-knowledge-prestroke.png`) are licensed under the MIT License in `LICENSE`, to the extent those materials are copyrightable and controlled by the publisher.
 
 The MIT License allows commercial use, copying, modification, distribution, sublicensing, and sale. Copies or substantial portions must retain the copyright and license notice. The work is provided without warranty.
 
@@ -27,6 +27,12 @@ No claim is made that purely machine-generated material receives copyright prote
 The maintainer-only generator uses [Pillow](https://github.com/python-pillow/Pillow), which is available under the [HPND License](https://github.com/python-pillow/Pillow/blob/main/LICENSE). Pillow is not vendored and is not required to run the website or Skill.
 
 The current local rendition used macOS-provided Georgia, Arial, and Songti typefaces. Their font software is not copied or distributed in this repository, and the MIT License does not relicense that software. Contributors regenerating the PNG are responsible for having lawful access to their chosen fonts; they may substitute licensed fonts without changing the runtime package.
+
+## Animated README preview provenance
+
+`assets/inkbrush-motion-demo.gif` is a direct 10.3-second capture of the repository's live 9:16 demo at commit `d795bf817dcad6359f3428a53f4d43a223e15495`. It contains the same disclosed AI-assisted pre-stroke background, exact code-native English knowledge text, and SVG/CSS/JavaScript motion shown on GitHub Pages. The frame count, dimensions, output hash, and capture recipe are recorded in [`references/readme-animation-record.md`](references/readme-animation-record.md).
+
+The maintainer-only capture used [Playwright](https://github.com/microsoft/playwright/blob/main/LICENSE) and an [FFmpeg](https://ffmpeg.org/legal.html) build. Neither tool nor its source code is included in this repository, and neither is required to view or reuse the GIF.
 
 ## Third-party material
 

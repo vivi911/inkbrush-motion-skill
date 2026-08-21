@@ -4,7 +4,7 @@
 
 <div align="center">
   <a href="https://vivi911.github.io/inkbrush-motion-skill/">
-    <img src="assets/social-preview.png" alt="InkBrush Motion 水墨 AI 知識動畫" width="100%">
+    <img src="assets/inkbrush-motion-demo.gif" alt="InkBrush Motion 水墨 AI 知識動畫" width="292">
   </a>
 </div>
 
