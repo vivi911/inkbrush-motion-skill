@@ -97,6 +97,45 @@ def main() -> None:
         result = run_validator(js_case)
         expect("reject JavaScript network call", result.returncode == 1 and "network requests" in result.stdout)
 
+        source_hash_case = clone_candidate(parent, "changed-readme-capture-source")
+        (source_hash_case / "app.js").write_text((source_hash_case / "app.js").read_text(encoding="utf-8") + "\n// harmless source drift\n", encoding="utf-8")
+        result = run_validator(source_hash_case)
+        expect("reject README GIF after capture-source drift", result.returncode == 1 and "capture source hash" in result.stdout)
+
+        source_record_case = clone_candidate(parent, "misbound-readme-capture-source")
+        source_record_path = source_record_case / "references/readme-animation-record.md"
+        approved_app_hash = "66fa06127bfa951739364c8fa4552932eae628bb305a1320b30bee206b4d42cd"
+        source_record_text = source_record_path.read_text(encoding="utf-8").replace(
+            f"`app.js` SHA-256 `{approved_app_hash}`",
+            f"`app.js` SHA-256 `{'0' * 64}`",
+            1,
+        )
+        source_record_text += f"\n<!-- `app.js` SHA-256 `{approved_app_hash}` -->\n"
+        source_record_path.write_text(source_record_text, encoding="utf-8")
+        result = run_validator(source_record_case)
+        expect("reject capture-source hash hidden outside its provenance field", result.returncode == 1 and "exact capture source identity line" in result.stdout)
+
+        source_comment_case = clone_candidate(parent, "comment-hidden-capture-source")
+        source_comment_path = source_comment_case / "references/readme-animation-record.md"
+        source_comment_text = source_comment_path.read_text(encoding="utf-8")
+        source_identity_line = next(line for line in source_comment_text.splitlines() if line.startswith("- Source code identity:"))
+        source_comment_path.write_text(source_comment_text.replace(source_identity_line, f"<!--\n{source_identity_line}\n-->", 1), encoding="utf-8")
+        result = run_validator(source_comment_case)
+        expect("reject source identity hidden in multiline HTML comment", result.returncode == 1 and "forbids HTML comments" in result.stdout)
+
+        clean_plate_src = 'src="assets/ai-agent-knowledge-cleanplate.png"'
+        for name, unsafe_src in [
+            ("traversal", "../outside/cleanplate.png"),
+            ("encoded-traversal", "%2e%2e/outside/cleanplate.png"),
+            ("absolute", "/tmp/outside/cleanplate.png"),
+            ("backslash", "assets\\cleanplate.png"),
+        ]:
+            path_case = clone_candidate(parent, f"unsafe-html-path-{name}")
+            html_path = path_case / "index.html"
+            html_path.write_text(html_path.read_text(encoding="utf-8").replace(clean_plate_src, f'src="{unsafe_src}"', 1), encoding="utf-8")
+            result = run_validator(path_case)
+            expect(f"reject {name} HTML runtime path", result.returncode == 1 and "safe package-relative runtime path" in result.stdout)
+
         schema_case = clone_candidate(parent, "schema-drift")
         schema_path = schema_case / "references/storyboard.schema.json"
         schema_text = schema_path.read_text(encoding="utf-8").replace('"$schema": {"type": "string"}', '"$schema": {"type": "string"}, "unexpected": {"type": "string"}')
@@ -160,18 +199,50 @@ def main() -> None:
         result = run_validator(hash_case)
         expect("reject changed GIF provenance hash", result.returncode == 1 and "provenance hash" in result.stdout)
 
+        clean_plate_case = clone_candidate(parent, "changed-clean-plate")
+        shutil.copyfile(
+            clean_plate_case / "assets/ai-agent-knowledge-prestroke.png",
+            clean_plate_case / "assets/ai-agent-knowledge-cleanplate.png",
+        )
+        result = run_validator(clean_plate_case)
+        expect("reject changed clean-plate provenance hash", result.returncode == 1 and "cleanplate.png does not match" in result.stdout)
+
+        brush_pose_case = clone_candidate(parent, "changed-brush-pose")
+        shutil.copyfile(
+            brush_pose_case / "assets/brush-poses-v2/pose-02.png",
+            brush_pose_case / "assets/brush-poses-v2/pose-01.png",
+        )
+        result = run_validator(brush_pose_case)
+        expect("reject changed nine-action brush pose", result.returncode == 1 and "pose-01.png does not match" in result.stdout)
+
+        final_brush_case = clone_candidate(parent, "changed-final-brush")
+        shutil.copyfile(
+            final_brush_case / "assets/brush-poses-v2/pose-08.png",
+            final_brush_case / "assets/brush-pose-final.png",
+        )
+        result = run_validator(final_brush_case)
+        expect("reject static board bound to the wrong final pose", result.returncode == 1 and "byte-identical" in result.stdout)
+
         record_case = clone_candidate(parent, "misbound-gif-record")
         record_path = record_case / "references/readme-animation-record.md"
         record_text = record_path.read_text(encoding="utf-8")
         record_text = record_text.replace(
-            "`282149ab0beae16c291f7a08fbcce0b2ae57d2e8e6ba01509ff438ca75f153a7` |",
+            "`996fca6cb98cbaa94bb8bb65d85cccb5b4b964e57276856f2f1abc2a90838194` |",
             f"`{'0' * 64}` |",
             1,
         )
-        record_text += "\n<!-- 282149ab0beae16c291f7a08fbcce0b2ae57d2e8e6ba01509ff438ca75f153a7 -->\n"
+        record_text += "\n<!-- 996fca6cb98cbaa94bb8bb65d85cccb5b4b964e57276856f2f1abc2a90838194 -->\n"
         record_path.write_text(record_text, encoding="utf-8")
         result = run_validator(record_case)
         expect("reject GIF hash hidden outside provenance table row", result.returncode == 1 and "exact approved GIF table row" in result.stdout)
+
+        gif_comment_case = clone_candidate(parent, "comment-hidden-gif-row")
+        gif_comment_path = gif_comment_case / "references/readme-animation-record.md"
+        gif_comment_text = gif_comment_path.read_text(encoding="utf-8")
+        gif_row = next(line for line in gif_comment_text.splitlines() if line.startswith("| `assets/inkbrush-motion-demo.gif` |"))
+        gif_comment_path.write_text(gif_comment_text.replace(gif_row, f"<!--\n{gif_row}\n-->", 1), encoding="utf-8")
+        result = run_validator(gif_comment_case)
+        expect("reject GIF provenance row hidden in multiline HTML comment", result.returncode == 1 and "forbids HTML comments" in result.stdout)
 
         gif_path = parent / "oversized-file.gif"
         with gif_path.open("wb") as handle:
@@ -185,10 +256,10 @@ def main() -> None:
         expect("reject oversized GIF before parsing", "16 MiB" in oversized_error)
 
         manifest_case = clone_candidate(parent, "missing-manifest")
-        for relative in [".nojekyll", ".github/workflows/validate.yml", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/inkbrush-motion-demo.gif", "references/image-generation-record.md", "references/readme-animation-record.md"]:
+        for relative in [".nojekyll", ".github/workflows/validate.yml", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v2/pose-09.png", "assets/inkbrush-motion-demo.gif", "references/image-generation-record.md", "references/readme-animation-record.md"]:
             (manifest_case / relative).unlink()
         result = run_validator(manifest_case)
-        expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 8)
+        expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 11)
 
         print("PASS: all public-package negative tests")
 

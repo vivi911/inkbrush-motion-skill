@@ -81,7 +81,7 @@ h1 em, h2 em { color: var(--cinnabar); font-weight: 400; }
 .river-path { stroke: url(#live-ink); stroke-width: 18; opacity: .9; stroke-dasharray: 2000; stroke-dashoffset: 2000; }
 #brush { opacity: 1; }
 .wet-edge { fill: #101612; opacity: .28; filter: url(#live-bloom); }
-.wet-core { fill: #151a17; stroke: #a13c32; stroke-width: 2; }
+.brush-sprite { filter: drop-shadow(0 5px 4px rgba(20, 15, 10, .18)); }
 .waypoint { position: absolute; z-index: 5; width: max-content; max-width: 28%; margin: 0; padding: .42rem .5rem .48rem; border-left: 3px solid var(--cinnabar); color: #1b211d; background: rgba(244,236,218,.91); box-shadow: 0 8px 22px rgba(48,38,24,.13); backdrop-filter: blur(3px); opacity: 0; transform: translateY(10px) rotate(-.5deg); transition: opacity .65s ease, transform .65s ease; }
 .waypoint-one { top: 31%; left: 10%; }
 .waypoint-two { top: 47.5%; left: 33%; }
@@ -94,7 +94,7 @@ h1 em, h2 em { color: var(--cinnabar); font-weight: 400; }
 .lesson-caption.is-visible { opacity: 1; transform: translateY(0); }
 .lesson-caption span { color: #cf766b; font-size: .58rem; font-weight: 900; letter-spacing: .16em; }
 .lesson-caption p { margin: .25rem 0 0; font-size: clamp(.72rem, 1.55vw, .82rem); font-weight: 650; line-height: 1.35; }
-.journey-result { position: absolute; z-index: 5; left: 8%; bottom: 8%; width: 60%; padding: .7rem .78rem; color: var(--paper-light); background: rgba(22,27,24,.86); box-shadow: 0 9px 24px rgba(27,22,17,.22); opacity: 0; transform: translateY(12px); transition: opacity .7s ease, transform .7s ease; }
+.journey-result { position: absolute; z-index: 5; left: 8%; bottom: 8%; width: 50%; padding: .7rem .78rem; color: var(--paper-light); background: rgba(22,27,24,.86); box-shadow: 0 9px 24px rgba(27,22,17,.22); opacity: 0; transform: translateY(12px); transition: opacity .7s ease, transform .7s ease; }
 .journey-result.is-visible { opacity: 1; transform: translateY(0); }
 .journey-result span { display: block; margin-bottom: .15rem; color: #cf766b; font-size: .48rem; font-weight: 900; letter-spacing: .16em; }
 .journey-result strong { font: 600 clamp(.76rem, 2.1vw, .98rem)/1.2 var(--serif); }

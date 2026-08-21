@@ -14,7 +14,7 @@
   "styleRecipe": "shan-shui-scroll",
   "textMode": "code-native",
   "staticArtifact": "assets/static-board.svg",
-  "staticArtifactSha256": "e81f446173243c3c61aa647bcfc3e8f671fa0397b8fc669b84aec7f66103793b",
+  "staticArtifactSha256": "95d1c64379e6698cf477172a3bbe0b4714b9cfd6280b66f92c1cb7a9bd5d4163",
   "beats": [
     {"id": "context", "label": "Context", "copy": "Give the goal, audience, and boundaries.", "startSecond": 0.7, "endSecond": 3.2},
     {"id": "action", "label": "Action", "copy": "Ask for one clear next step.", "startSecond": 3.2, "endSecond": 5.9},

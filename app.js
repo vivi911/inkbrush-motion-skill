@@ -5,6 +5,8 @@
   const path = document.querySelector("#river-path");
   const diffusion = document.querySelector("#river-diffusion");
   const brush = document.querySelector("#brush");
+  const movingBrush = document.querySelector("#moving-brush");
+  const wetEdge = document.querySelector(".wet-edge");
   const replayButton = document.querySelector("#replay");
   const status = document.querySelector("#motion-status");
   const journeyFrame = document.querySelector(".journey-frame");
@@ -15,50 +17,96 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const previewMode = new URLSearchParams(window.location.search).get("preview");
 
-  if (!stage || !path || !diffusion || !brush || !replayButton || !status || !journeyFrame) return;
+  if (!stage || !path || !diffusion || !brush || !movingBrush || !wetEdge || !replayButton || !status || !journeyFrame) return;
 
   const duration = 9200;
-  const diffusionDelay = 0.02;
+  const diffusionDelay = 0.025;
   const pathLength = path.getTotalLength();
   let frameId = 0;
   let loopTimer = 0;
+  let activePose = -1;
+
+  const brushPoses = [
+    { src: "assets/brush-poses-v2/pose-01.png", anchor: [315, 584] },
+    { src: "assets/brush-poses-v2/pose-02.png", anchor: [309, 606] },
+    { src: "assets/brush-poses-v2/pose-03.png", anchor: [324, 605] },
+    { src: "assets/brush-poses-v2/pose-04.png", anchor: [186, 599] },
+    { src: "assets/brush-poses-v2/pose-05.png", anchor: [269, 590] },
+    { src: "assets/brush-poses-v2/pose-06.png", anchor: [310, 609] },
+    { src: "assets/brush-poses-v2/pose-07.png", anchor: [290, 581] },
+    { src: "assets/brush-poses-v2/pose-08.png", anchor: [326, 637] },
+    // LEAVE uses its own clean lifted pose and keeps the bristles
+    // 40 px above the completed stroke so the final hold reads as off-paper.
+    { src: "assets/brush-poses-v2/pose-09.png", anchor: [315, 629] },
+  ];
+  brushPoses.forEach(({ src }) => { const image = new Image(); image.src = src; });
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const ease = (value) => value * value * (3 - 2 * value);
 
-  function placeBrush(progress) {
+  function poseIndexFor(progress) {
+    const breaks = [0.08, 0.14, 0.22, 0.58, 0.68, 0.78, 0.88, 0.96];
+    const index = breaks.findIndex((threshold) => progress < threshold);
+    return index === -1 ? brushPoses.length - 1 : index;
+  }
+
+  function strokeProgress(progress) {
+    const segment = (start, end, from, to) => from + (to - from) * ease(clamp((progress - start) / (end - start), 0, 1));
+    if (progress < 0.08) return 0;
+    if (progress < 0.14) return segment(0.08, 0.14, 0, 0.01);
+    if (progress < 0.22) return segment(0.14, 0.22, 0.01, 0.04);
+    if (progress < 0.58) return segment(0.22, 0.58, 0.04, 0.60);
+    if (progress < 0.68) return segment(0.58, 0.68, 0.60, 0.72);
+    if (progress < 0.78) return segment(0.68, 0.78, 0.72, 0.86);
+    if (progress < 0.88) return segment(0.78, 0.88, 0.86, 0.94);
+    if (progress < 0.96) return segment(0.88, 0.96, 0.94, 1);
+    return 1;
+  }
+
+  function placeBrush(progress, poseIndex) {
     const distance = clamp(progress, 0, 1) * pathLength;
     const point = path.getPointAtLength(distance);
-    const previous = path.getPointAtLength(Math.max(0, distance - 2));
-    const direction = Math.atan2(point.y - previous.y, point.x - previous.x) * 180 / Math.PI;
-    brush.setAttribute("transform", `translate(${point.x.toFixed(2)} ${point.y.toFixed(2)}) rotate(${(direction - 90).toFixed(2)})`);
+    const pose = brushPoses[poseIndex];
+    if (poseIndex !== activePose) {
+      movingBrush.setAttribute("href", pose.src);
+      movingBrush.setAttribute("x", String(-pose.anchor[0]));
+      movingBrush.setAttribute("y", String(-pose.anchor[1]));
+      activePose = poseIndex;
+    }
+    brush.setAttribute("transform", `translate(${point.x.toFixed(2)} ${point.y.toFixed(2)})`);
+    wetEdge.style.opacity = poseIndex === brushPoses.length - 1 ? "0" : "";
+    stage.dataset.brushProgress = clamp(progress, 0, 1).toFixed(4);
+    stage.dataset.brushPose = String(poseIndex + 1).padStart(2, "0");
   }
 
   function paint(progress) {
-    const eased = ease(progress);
-    const bloomProgress = clamp((progress - diffusionDelay) / (1 - diffusionDelay), 0, 1);
+    const stroke = strokeProgress(progress);
+    const bloomProgress = clamp((stroke - diffusionDelay) / (1 - diffusionDelay), 0, 1);
+    const poseIndex = poseIndexFor(progress);
 
-    path.style.strokeDashoffset = String(pathLength * (1 - eased));
+    path.style.strokeDashoffset = String(pathLength * (1 - stroke));
     diffusion.style.strokeDashoffset = String(pathLength * (1 - ease(bloomProgress)));
-    placeBrush(eased);
+    placeBrush(stroke, poseIndex);
 
     reveals.forEach((reveal) => {
       const threshold = Number(reveal.dataset.threshold || 0);
       const endThreshold = Number(reveal.dataset.endThreshold || 1.01);
-      reveal.classList.toggle("is-visible", eased >= threshold && eased < endThreshold);
+      reveal.classList.toggle("is-visible", stroke >= threshold && stroke < endThreshold);
     });
 
     if (progress >= 1) {
       status.textContent = "Evidence verified";
-      brush.style.opacity = "0";
+      brush.style.opacity = "1";
       stage.dataset.motionState = "complete";
       journeyFrame.dataset.motionState = "complete";
     } else {
-      status.textContent = progress < 0.32
-        ? "Painting context…"
-        : progress < 0.62
-          ? "Choosing one action…"
-          : "Checking evidence…";
+      status.textContent = progress < 0.08
+        ? "Poising the brush…"
+        : progress < 0.22
+          ? "Setting the ink…"
+          : progress < 0.58
+            ? "Painting context and action…"
+            : "Checking evidence…";
       brush.style.opacity = "1";
       stage.dataset.motionState = "painting";
       journeyFrame.dataset.motionState = "painting";

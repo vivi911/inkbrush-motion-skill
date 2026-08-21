@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://vivi911.github.io/inkbrush-motion-skill/">
-    <img src="assets/inkbrush-motion-demo.gif" alt="Animated Chinese ink-wash lesson showing Context, Action, and Evidence" width="292">
+    <img src="assets/inkbrush-motion-demo.gif" alt="Animated Chinese ink-wash lesson in which a real-hand brush study paints Context, Action, and Evidence" width="292">
   </a>
   <h1>InkBrush Motion</h1>
   <p><strong>An open-source AI Skill for calm, brush-led 9:16 knowledge animation.</strong></p>
@@ -17,7 +17,7 @@
   </p>
 </div>
 
-Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. The live demo teaches one reliable AI-agent loop—**Context → Action → Evidence**—as a calligraphy brush completes a Chinese ink-wash journey. Give AI the right context, ask for one clear next step, and check the result before you trust it. Exact knowledge text stays code-native while the AI-assisted scene carries the feeling.
+Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. The live demo teaches one reliable AI-agent loop—**Context → Action → Evidence**—as an AI-assisted real-hand brush study moves through nine calligraphy actions: hover, touch, press, travel, turn, lift, return, finish, and leave. Give AI the right context, ask for one clear next step, and check the result before you trust it. Exact knowledge text stays code-native while the brush tip leads every visible millimetre of ink.
 
 The repository includes both the reusable Skill and a zero-dependency SVG/CSS/JavaScript delivery demo. The README preview is a direct capture of that same live animation, not a separate concept still.
 
@@ -26,6 +26,7 @@ The repository includes both the reusable Skill and a zero-dependency SVG/CSS/Ja
 | Deliverable | What it proves |
 |---|---|
 | Native 9:16 static board | The composition works before motion hides layout problems |
+| Nine-action real-hand painter | The wrist, upright grip, pressure, turn, finish, and off-paper hold read as distinct actions |
 | 6–10 second motion proof | The brush leads the active stroke; ink never appears ahead of it |
 | Start / middle / end evidence | Reviewers can inspect causality, diffusion, exact text, and final hold |
 | Rights packet | Sources, licenses, and authorship boundaries stay explicit |
@@ -63,7 +64,7 @@ You can also point another coding agent directly at `SKILL.md`. Do not assume co
 - Warm xuan paper, near-black ink, gray wash, and one restrained vermilion seal.
 - Native portrait composition—never a mechanical crop of a landscape board.
 - Code-native text for exact glyphs and wording.
-- Brush-tip tracking, pressure variation, delayed local diffusion, and a final hold.
+- Nine brush states, tip-led tracking, pressure variation, delayed local diffusion, and a motionless final hold.
 - No neon, circuitry, holograms, glossy UI cards, or fake handwriting wipes.
 - Human visual approval before motion.
 
@@ -90,7 +91,7 @@ The demo is intentionally dependency-free. The references list optional open-sou
 
 Copyright © 2026 Vivi (GoAskVivi).
 
-The source code, Skill instructions, documentation, code-authored SVG/CSS/JavaScript visuals, published social-preview PNG and animated README GIF, and the selected AI-assisted demo backgrounds in this repository are available under the [MIT License](LICENSE) to the extent those materials are copyrightable and controlled by the publisher, subject to the detailed boundaries in [COPYRIGHT.md](COPYRIGHT.md). Keep the copyright and license notice with copies or substantial portions.
+The source code, Skill instructions, documentation, code-authored SVG/CSS/JavaScript visuals, published social-preview PNG and animated README GIF, and the selected AI-assisted demo backgrounds and brush sprites in this repository are available under the [MIT License](LICENSE) to the extent those materials are copyrightable and controlled by the publisher, subject to the detailed boundaries in [COPYRIGHT.md](COPYRIGHT.md). Keep the copyright and license notice with copies or substantial portions.
 
 The names **GoAskVivi** and its brand identity are not licensed for implied endorsement. See [COPYRIGHT.md](COPYRIGHT.md) for the human direction, AI-assistance, third-party, and trademark boundaries.
 
