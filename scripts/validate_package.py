@@ -36,30 +36,30 @@ from validate_storyboard import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-README_GIF_SHA256 = "8b9166cbac1522ffab69a1c0494b1124ce1a4ce8351fbf15c91c8952d6f123e9"
+README_GIF_SHA256 = "a3160d3d094dc5473fe73c13d67e067300c5d08641946045424524f9f7ad7929"
 README_SOURCE_SHA256 = {
-    "index.html": "ef92e770080ea40036143cb59313c5d8fcfb6c763cadc7f60ff4f84f615c3cfe",
-    "styles.css": "b1eb0c1a21338bacc65e596d92598f6eca0a24af4d5f237f006ae57b62ac9a54",
+    "index.html": "0e8b475da0708e7c136791dc461ffc7844e1d4745a12884e95f929af261b740a",
+    "styles.css": "efdcff1009fde42b6670791333082ad808434e2c11a4b99ab308455aa9e668d7",
     "motion-timing.js": "b2db8b094527aaacdc3febf9f004b2ffc23f3b72ff3f8462f1e76f6b441cc6aa",
-    "app.js": "05c73dc6368abf66b31bb4083fa9a8a87b755da93325122d1e89595d7fc3b7ae",
+    "app.js": "71804469abd11aa52b45e7b8cc391b426b1f63f7f09ca2ee97ffb3fa6f32d1cf",
     "scripts/motion_timing.py": "6417a4b90b29dff1ab584e6c0930fde04a93a0472526a9451f9d915541154700",
-    "scripts/render_readme_gif.py": "185604e7b51af31a00a5e20a6e29cf5e8bee33c8a638c73de9029582a57ea4a8",
+    "scripts/render_readme_gif.py": "91d94c2a0b38547a6326da2a7f7a22ab40f0cdd250b68cb2dbae030f7a89b5bd",
 }
 HERO_EVIDENCE_SHA256 = {
-    "assets/evidence/hero-start.png": "8551fc30e885cd057632b6a58a9486349378ccd5f1d8908d0cb9eead66625457",
-    "assets/evidence/hero-middle.png": "84dbe05b196c30cfae18db5d25ed26db899498240ffca6fbd290ed73acddce69",
-    "assets/evidence/hero-end.png": "32aa460a1ef7eb67f37794bdd6cbc8b45a3c2b22f76786e5f4ff14a9f97c75d1",
+    "assets/evidence/hero-start.png": "135d924707022680d773158d93e383aa1681a58fdcfeec5fb62694b8aacf28fb",
+    "assets/evidence/hero-middle.png": "4f4d2736a61e16d3e83664af77e47a8c61b20d3653c67c8c4a5166fe969e32e3",
+    "assets/evidence/hero-end.png": "d0468aa84929c405a7c9c410b968b863a4211ac33fadb991eb3b9bcb982a3332",
 }
 BRUSH_ASSET_SHA256 = {
-    "assets/brush-poses-v4/pose-01.png": "142ca1b8d1b8ef3eea85a432fce5aa7f17641a5c3be84865158231c0c845589a",
-    "assets/brush-poses-v4/pose-02.png": "d009180e4687c586c89b6700eec255fa2f487cde5093699dc42391169dd95c8e",
-    "assets/brush-poses-v4/pose-03.png": "4937512b84b0144d4c4aecb5fa07859d13a123817cfff0f57a510e78e41436f0",
-    "assets/brush-poses-v4/pose-04.png": "b0a6b592427f419880a6bfe8952e961f423b422cbe9d736d8aa6c6fbfcd4c213",
-    "assets/brush-poses-v4/pose-05.png": "31b51a36e37cc13251b78454c67fe78f18f22a93dd74fe006e9322ec9523b649",
-    "assets/brush-poses-v4/pose-06.png": "2570c9d48f093e7648ebf1eeedbf34855e976dcf655a1919cf8b0d03fecb9ee9",
-    "assets/brush-poses-v4/pose-07.png": "7511f86429b2eb677f9c9219c918f1a3d9f87cf9e0d7b96d5f279dad01c75a63",
-    "assets/brush-poses-v4/pose-08.png": "96b02f554de2800e8722114f1b47f5bf221145ef67eb91828596810c4077dd88",
-    "assets/brush-poses-v4/pose-09.png": "a0fd8190962e75cd24b7f8e0ed5a9659c36450512ae867f78925dff54729a3d2",
+    "assets/brush-poses-v5/pose-01.png": "0395742b0478962b0dcd09ccc292db797a5e3d9e0f8eec8b26a0f8c1ce91396f",
+    "assets/brush-poses-v5/pose-02.png": "3b7d85a04a7a694685d5c6f1944972936d8bf422e544c9841e2dd91a28a176ad",
+    "assets/brush-poses-v5/pose-03.png": "3b0f97e63d0b4d355d43c6568d538a29e15e70528bbed2c7dca115bc3c2922cb",
+    "assets/brush-poses-v5/pose-04.png": "dfafed3c777090a411e2e84f4854b1e288255f1f235dd527235399f7bbfafe5c",
+    "assets/brush-poses-v5/pose-05.png": "d379bc9a2e4c367763d377039ea720a61f11fd8e54f292940625f3b796f58a74",
+    "assets/brush-poses-v5/pose-06.png": "45c4296951793fb2f3190fb1b5be67be813d0d2dcf9dda3a69df0b66484d7217",
+    "assets/brush-poses-v5/pose-07.png": "b14c6d6b0135fab607d8929dbfdee1ad9a572a4f38d1b7bb4b3459d60d8a9225",
+    "assets/brush-poses-v5/pose-08.png": "fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff",
+    "assets/brush-poses-v5/pose-09.png": "a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681",
 }
 HISTORICAL_BRUSH_ASSET_SHA256 = {
     "assets/brush-poses-v2/pose-01.png": "7cb1b6e47eab38f5294d08fb1b51ff256466a97667973a867ae616a6da0bb429",
@@ -80,11 +80,23 @@ HISTORICAL_BRUSH_ASSET_SHA256 = {
     "assets/brush-poses-v3/pose-07.png": "3f7f1e077de59f5a84484ee39bb0338ef3a320b7b6fda980fe8c9e4206ad89cb",
     "assets/brush-poses-v3/pose-08.png": "63dc0996a9ac75e4b0cb5a283249c1d3b5c00f2097b4aa6261c1e33b63eed311",
     "assets/brush-poses-v3/pose-09.png": "a9f8a713feffd92e911aa6d5e52b8716f641a48d34f7f73c32c2588bace68b00",
+    "assets/brush-poses-v4/pose-01.png": "142ca1b8d1b8ef3eea85a432fce5aa7f17641a5c3be84865158231c0c845589a",
+    "assets/brush-poses-v4/pose-02.png": "d009180e4687c586c89b6700eec255fa2f487cde5093699dc42391169dd95c8e",
+    "assets/brush-poses-v4/pose-03.png": "4937512b84b0144d4c4aecb5fa07859d13a123817cfff0f57a510e78e41436f0",
+    "assets/brush-poses-v4/pose-04.png": "b0a6b592427f419880a6bfe8952e961f423b422cbe9d736d8aa6c6fbfcd4c213",
+    "assets/brush-poses-v4/pose-05.png": "31b51a36e37cc13251b78454c67fe78f18f22a93dd74fe006e9322ec9523b649",
+    "assets/brush-poses-v4/pose-06.png": "2570c9d48f093e7648ebf1eeedbf34855e976dcf655a1919cf8b0d03fecb9ee9",
+    "assets/brush-poses-v4/pose-07.png": "7511f86429b2eb677f9c9219c918f1a3d9f87cf9e0d7b96d5f279dad01c75a63",
+    "assets/brush-poses-v4/pose-08.png": "96b02f554de2800e8722114f1b47f5bf221145ef67eb91828596810c4077dd88",
+    "assets/brush-poses-v4/pose-09.png": "a0fd8190962e75cd24b7f8e0ed5a9659c36450512ae867f78925dff54729a3d2",
 }
-FINAL_BRUSH_SHA256 = BRUSH_ASSET_SHA256["assets/brush-poses-v4/pose-09.png"]
+FINAL_BRUSH_SHA256 = BRUSH_ASSET_SHA256["assets/brush-poses-v5/pose-09.png"]
+V5_SOURCE_SHA256 = "569fb216f3510dcff04813ad451e96d09d458a6ca61bb942d2d57558fce9f6d9"
+V5_BUILDER_SHA256 = "6ddf2f0561ab0f3f5bd8081d91b0f865515134d4b776c0d4a1d2fddc885c617c"
+V5_MANIFEST_SHA256 = "573fb65d5a10fd22eabfc05e0bf0fa5a0bfe81a97b431a6ab780e7e4fec2e7b5"
 CLEAN_PLATE_SHA256 = "37e16d24d69537bcdbb88dcee8307b78ae77a02c05fec79d82bc77a8a5f2e658"
 REAL_BRUSH_REFERENCE_SHA256 = "49153b50a9a56539430099af1aa6475957b9bc7b9630075bdebc9927fcb6f85d"
-NINE_ACTION_PROOF_SHA256 = "6b16a518803ba73b6e8054b1fab3e9231d14d175293cd465b93bd587de9806d9"
+NINE_ACTION_PROOF_SHA256 = "b9e6d42f916c3bba43ac44c5ec76dc1e1daccb7f065ed002b42854a641e9dfe7"
 REQUIRED = [
     ".gitignore", ".nojekyll", ".github/workflows/validate.yml",
     "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md",
@@ -92,10 +104,11 @@ REQUIRED = [
     "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png", "assets/inkbrush-motion-demo.gif",
     "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png",
     "assets/brush-pose-final.png", *BRUSH_ASSET_SHA256, *HISTORICAL_BRUSH_ASSET_SHA256, "assets/reference/real-brush-gray-linen.png",
+    "assets/reference/brush-hand-sheet-v5.png", "assets/brush-poses-v5/manifest.json",
     "assets/nine-action-proof.png", "assets/evidence/start.png", "assets/evidence/middle.png", "assets/evidence/end.png", *HERO_EVIDENCE_SHA256, "assets/demo-plan.json",
     "references/style-contract.md", "references/motion-contract.md", "references/qa-rubric.md",
     "references/real-brush-contract.md", "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/readme-animation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
-    "scripts/generate_social_preview.py", "scripts/motion_timing.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
+    "scripts/build_calligraphy_brush_v5.py", "scripts/generate_social_preview.py", "scripts/motion_timing.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/test_build_calligraphy_brush_v5.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
 ]
 FORBIDDEN_PUBLIC_BUNDLES = [".agents", "skills-lock.json"]
 
@@ -245,6 +258,11 @@ def main() -> int:
     if re.search(r"@import\b|url\(\s*[\"']?(?:https?:)?//", css, re.IGNORECASE): errors.append("styles.css must not import external runtime resources")
     javascript = (ROOT / "app.js").read_text(encoding="utf-8")
     if re.search(r"\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\b|navigator\.sendBeacon|import\s*\(\s*[\"'](?:https?:)?//", javascript): errors.append("app.js must not make runtime network requests")
+    renderer_source = (ROOT / "scripts/render_readme_gif.py").read_text(encoding="utf-8")
+    if "assets/brush-poses-v5/pose-" not in renderer_source:
+        errors.append("README renderer must consume the active v5 brush sprites")
+    if re.search(r"assets/brush-poses-v[234]/pose-", javascript + html + renderer_source):
+        errors.append("active demo consumers must not load historical brush sprites")
     try:
         timing = load_motion_timing(ROOT / "motion-timing.js")
         errors.extend(validate_motion_timing(timing))
@@ -256,6 +274,8 @@ def main() -> int:
             errors.append(f"index.html is missing semantic timing key: {timing_key}")
     for relative in BRUSH_ASSET_SHA256:
         if relative not in javascript: errors.append(f"app.js is missing the nine-action brush asset: {relative}")
+    if 'href="assets/brush-poses-v5/pose-01.png"' not in html:
+        errors.append("index.html initial brush must use the active v5 HOVER pose")
     for svg_name in ["assets/icon.svg", "assets/social-preview.svg", "assets/static-board.svg"]:
         try:
             validate_svg_safety(ROOT / svg_name, allow_local_png=svg_name == "assets/static-board.svg")
@@ -316,12 +336,68 @@ def main() -> int:
         errors.append(f"invalid JSON: {exc}")
 
     try:
+        manifest_path = ROOT / "assets/brush-poses-v5/manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
+        manifest_fields = {"schemaVersion", "assetVersion", "description", "source", "sourceSha256", "sourceSize", "canvas", "anchor", "actions"}
+        if not isinstance(manifest, dict) or set(manifest) != manifest_fields:
+            errors.append("v5 brush manifest top-level fields drift")
+        elif (
+            manifest.get("schemaVersion") != 1
+            or manifest.get("assetVersion") != "v5"
+            or manifest.get("source") != "assets/reference/brush-hand-sheet-v5.png"
+            or manifest.get("sourceSha256") != V5_SOURCE_SHA256
+            or manifest.get("sourceSize") != [941, 1672]
+            or manifest.get("canvas") != [720, 1280]
+            or manifest.get("anchor") != [315, 620]
+        ):
+            errors.append("v5 brush manifest identity or dimensions drift")
+        actions = manifest.get("actions") if isinstance(manifest, dict) else None
+        action_fields = {"index", "action", "sourceCell", "transform", "anchor", "output", "sha256"}
+        if not isinstance(actions, list) or len(actions) != 9:
+            errors.append("v5 brush manifest must contain nine actions")
+        else:
+            for index, record in enumerate(actions, start=1):
+                relative = f"assets/brush-poses-v5/pose-{index:02d}.png"
+                expected_transform = {
+                    "kind": "photographic-raster-axial-pressure",
+                    "terminalCrop": [282, 452, 354, 624],
+                    "ferruleHeight": 42,
+                    "hairHeight": 60,
+                    "maxWidth": 27,
+                    "bendPx": 0.0,
+                    "tipWidth": 3,
+                    "shaftOverlapPx": 4,
+                } if index == 3 else {"kind": "source-photographic"}
+                if not isinstance(record, dict) or set(record) != action_fields:
+                    errors.append(f"v5 brush manifest action {index:02d} fields drift")
+                    continue
+                if (
+                    record.get("index") != index
+                    or record.get("action") != NINE_ACTIONS[index - 1]
+                    or record.get("sourceCell") != index
+                    or record.get("transform") != expected_transform
+                    or record.get("anchor") != [315, 620]
+                    or record.get("output") != relative
+                    or record.get("sha256") != BRUSH_ASSET_SHA256[relative]
+                ):
+                    errors.append(f"v5 brush manifest action {index:02d} identity or transform drift")
+        if sha256_file(manifest_path) != V5_MANIFEST_SHA256:
+            errors.append("v5 brush manifest does not match the approved provenance hash")
+        if sha256_file(ROOT / "scripts/build_calligraphy_brush_v5.py") != V5_BUILDER_SHA256:
+            errors.append("v5 brush builder does not match the approved provenance hash")
+    except (json.JSONDecodeError, ValueError) as exc:
+        errors.append(f"invalid v5 brush manifest: {exc}")
+
+    try:
         if png_dimensions(ROOT / "assets/social-preview.png") != (1280, 640): errors.append("assets/social-preview.png must be 1280x640")
         if png_dimensions(ROOT / "assets/ai-agent-knowledge-journey.png") != (1080, 1920): errors.append("assets/ai-agent-knowledge-journey.png must be 1080x1920")
         if png_dimensions(ROOT / "assets/ai-agent-knowledge-prestroke.png") != (1080, 1920): errors.append("assets/ai-agent-knowledge-prestroke.png must be 1080x1920")
         clean_plate = ROOT / "assets/ai-agent-knowledge-cleanplate.png"
         if png_dimensions(clean_plate) != (1080, 1920): errors.append("assets/ai-agent-knowledge-cleanplate.png must be 1080x1920")
         if sha256_file(clean_plate) != CLEAN_PLATE_SHA256: errors.append("assets/ai-agent-knowledge-cleanplate.png does not match the approved provenance hash")
+        v5_source = ROOT / "assets/reference/brush-hand-sheet-v5.png"
+        if png_dimensions(v5_source) != (941, 1672): errors.append("assets/reference/brush-hand-sheet-v5.png must be 941x1672")
+        if sha256_file(v5_source) != V5_SOURCE_SHA256: errors.append("assets/reference/brush-hand-sheet-v5.png does not match the approved provenance hash")
         final_brush = ROOT / "assets/brush-pose-final.png"
         if png_dimensions(final_brush) != (720, 1280): errors.append("assets/brush-pose-final.png must be 720x1280")
         if sha256_file(final_brush) != FINAL_BRUSH_SHA256: errors.append("assets/brush-pose-final.png must be byte-identical to the approved LEAVE pose")

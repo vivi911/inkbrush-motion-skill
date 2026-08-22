@@ -190,7 +190,7 @@ def main() -> None:
 
         source_record_case = clone_candidate(parent, "misbound-readme-capture-source")
         source_record_path = source_record_case / "references/readme-animation-record.md"
-        approved_app_hash = "05c73dc6368abf66b31bb4083fa9a8a87b755da93325122d1e89595d7fc3b7ae"
+        approved_app_hash = "71804469abd11aa52b45e7b8cc391b426b1f63f7f09ca2ee97ffb3fa6f32d1cf"
         source_record_text = source_record_path.read_text(encoding="utf-8").replace(
             f"`app.js` SHA-256 `{approved_app_hash}`",
             f"`app.js` SHA-256 `{'0' * 64}`",
@@ -307,11 +307,58 @@ def main() -> None:
 
         brush_pose_case = clone_candidate(parent, "changed-brush-pose")
         shutil.copyfile(
-            brush_pose_case / "assets/brush-poses-v4/pose-02.png",
-            brush_pose_case / "assets/brush-poses-v4/pose-01.png",
+            brush_pose_case / "assets/brush-poses-v5/pose-02.png",
+            brush_pose_case / "assets/brush-poses-v5/pose-01.png",
         )
         result = run_validator(brush_pose_case)
         expect("reject changed nine-action brush pose", result.returncode == 1 and "pose-01.png does not match" in result.stdout)
+
+        v5_source_case = clone_candidate(parent, "changed-v5-source")
+        source_path = v5_source_case / "assets/reference/brush-hand-sheet-v5.png"
+        shutil.copyfile(v5_source_case / "assets/reference/real-brush-gray-linen.png", source_path)
+        result = run_validator(v5_source_case)
+        expect("reject changed v5 photographic source", result.returncode == 1 and "brush-hand-sheet-v5.png does not match" in result.stdout)
+
+        manifest_unknown_case = clone_candidate(parent, "v5-manifest-unknown")
+        manifest_path = manifest_unknown_case / "assets/brush-poses-v5/manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["unexpected"] = True
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        result = run_validator(manifest_unknown_case)
+        expect("reject unknown v5 manifest field", result.returncode == 1 and "top-level fields drift" in result.stdout)
+
+        manifest_nan_case = clone_candidate(parent, "v5-manifest-nan")
+        manifest_path = manifest_nan_case / "assets/brush-poses-v5/manifest.json"
+        manifest_text = manifest_path.read_text(encoding="utf-8").replace('"hairHeight": 60', '"hairHeight": NaN', 1)
+        manifest_path.write_text(manifest_text, encoding="utf-8")
+        result = run_validator(manifest_nan_case)
+        expect("reject NaN v5 manifest value", result.returncode == 1 and "invalid v5 brush manifest" in result.stdout)
+
+        manifest_duplicate_case = clone_candidate(parent, "v5-manifest-duplicate-action")
+        manifest_path = manifest_duplicate_case / "assets/brush-poses-v5/manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["actions"][4]["action"] = manifest["actions"][3]["action"]
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        result = run_validator(manifest_duplicate_case)
+        expect("reject duplicate v5 action", result.returncode == 1 and "action 05 identity" in result.stdout)
+
+        app_consumer_case = clone_candidate(parent, "v5-app-consumer-drift")
+        app_path = app_consumer_case / "app.js"
+        app_path.write_text(app_path.read_text(encoding="utf-8").replace("brush-poses-v5", "brush-poses-v4", 1), encoding="utf-8")
+        result = run_validator(app_consumer_case)
+        expect("reject app consumer drift from v5", result.returncode == 1 and "historical brush sprites" in result.stdout)
+
+        index_consumer_case = clone_candidate(parent, "v5-index-consumer-drift")
+        index_path = index_consumer_case / "index.html"
+        index_path.write_text(index_path.read_text(encoding="utf-8").replace("brush-poses-v5", "brush-poses-v4", 1), encoding="utf-8")
+        result = run_validator(index_consumer_case)
+        expect("reject index consumer drift from v5", result.returncode == 1 and "historical brush sprites" in result.stdout)
+
+        renderer_consumer_case = clone_candidate(parent, "v5-renderer-consumer-drift")
+        renderer_path = renderer_consumer_case / "scripts/render_readme_gif.py"
+        renderer_path.write_text(renderer_path.read_text(encoding="utf-8").replace("brush-poses-v5", "brush-poses-v4", 1), encoding="utf-8")
+        result = run_validator(renderer_consumer_case)
+        expect("reject README renderer drift from v5", result.returncode == 1 and "historical brush sprites" in result.stdout)
 
         historical_brush_case = clone_candidate(parent, "changed-historical-brush-pose")
         shutil.copyfile(
@@ -323,7 +370,7 @@ def main() -> None:
 
         final_brush_case = clone_candidate(parent, "changed-final-brush")
         shutil.copyfile(
-            final_brush_case / "assets/brush-poses-v4/pose-08.png",
+            final_brush_case / "assets/brush-poses-v5/pose-08.png",
             final_brush_case / "assets/brush-pose-final.png",
         )
         result = run_validator(final_brush_case)
@@ -333,11 +380,11 @@ def main() -> None:
         record_path = record_case / "references/readme-animation-record.md"
         record_text = record_path.read_text(encoding="utf-8")
         record_text = record_text.replace(
-            "`8b9166cbac1522ffab69a1c0494b1124ce1a4ce8351fbf15c91c8952d6f123e9` |",
+            "`a3160d3d094dc5473fe73c13d67e067300c5d08641946045424524f9f7ad7929` |",
             f"`{'0' * 64}` |",
             1,
         )
-        record_text += "\n<!-- 8b9166cbac1522ffab69a1c0494b1124ce1a4ce8351fbf15c91c8952d6f123e9 -->\n"
+        record_text += "\n<!-- a3160d3d094dc5473fe73c13d67e067300c5d08641946045424524f9f7ad7929 -->\n"
         record_path.write_text(record_text, encoding="utf-8")
         result = run_validator(record_case)
         expect("reject GIF hash hidden outside provenance table row", result.returncode == 1 and "exact approved GIF table row" in result.stdout)
@@ -362,7 +409,7 @@ def main() -> None:
         expect("reject oversized GIF before parsing", "16 MiB" in oversized_error)
 
         manifest_case = clone_candidate(parent, "missing-manifest")
-        for relative in [".nojekyll", ".github/workflows/validate.yml", "motion-timing.js", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v2/pose-09.png", "assets/brush-poses-v4/pose-09.png", "assets/reference/real-brush-gray-linen.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/evidence/hero-middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
+        for relative in [".nojekyll", ".github/workflows/validate.yml", "motion-timing.js", "scripts/test_validate_storyboard.py", "scripts/test_build_calligraphy_brush_v5.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v2/pose-09.png", "assets/brush-poses-v5/pose-09.png", "assets/brush-poses-v5/manifest.json", "assets/reference/real-brush-gray-linen.png", "assets/reference/brush-hand-sheet-v5.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/evidence/hero-middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
             (manifest_case / relative).unlink()
         result = run_validator(manifest_case)
         expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 15)

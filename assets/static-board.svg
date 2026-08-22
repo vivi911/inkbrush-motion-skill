@@ -3,17 +3,17 @@
   <desc id="description">The exact static composition behind the Context, Action, and Evidence demo.</desc>
   <image href="ai-agent-knowledge-cleanplate.png" x="0" y="0" width="720" height="1280" preserveAspectRatio="xMidYMid slice"/>
   <rect x="58" y="102" width="500" height="118" fill="#f4ecda" opacity="0.78"/>
-  <path d="M318 304C295 326 278 350 300 392C325 439 391 445 355 497C326 540 259 554 317 620C365 675 492 679 494 748C496 813 424 817 383 867C342 918 390 958 456 1000" fill="none" stroke="#111813" stroke-width="54" stroke-linecap="round" opacity="0.22"/>
-  <path d="M318 304C295 326 278 350 300 392C325 439 391 445 355 497C326 540 259 554 317 620C365 675 492 679 494 748C496 813 424 817 383 867C342 918 390 958 456 1000" fill="none" stroke="#171b18" stroke-width="18" stroke-linecap="round"/>
-  <image href="brush-pose-final.png" x="141" y="371" width="720" height="1280" preserveAspectRatio="xMidYMid meet"/>
+  <path d="M318 550C295 565 280 585 300 610C325 640 391 650 355 685C326 715 275 735 317 775C365 820 480 825 494 870C496 915 440 935 400 960C370 985 400 995 456 1000" fill="none" stroke="#111813" stroke-width="54" stroke-linecap="round" opacity="0.22"/>
+  <path d="M318 550C295 565 280 585 300 610C325 640 391 650 355 685C326 715 275 735 317 775C365 820 480 825 494 870C496 915 440 935 400 960C370 985 400 995 456 1000" fill="none" stroke="#171b18" stroke-width="18" stroke-linecap="round"/>
+  <image href="brush-pose-final.png" x="141" y="368" width="720" height="1280" preserveAspectRatio="xMidYMid meet"/>
 
   <rect x="72" y="397" width="146" height="70" fill="#f4ecda" opacity="0.92"/>
   <rect x="72" y="397" width="6" height="70" fill="#9b352c"/>
   <rect x="238" y="608" width="136" height="70" fill="#f4ecda" opacity="0.92"/>
   <rect x="238" y="608" width="6" height="70" fill="#9b352c"/>
-  <rect x="514" y="506" width="148" height="70" fill="#f4ecda" opacity="0.92"/>
-  <rect x="514" y="506" width="6" height="70" fill="#9b352c"/>
-  <rect x="58" y="1060" width="500" height="110" fill="#171b18" opacity="0.9"/>
+  <rect x="72" y="730" width="179" height="71" fill="#f4ecda" opacity="0.92"/>
+  <rect x="72" y="730" width="6" height="71" fill="#9b352c"/>
+  <rect x="58" y="1060" width="300" height="110" fill="#171b18" opacity="0.9"/>
 
   <text x="72" y="125" fill="#9b352c" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">AI KNOWLEDGE · 01</text>
   <text x="72" y="165" fill="#171b18" font-family="Georgia, serif" font-size="30" font-weight="600">How Reliable AI Agents Work</text>
@@ -25,18 +25,18 @@
   <text x="254" y="633" fill="#9b352c" font-family="Arial, sans-serif" font-size="18" font-weight="700">02</text>
   <text x="254" y="665" fill="#171b18" font-family="Georgia, serif" font-size="27" font-weight="600">Action</text>
 
-  <text x="528" y="531" fill="#9b352c" font-family="Arial, sans-serif" font-size="18" font-weight="700">03</text>
-  <text x="528" y="563" fill="#171b18" font-family="Georgia, serif" font-size="27" font-weight="600">Evidence</text>
+  <text x="88" y="755" fill="#9b352c" font-family="Arial, sans-serif" font-size="18" font-weight="700">03</text>
+  <text x="88" y="787" fill="#171b18" font-family="Georgia, serif" font-size="27" font-weight="600">Evidence</text>
 
-  <rect x="58" y="806" width="604" height="190" fill="#f4ecda" opacity="0.94"/>
+  <rect x="58" y="806" width="380" height="190" fill="#f4ecda" opacity="0.94"/>
   <rect x="58" y="806" width="6" height="190" fill="#9b352c"/>
-  <circle cx="78" cy="852" r="5" fill="#9b352c"/>
-  <circle cx="78" cy="908" r="5" fill="#9b352c"/>
-  <circle cx="78" cy="964" r="5" fill="#9b352c"/>
-  <text x="94" y="858" fill="#171b18" font-family="Arial, sans-serif" font-size="18" font-weight="700">Give the goal, audience, and boundaries.</text>
-  <text x="94" y="914" fill="#171b18" font-family="Arial, sans-serif" font-size="18" font-weight="700">Ask for one clear next step.</text>
-  <text x="94" y="970" fill="#171b18" font-family="Arial, sans-serif" font-size="18" font-weight="700">Check the result before calling it done.</text>
+  <circle cx="70" cy="852" r="5" fill="#9b352c"/>
+  <circle cx="70" cy="908" r="5" fill="#9b352c"/>
+  <circle cx="70" cy="964" r="5" fill="#9b352c"/>
+  <text x="82" y="858" fill="#171b18" font-family="Arial, sans-serif" font-size="18" font-weight="700">Give the goal, audience, and boundaries.</text>
+  <text x="82" y="914" fill="#171b18" font-family="Arial, sans-serif" font-size="18" font-weight="700">Ask for one clear next step.</text>
+  <text x="82" y="970" fill="#171b18" font-family="Arial, sans-serif" font-size="18" font-weight="700">Check the result before calling it done.</text>
 
   <text x="76" y="1095" fill="#cf766b" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">RELIABLE AI</text>
-  <text x="76" y="1140" fill="#f6f0e3" font-family="Georgia, serif" font-size="28" font-weight="600">Context + Action + Evidence</text>
+  <text x="76" y="1140" fill="#f6f0e3" font-family="Georgia, serif" font-size="18" font-weight="600">Context + Action + Evidence</text>
 </svg>

@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "assetVersion": "v5",
+  "description": "AI-assisted photographic-looking hand, brush, ferrule, and wet-bristle sprites",
+  "source": "assets/reference/brush-hand-sheet-v5.png",
+  "sourceSha256": "569fb216f3510dcff04813ad451e96d09d458a6ca61bb942d2d57558fce9f6d9",
+  "sourceSize": [
+    941,
+    1672
+  ],
+  "canvas": [
+    720,
+    1280
+  ],
+  "anchor": [
+    315,
+    620
+  ],
+  "actions": [
+    {
+      "index": 1,
+      "action": "hover",
+      "sourceCell": 1,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-01.png",
+      "sha256": "0395742b0478962b0dcd09ccc292db797a5e3d9e0f8eec8b26a0f8c1ce91396f"
+    },
+    {
+      "index": 2,
+      "action": "touch",
+      "sourceCell": 2,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-02.png",
+      "sha256": "3b7d85a04a7a694685d5c6f1944972936d8bf422e544c9841e2dd91a28a176ad"
+    },
+    {
+      "index": 3,
+      "action": "press",
+      "sourceCell": 3,
+      "transform": {
+        "kind": "photographic-raster-axial-pressure",
+        "terminalCrop": [
+          282,
+          452,
+          354,
+          624
+        ],
+        "ferruleHeight": 42,
+        "hairHeight": 60,
+        "maxWidth": 27,
+        "bendPx": 0.0,
+        "tipWidth": 3,
+        "shaftOverlapPx": 4
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-03.png",
+      "sha256": "3b0f97e63d0b4d355d43c6568d538a29e15e70528bbed2c7dca115bc3c2922cb"
+    },
+    {
+      "index": 4,
+      "action": "travel",
+      "sourceCell": 4,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-04.png",
+      "sha256": "dfafed3c777090a411e2e84f4854b1e288255f1f235dd527235399f7bbfafe5c"
+    },
+    {
+      "index": 5,
+      "action": "turn",
+      "sourceCell": 5,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-05.png",
+      "sha256": "d379bc9a2e4c367763d377039ea720a61f11fd8e54f292940625f3b796f58a74"
+    },
+    {
+      "index": 6,
+      "action": "lift",
+      "sourceCell": 6,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-06.png",
+      "sha256": "45c4296951793fb2f3190fb1b5be67be813d0d2dcf9dda3a69df0b66484d7217"
+    },
+    {
+      "index": 7,
+      "action": "return",
+      "sourceCell": 7,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-07.png",
+      "sha256": "b14c6d6b0135fab607d8929dbfdee1ad9a572a4f38d1b7bb4b3459d60d8a9225"
+    },
+    {
+      "index": 8,
+      "action": "finish",
+      "sourceCell": 8,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-08.png",
+      "sha256": "fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff"
+    },
+    {
+      "index": 9,
+      "action": "leave",
+      "sourceCell": 9,
+      "transform": {
+        "kind": "source-photographic"
+      },
+      "anchor": [
+        315,
+        620
+      ],
+      "output": "assets/brush-poses-v5/pose-09.png",
+      "sha256": "a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681"
+    }
+  ]
+}

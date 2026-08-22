@@ -15,6 +15,7 @@ Turn knowledge into a quiet visual journey built from brush, ink, paper, and del
 - Lock exact wording before visual work. Render final text as code-native SVG or licensed font text, never image-model lettering.
 - Keep the first proof silent unless audio is explicitly requested.
 - When a visible hand is requested, use nine readable calligraphy actions in order: hover, touch, press, travel, turn, lift pressure, return tip, finish, and leave paper. A floating brush or one rigid sprite does not satisfy this contract.
+- Keep a photographic-looking hand, shaft, ferrule, and complete wet tuft in each visible-hand sprite. Never repair a photographed brush by attaching a code-drawn polygon nib; disclose the source sheet, build manifest, and output hashes.
 - Default real-hand work to the `gray-linen-xuan` profile: an upright brush, a continuous sleeve entering from the right or lower-right, and ink that visibly dries into the paper instead of staying as a solid black ribbon.
 - For a public repository showcase, prove the result above the fold: render the README loop at no less than `360×640`, show the first visible ink by `0.8 s`, reveal the first knowledge beat by `2.5 s`, and place labeled start / middle / end evidence directly below the preview.
 
@@ -65,6 +66,7 @@ Read `references/qa-rubric.md` before calling any visual ready. The validators v
 - Do not call a static board an animation or a plan an MP4.
 - Do not use wipes, rectangular masks, or opacity fades as the primary writing illusion.
 - Do not call a floating brush, detached hand, pencil grip, or rigid single-pose translation a real-hand calligraphy animation.
+- Do not use a fixed wet circle, a lifted-anchor jump, or a detached bristle overlay to fake paper contact.
 - Do not let bare skin touch a frame boundary, let the brush fall outside 80–85°, or leave a uniform opaque trail after the brush has moved on.
 - In visible-hand mode, cap the moving fresh-ink core at 18 native SVG pixels (default 6). Any longer rigid black segment that travels with the hand is a failed proof.
 - Do not publish, deploy, spend generation credits, or install third-party code without authorization.

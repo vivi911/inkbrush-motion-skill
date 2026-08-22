@@ -9,6 +9,9 @@ Read this contract only when a visible hand appears. It turns the fragile parts 
 - Hold the brush shaft at 80–85° from horizontal. Path direction may bend the bristles but must not turn the shaft into a pencil grip.
 - Enter from the right or lower-right. The frame may cut continuous sleeve fabric; it must never cut bare skin.
 - Keep the hand, sleeve, and brush at least 16 SVG pixels away from visible knowledge text.
+- Build active public sprites from one disclosed photographic-looking raster source and a machine-readable manifest. Do not paste a code-drawn polygon nib onto a photographic shaft.
+- Keep the ferrule, bristle root, wet tuft, and shaft visually continuous at both 720×1280 and 360×640. A transparent seam, square join, detached tail, or material jump is an automatic failure.
+- HOVER and LEAVE must use pointed source bristles with a 10–14 pixel paper gap. PRESS may deform photographed pixels, but must shorten axially by at least 15% and spread mainly through the lower third rather than forming a flat broom edge.
 
 ## Xuan-paper ink model
 
@@ -33,5 +36,6 @@ Fail the proof when any cell shows:
 - a detached hand, extra finger, duplicated brush, or floating tip;
 - a uniform black or gray ribbon without fibre gaps; or
 - no paper gap between the lifted final bristles and completed ink.
+- a fixed circular wet blob or 42-pixel anchor jump used to fake contact or lifting.
 
 The validator can bind dimensions, fields, paths, and hashes. A reviewer must still inspect anatomy, angle, crop continuity, text clearance, and ink material.

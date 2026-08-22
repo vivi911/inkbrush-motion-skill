@@ -224,7 +224,7 @@ Reading order: 01 hover = narrow pointed tuft; 02 touch = point just beginning t
 Preserve perfectly flat uniform #00FF00 background and all other pixels/composition. No text, grid, paper, shadows on green, watermark, extra fingers, extra hands, extra brushes, detached tips, L-shapes, hose shapes, or long black strokes.
 ```
 
-### Active v4 sprite identity with deterministic soft-hair reconstruction
+### Historical v4 sprite identity with deterministic soft-hair reconstruction
 
 After chroma keying and alignment, `scripts/prepare_nine_action_sprites.py`
 removes the generated compact tuft and rebuilds the visible hairs from a
@@ -248,4 +248,64 @@ post-processing script SHA-256 is
 | 08 FINISH | `96b02f554de2800e8722114f1b47f5bf221145ef67eb91828596810c4077dd88` |
 | 09 LEAVE | `a0fd8190962e75cd24b7f8e0ed5a9659c36450512ae867f78925dff54729a3d2` |
 
-`scripts/prepare_nine_action_sprites.py` turns the selected v4 sheet into nine 720×1280 RGBA sprites and applies the disclosed deterministic soft-hair reconstruction. `assets/brush-pose-final.png` is byte-identical to v4 pose 09 (`a0fd8190962e75cd24b7f8e0ed5a9659c36450512ae867f78925dff54729a3d2`) so static and motion evidence use the same lifted hand.
+`scripts/prepare_nine_action_sprites.py` turns the selected v4 sheet into nine 720×1280 RGBA sprites and applies the disclosed deterministic soft-hair reconstruction. These files remain as inactive version history and are not loaded by the active demo.
+
+## Photographic-looking v5 source and active sprites
+
+- Service: OpenAI ImageGen, built-in image generation tool. The session did not expose a more specific model identifier.
+- Creation and selection date: 2026-08-22.
+- Human direction, selection, and review: Vivi / GoAskVivi.
+- Intended use: synthetic hand-and-brush motion sprites for this open-source 9:16 knowledge-animation Skill.
+- Public source: `assets/reference/brush-hand-sheet-v5.png`, 941×1672, SHA-256 `569fb216f3510dcff04813ad451e96d09d458a6ca61bb942d2d57558fce9f6d9`.
+- Identity boundary: the depicted hand is AI-assisted synthetic media. It is not an identified performer and is not evidence that a person painted the pixels.
+
+### Production brief supplied to ImageGen
+
+The generation requested one 3×3 chroma-green production sheet with a single
+consistent adult right hand, gray linen sleeve, upright traditional Chinese
+calligraphy brush, photographic lighting, and nine states in row-major order:
+HOVER, TOUCH, PRESS, TRAVEL, TURN, LIFT, RETURN, FINISH, and LEAVE. The brief
+required five-finger anatomy, one brush, a continuous sleeve reaching the
+right edge, complete ferrule and wet bristles, no ink trail, no paper, no text,
+no grid labels, no extra hand or brush, and a flat green background suitable
+for deterministic chroma keying. It explicitly rejected a hard polygon nib,
+detached bristles, a square ferrule seam, a long rope-like black tail, and bare
+skin touching the canvas edge.
+
+The exact verbatim ImageGen request was not retained by the generation tool in
+the repository session. This section therefore records the human-authored
+production requirements without presenting a reconstructed paragraph as an
+exact quote. The selected source pixels, source hash, deterministic builder,
+machine-readable action manifest, and every published output hash are included
+so the released asset identity remains auditable.
+
+### Deterministic post-processing
+
+`scripts/build_calligraphy_brush_v5.py` crops the nine source cells, removes and
+despills chroma green, anchors every bristle tip to `(315,620)`, preserves each
+cell's photographic-looking hand, wrist, shaft, ferrule, and wet tuft, and
+extends only sleeve fabric to the right frame edge. PRESS alone applies a
+raster-only axial compression to the photographed terminal pixels: hair height
+60 px, maximum contact width 27 px, 3 px terminal width, 42 px ferrule region,
+and 4 px shaft overlap. No vector or code-drawn nib is composited into v5.
+
+The builder SHA-256 is `6ddf2f0561ab0f3f5bd8081d91b0f865515134d4b776c0d4a1d2fddc885c617c`.
+The machine-readable parameters and hashes are also stored in
+`assets/brush-poses-v5/manifest.json` (SHA-256
+`573fb65d5a10fd22eabfc05e0bf0fa5a0bfe81a97b431a6ab780e7e4fec2e7b5`).
+
+| Active v5 asset | SHA-256 |
+|---|---|
+| 01 HOVER | `0395742b0478962b0dcd09ccc292db797a5e3d9e0f8eec8b26a0f8c1ce91396f` |
+| 02 TOUCH | `3b7d85a04a7a694685d5c6f1944972936d8bf422e544c9841e2dd91a28a176ad` |
+| 03 PRESS | `3b0f97e63d0b4d355d43c6568d538a29e15e70528bbed2c7dca115bc3c2922cb` |
+| 04 TRAVEL | `dfafed3c777090a411e2e84f4854b1e288255f1f235dd527235399f7bbfafe5c` |
+| 05 TURN | `d379bc9a2e4c367763d377039ea720a61f11fd8e54f292940625f3b796f58a74` |
+| 06 LIFT | `45c4296951793fb2f3190fb1b5be67be813d0d2dcf9dda3a69df0b66484d7217` |
+| 07 RETURN | `b14c6d6b0135fab607d8929dbfdee1ad9a572a4f38d1b7bb4b3459d60d8a9225` |
+| 08 FINISH | `fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff` |
+| 09 LEAVE | `a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681` |
+
+`assets/brush-pose-final.png` is byte-identical to active v5 pose 09. Two
+independent rebuilds under Pillow 11.3.0 reproduced all nine PNG files
+byte-for-byte via `scripts/test_build_calligraphy_brush_v5.py`.

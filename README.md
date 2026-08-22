@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://vivi911.github.io/inkbrush-motion-skill/">
-    <img src="assets/inkbrush-motion-demo.gif" alt="Animated Chinese ink-wash lesson in which a real-hand brush study paints Context, Action, and Evidence" width="360">
+    <img src="assets/inkbrush-motion-demo.gif" alt="Animated Chinese ink-wash lesson in which a photographic-looking hand and calligraphy brush paint Context, Action, and Evidence" width="360">
   </a>
   <h1>InkBrush Motion</h1>
   <p><strong>An open-source AI Skill for calm, brush-led 9:16 knowledge animation.</strong></p>
@@ -32,7 +32,7 @@
   <p><img src="assets/nine-action-proof.png" alt="Nine-action proof from hover through leave paper" width="720"></p>
 </details>
 
-Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. The live demo teaches one reliable AI-agent loop—**Context → Action → Evidence**—as an AI-assisted real-hand brush study moves through nine calligraphy actions: hover, touch, press, travel, turn, lift, return, finish, and leave. Give AI the right context, ask for one clear next step, and check the result before you trust it. Exact knowledge text stays code-native while the brush tip leads every visible millimetre of ink.
+Most AI explainers look like AI: neon gradients, floating cards, synthetic particles, and generic motion. InkBrush Motion takes the opposite direction. The live demo teaches one reliable AI-agent loop—**Context → Action → Evidence**—as an AI-assisted photographic hand-and-brush study moves through nine calligraphy actions: hover, touch, press, travel, turn, lift, return, finish, and leave. Give AI the right context, ask for one clear next step, and check the result before you trust it. Exact knowledge text stays code-native while the brush tip leads every visible millimetre of ink.
 
 The repository includes both the reusable Skill and a zero-dependency SVG/CSS/JavaScript delivery demo. The README preview is a deterministic proof render of that same motion contract, not a separate concept still.
 
@@ -98,6 +98,12 @@ python3 scripts/validate_package.py
 python3 scripts/validate_storyboard.py assets/demo-plan.json
 python3 scripts/test_validate_storyboard.py
 python3 scripts/test_validate_package.py
+```
+
+Maintainers with Pillow 11.3.0 can also prove that the disclosed v5 source rebuilds all nine active sprites byte-for-byte:
+
+```bash
+python3 scripts/test_build_calligraphy_brush_v5.py
 ```
 
 The demo is intentionally dependency-free. The references list optional open-source building blocks, but none are vendored into this repository.

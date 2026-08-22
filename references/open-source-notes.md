@@ -9,7 +9,7 @@ These projects are reference points, not dependencies. No source code, datasets,
 | [perfect-freehand](https://github.com/steveruizok/perfect-freehand) | Pressure-aware freehand stroke geometry | MIT |
 | [Paper.js](https://github.com/paperjs/paper.js) | Vector path manipulation and timing | Check the repository before adopting |
 | [Aquarelle](https://github.com/Ramotion/aquarelle) | Watercolor-mask animation as a product effect | MIT |
-| [Pillow](https://github.com/python-pillow/Pillow) | Maintainer-only raster export for the social preview | HPND |
+| [Pillow 11.3.0](https://github.com/python-pillow/Pillow/tree/11.3.0) | Maintainer-only raster export for the social preview | MIT-CMU |
 
 Research snapshot: 2026-08-20. Licenses and project status can change; verify the current repository before adopting code.
 

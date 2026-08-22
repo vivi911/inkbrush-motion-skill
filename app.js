@@ -8,7 +8,6 @@
   const dryMask = document.querySelector("#river-dry-mask");
   const brush = document.querySelector("#brush");
   const movingBrush = document.querySelector("#moving-brush");
-  const wetEdge = document.querySelector(".wet-edge");
   const replayButton = document.querySelector("#replay");
   const status = document.querySelector("#motion-status");
   const journeyFrame = document.querySelector(".journey-frame");
@@ -20,7 +19,7 @@
   const previewMode = new URLSearchParams(window.location.search).get("preview");
   const timing = window.INKBRUSH_TIMING;
 
-  if (!stage || !path || !diffusion || !dryPath || !dryMask || !brush || !movingBrush || !wetEdge || !replayButton || !status || !journeyFrame || !timing) return;
+  if (!stage || !path || !diffusion || !dryPath || !dryMask || !brush || !movingBrush || !replayButton || !status || !journeyFrame || !timing) return;
 
   const duration = timing.durationMs;
   const totalFrames = duration / 1000 * timing.fps;
@@ -32,17 +31,15 @@
   let activePose = -1;
 
   const brushPoses = [
-    { src: "assets/brush-poses-v4/pose-01.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v4/pose-02.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v4/pose-03.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v4/pose-04.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v4/pose-05.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v4/pose-06.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v4/pose-07.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v4/pose-08.png", anchor: [315, 620] },
-    // LEAVE uses its own clean lifted pose and keeps the bristles
-    // 40 px above the completed stroke so the final hold reads as off-paper.
-    { src: "assets/brush-poses-v4/pose-09.png", anchor: [315, 662] },
+    { src: "assets/brush-poses-v5/pose-01.png", anchor: [315, 620], lift: 12 },
+    { src: "assets/brush-poses-v5/pose-02.png", anchor: [315, 620], lift: 0 },
+    { src: "assets/brush-poses-v5/pose-03.png", anchor: [315, 620], lift: 0 },
+    { src: "assets/brush-poses-v5/pose-04.png", anchor: [315, 620], lift: 0 },
+    { src: "assets/brush-poses-v5/pose-05.png", anchor: [315, 620], lift: 0 },
+    { src: "assets/brush-poses-v5/pose-06.png", anchor: [315, 620], lift: 0 },
+    { src: "assets/brush-poses-v5/pose-07.png", anchor: [315, 620], lift: 0 },
+    { src: "assets/brush-poses-v5/pose-08.png", anchor: [315, 620], lift: 0 },
+    { src: "assets/brush-poses-v5/pose-09.png", anchor: [315, 620], lift: 12 },
   ];
   brushPoses.forEach(({ src }) => { const image = new Image(); image.src = src; });
 
@@ -72,8 +69,7 @@
       movingBrush.setAttribute("y", String(-pose.anchor[1]));
       activePose = poseIndex;
     }
-    brush.setAttribute("transform", `translate(${point.x.toFixed(2)} ${point.y.toFixed(2)})`);
-    wetEdge.style.opacity = poseIndex === brushPoses.length - 1 ? "0" : "";
+    brush.setAttribute("transform", `translate(${point.x.toFixed(2)} ${(point.y - pose.lift).toFixed(2)})`);
     stage.dataset.brushProgress = clamp(progress, 0, 1).toFixed(4);
     stage.dataset.brushPose = String(poseIndex + 1).padStart(2, "0");
   }

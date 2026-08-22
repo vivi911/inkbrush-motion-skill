@@ -41,12 +41,12 @@ def cubic(p0, p1, p2, p3, t: float) -> tuple[float, float]:
 
 def build_path() -> tuple[list[tuple[float, float]], list[float]]:
     segments = [
-        ((318, 304), (295, 326), (278, 350), (300, 392)),
-        ((300, 392), (325, 439), (391, 445), (355, 497)),
-        ((355, 497), (326, 540), (259, 554), (317, 620)),
-        ((317, 620), (365, 675), (492, 679), (494, 748)),
-        ((494, 748), (496, 813), (424, 817), (383, 867)),
-        ((383, 867), (342, 918), (390, 958), (456, 1000)),
+        ((318, 550), (295, 565), (280, 585), (300, 610)),
+        ((300, 610), (325, 640), (391, 650), (355, 685)),
+        ((355, 685), (326, 715), (275, 735), (317, 775)),
+        ((317, 775), (365, 820), (480, 825), (494, 870)),
+        ((494, 870), (496, 915), (440, 935), (400, 960)),
+        ((400, 960), (370, 985), (400, 995), (456, 1000)),
     ]
     points: list[tuple[float, float]] = []
     for segment_index, segment in enumerate(segments):
@@ -145,14 +145,14 @@ def round_rect(draw: ImageDraw.ImageDraw, box, fill, radius=7) -> None:
 def add_text_and_cards(frame: Image.Image, stroke: float, progress: float) -> None:
     draw = ImageDraw.Draw(frame, "RGBA")
     draw.text((36, 45), "AI KNOWLEDGE · 01", font=font(ARIAL_BOLD, 14), fill=(151, 52, 45, 255))
-    draw.text((36, 78), "How Reliable", font=font(GEORGIA, 42), fill=(25, 29, 25, 255))
-    draw.text((36, 119), "AI Agents Work", font=font(GEORGIA, 42), fill=(25, 29, 25, 255))
+    draw.text((36, 78), "How Reliable", font=font(GEORGIA, 41), fill=(25, 29, 25, 255))
+    draw.text((36, 119), "AI Agents Work", font=font(GEORGIA, 41), fill=(25, 29, 25, 255))
     draw.text((38, 173), "ONE DECISION AT A TIME", font=font(ARIAL_BOLD, 12), fill=(77, 87, 80, 255))
 
     cards = [
         (KNOWLEDGE_THRESHOLDS["context"], (72, 397, 217, 468), "01", "Context"),
         (KNOWLEDGE_THRESHOLDS["action"], (238, 608, 383, 679), "02", "Action"),
-        (KNOWLEDGE_THRESHOLDS["evidence"], (505, 506, 684, 577), "03", "Evidence"),
+        (KNOWLEDGE_THRESHOLDS["evidence"], (72, 730, 251, 801), "03", "Evidence"),
     ]
     for threshold, box, number, label in cards:
         if stroke < threshold:
@@ -170,13 +170,13 @@ def add_text_and_cards(frame: Image.Image, stroke: float, progress: float) -> No
     for start, end, label, copy in captions:
         if not start <= stroke < end:
             continue
-        round_rect(draw, (58, 940, 492, 1038), (27, 33, 29, 224), 4)
-        draw.text((78, 958), label, font=font(ARIAL_BOLD, 12), fill=(207, 118, 107, 255))
-        draw.text((78, 984), copy, font=font(ARIAL_BOLD, 15), fill=(244, 238, 222, 255))
+        round_rect(draw, (36, 1045, 336, 1143), (27, 33, 29, 224), 4)
+        draw.text((56, 1063), label, font=font(ARIAL_BOLD, 12), fill=(207, 118, 107, 255))
+        draw.text((56, 1089), copy, font=font(ARIAL_BOLD, 13), fill=(244, 238, 222, 255))
     if stroke >= KNOWLEDGE_THRESHOLDS["result"]:
-        round_rect(draw, (58, 1085, 430, 1177), (27, 33, 29, 228), 4)
-        draw.text((78, 1103), "RELIABLE AI", font=font(ARIAL_BOLD, 12), fill=(207, 118, 107, 255))
-        draw.text((78, 1134), "Context + Action + Evidence", font=font(GEORGIA, 20), fill=(244, 238, 222, 255))
+        round_rect(draw, (36, 1085, 336, 1177), (27, 33, 29, 228), 4)
+        draw.text((56, 1103), "RELIABLE AI", font=font(ARIAL_BOLD, 12), fill=(207, 118, 107, 255))
+        draw.text((56, 1134), "Context + Action + Evidence", font=font(GEORGIA, 18), fill=(244, 238, 222, 255))
 
 
 def render_frame(background: Image.Image, sprites: list[Image.Image], progress: float) -> Image.Image:
@@ -216,22 +216,16 @@ def render_frame(background: Image.Image, sprites: list[Image.Image], progress: 
 
     index = pose_index(progress)
     point = point_at(stroke)
-    if index != 8:
-        wet = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-        wet_draw = ImageDraw.Draw(wet)
-        wet_draw.ellipse((point[0] - 13, point[1] - 13, point[0] + 13, point[1] + 13), fill=(48, 55, 48, 46))
-        frame = Image.alpha_composite(frame, wet.filter(ImageFilter.GaussianBlur(5)))
-
     sprite = sprites[index]
-    anchor_y = 662 if index == 8 else 620
-    frame.alpha_composite(sprite, (round(point[0] - 315), round(point[1] - anchor_y)))
+    lift = 12 if index in {0, 8} else 0
+    frame.alpha_composite(sprite, (round(point[0] - 315), round(point[1] - 620 - lift)))
     add_text_and_cards(frame, stroke, progress)
     return frame.convert("RGB")
 
 
 def main() -> None:
     background = Image.open(ROOT / "assets/ai-agent-knowledge-cleanplate.png").convert("RGB").resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
-    sprites = [Image.open(ROOT / f"assets/brush-poses-v4/pose-{index:02d}.png").convert("RGBA") for index in range(1, 10)]
+    sprites = [Image.open(ROOT / f"assets/brush-poses-v5/pose-{index:02d}.png").convert("RGBA") for index in range(1, 10)]
     output_dir = ROOT / "output/visual-gate-v3"
     evidence_dir = ROOT / "assets/evidence"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -257,8 +251,8 @@ def main() -> None:
         frame = render_frame(background, sprites, progress).resize((360, 640), Image.Resampling.LANCZOS)
         x, y = index % 3 * 360, index // 3 * 640
         proof.paste(frame, (x, y))
-        proof_draw.rectangle((x, y, x + 360, y + 34), fill=(26, 31, 27, 220))
-        proof_draw.text((x + 12, y + 8), f"{index + 1:02d} · {ACTIONS[index]}", font=font(ARIAL_BOLD, 14), fill=(245, 238, 222, 255))
+        proof_draw.rounded_rectangle((x + 8, y + 8, x + 152, y + 38), radius=7, fill=(26, 31, 27, 220))
+        proof_draw.text((x + 18, y + 15), f"{index + 1:02d} · {ACTIONS[index]}", font=font(ARIAL_BOLD, 12), fill=(245, 238, 222, 255))
     proof_path = ROOT / "assets/nine-action-proof.png"
     proof.save(proof_path, optimize=True)
 

@@ -23,6 +23,8 @@ Inspect the static board and evidence frames at full size and at a 360×640 mobi
 - The last frame holds long enough to read.
 - Real-hand mode keeps the shaft at 80–85°, crops only through sleeve fabric, and shows all nine ordered actions from the same hand identity.
 - Fresh ink is darkest at the touching tip; the older trail visibly fades and breaks into xuan-paper fibres.
+- The active v5 proof uses the exact runtime sprites: photographic-looking ferrule and bristles, no code-drawn nib, no visible seam, and no rigid wet circle attached to the hand.
+- HOVER and LEAVE have a readable paper gap; PRESS is shorter and wider through the lower third; TURN and RETURN bend continuously without a broken neck.
 
 ## Truthfulness gate
 

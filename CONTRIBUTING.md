@@ -14,4 +14,11 @@ Good first contributions include code-authored paper textures, verified renderer
 
 By submitting a contribution, you agree that it may be distributed under this repository's MIT License.
 
-The website has no runtime dependencies. Maintainers who intentionally regenerate `assets/social-preview.png` need Pillow and lawful access to the fonts named in `COPYRIGHT.md`; Pillow and font files are not vendored here.
+The website has no runtime dependencies. Maintainers who intentionally regenerate `assets/social-preview.png`, the README GIF, or the v5 brush sprites need Pillow 11.3.0 and lawful access to any fonts named in `COPYRIGHT.md`; Pillow and font files are not vendored here.
+
+Rebuild and verify the disclosed v5 brush sprites with:
+
+```bash
+python3 scripts/build_calligraphy_brush_v5.py
+python3 scripts/test_build_calligraphy_brush_v5.py
+```
