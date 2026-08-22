@@ -327,6 +327,22 @@ def main() -> None:
         result = run_validator(manifest_unknown_case)
         expect("reject unknown v5 manifest field", result.returncode == 1 and "top-level fields drift" in result.stdout)
 
+        manifest_schema_case = clone_candidate(parent, "v5-manifest-schema-drift")
+        manifest_path = manifest_schema_case / "assets/brush-poses-v5/manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["schemaVersion"] = 1
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        result = run_validator(manifest_schema_case)
+        expect("reject v1 shape after v2 pixel contract", result.returncode == 1 and "schemaVersion must be 2" in result.stdout)
+
+        manifest_algorithm_case = clone_candidate(parent, "v5-manifest-pixel-algorithm-drift")
+        manifest_path = manifest_algorithm_case / "assets/brush-poses-v5/manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["pixelHashAlgorithm"] = "sha256(rgba8-only)"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        result = run_validator(manifest_algorithm_case)
+        expect("reject v5 pixel hash algorithm drift", result.returncode == 1 and "pixel hash algorithm drift" in result.stdout)
+
         manifest_nan_case = clone_candidate(parent, "v5-manifest-nan")
         manifest_path = manifest_nan_case / "assets/brush-poses-v5/manifest.json"
         manifest_text = manifest_path.read_text(encoding="utf-8").replace('"hairHeight": 60', '"hairHeight": NaN', 1)

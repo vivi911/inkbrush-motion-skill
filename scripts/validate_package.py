@@ -103,8 +103,9 @@ HISTORICAL_BRUSH_ASSET_SHA256 = {
 }
 FINAL_BRUSH_SHA256 = BRUSH_ASSET_SHA256["assets/brush-poses-v5/pose-09.png"]
 V5_SOURCE_SHA256 = "569fb216f3510dcff04813ad451e96d09d458a6ca61bb942d2d57558fce9f6d9"
-V5_BUILDER_SHA256 = "917650614f976083703c4cac5b6011b446fb1faa723e82d12a8d43bfcb144211"
-V5_MANIFEST_SHA256 = "5ccf96475ab88e7c695f1e713b269dfe2554b81d73749a9219f5561c835331be"
+V5_PIXEL_HASH_ALGORITHM = "sha256(be32-width || be32-height || rgba8-straight-row-major-top-left)"
+V5_BUILDER_SHA256 = "a47e8170ec39a9a0022d226472c22c176269843bebfd30dada89f34c6ca2dfcb"
+V5_MANIFEST_SHA256 = "7c15e08231a65c20b1c468e8982b30617b4b376e1f39e9a498814011d5211d98"
 CLEAN_PLATE_SHA256 = "37e16d24d69537bcdbb88dcee8307b78ae77a02c05fec79d82bc77a8a5f2e658"
 REAL_BRUSH_REFERENCE_SHA256 = "49153b50a9a56539430099af1aa6475957b9bc7b9630075bdebc9927fcb6f85d"
 NINE_ACTION_PROOF_SHA256 = "b9e6d42f916c3bba43ac44c5ec76dc1e1daccb7f065ed002b42854a641e9dfe7"
@@ -349,12 +350,16 @@ def main() -> int:
     try:
         manifest_path = ROOT / "assets/brush-poses-v5/manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
-        manifest_fields = {"schemaVersion", "assetVersion", "description", "source", "sourceSha256", "sourceSize", "canvas", "anchor", "actions"}
+        manifest_fields = {"schemaVersion", "assetVersion", "description", "pixelHashAlgorithm", "source", "sourceSha256", "sourceSize", "canvas", "anchor", "actions"}
         if not isinstance(manifest, dict) or set(manifest) != manifest_fields:
             errors.append("v5 brush manifest top-level fields drift")
-        elif (
-            manifest.get("schemaVersion") != 1
-            or manifest.get("assetVersion") != "v5"
+        else:
+            if manifest.get("schemaVersion") != 2:
+                errors.append("v5 brush manifest schemaVersion must be 2")
+            if manifest.get("pixelHashAlgorithm") != V5_PIXEL_HASH_ALGORITHM:
+                errors.append("v5 brush manifest pixel hash algorithm drift")
+        if isinstance(manifest, dict) and (
+            manifest.get("assetVersion") != "v5"
             or manifest.get("source") != "assets/reference/brush-hand-sheet-v5.png"
             or manifest.get("sourceSha256") != V5_SOURCE_SHA256
             or manifest.get("sourceSize") != [941, 1672]

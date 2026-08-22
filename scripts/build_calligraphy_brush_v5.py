@@ -44,6 +44,7 @@ PRESS_TRANSFORM = {
     "tipWidth": 3,
     "shaftOverlapPx": 4,
 }
+PIXEL_HASH_ALGORITHM = "sha256(be32-width || be32-height || rgba8-straight-row-major-top-left)"
 
 
 def sha256_file(path: Path) -> str:
@@ -284,9 +285,10 @@ def build(source_path: Path, output_dir: Path, manifest_path: Path, final_copy: 
     final_copy.parent.mkdir(parents=True, exist_ok=True)
     final_copy.write_bytes((output_dir / "pose-09.png").read_bytes())
     manifest = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "assetVersion": "v5",
         "description": "AI-assisted photographic-looking hand, brush, ferrule, and wet-bristle sprites",
+        "pixelHashAlgorithm": PIXEL_HASH_ALGORITHM,
         "source": source_path.relative_to(ROOT).as_posix() if source_path.is_relative_to(ROOT) else source_path.name,
         "sourceSha256": SOURCE_SHA256,
         "sourceSize": list(SHEET_SIZE),

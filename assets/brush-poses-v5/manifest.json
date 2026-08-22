@@ -1,7 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "assetVersion": "v5",
   "description": "AI-assisted photographic-looking hand, brush, ferrule, and wet-bristle sprites",
+  "pixelHashAlgorithm": "sha256(be32-width || be32-height || rgba8-straight-row-major-top-left)",
   "source": "assets/reference/brush-hand-sheet-v5.png",
   "sourceSha256": "569fb216f3510dcff04813ad451e96d09d458a6ca61bb942d2d57558fce9f6d9",
   "sourceSize": [

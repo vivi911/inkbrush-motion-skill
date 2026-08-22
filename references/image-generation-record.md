@@ -289,10 +289,15 @@ raster-only axial compression to the photographed terminal pixels: hair height
 60 px, maximum contact width 27 px, 3 px terminal width, 42 px ferrule region,
 and 4 px shaft overlap. No vector or code-drawn nib is composited into v5.
 
-The builder SHA-256 is `917650614f976083703c4cac5b6011b446fb1faa723e82d12a8d43bfcb144211`.
+The builder SHA-256 is `a47e8170ec39a9a0022d226472c22c176269843bebfd30dada89f34c6ca2dfcb`.
 The machine-readable parameters and hashes are also stored in
 `assets/brush-poses-v5/manifest.json` (SHA-256
-`5ccf96475ab88e7c695f1e713b269dfe2554b81d73749a9219f5561c835331be`).
+`7c15e08231a65c20b1c468e8982b30617b4b376e1f39e9a498814011d5211d98`).
+Manifest schema v2 defines the canonical decoded-pixel digest as
+`SHA-256(BE32(width) || BE32(height) || RGBA8-straight-row-major-top-left)`:
+width and height are unsigned 32-bit big-endian integers, followed by
+unpremultiplied 8-bit R, G, B, A channel bytes for each pixel, left-to-right
+and top-to-bottom, with no row padding or metadata.
 
 | Active v5 asset | Published PNG SHA-256 | Decoded RGBA pixel SHA-256 |
 |---|---|---|
