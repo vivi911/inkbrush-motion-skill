@@ -128,7 +128,55 @@ Use one perfectly flat, uniform bright chroma-green background #00FF00 in every 
 
 The prompt describes the intended production asset. It must not be read as a claim that an identified person performed the action.
 
-### Published sprite identity
+### Historical v2 per-action sprite identity
+
+Before the consolidated 3×3 sheet, nine ImageGen edits were produced from the
+same project-owned references using a shared full-frame prompt and one named
+action addition per pose. The shared requirements locked the same synthetic
+adult right hand, five-finger anatomy, 80–85° traditional grip, brush, scale,
+lighting, chroma-green background, and right-edge forearm continuation. The
+per-pose additions were HOVER, TOUCH DOWN, PRESS, TRAVEL, TURN, LIFT PRESSURE,
+RETURN TIP, FINISH, and LEAVE PAPER. No third-party pixels, font files, logos,
+or identified human performer were supplied.
+
+#### Exact shared v2 production prompt
+
+```text
+Use case: precise-object-edit
+Asset type: full-frame animation sprite on native 9:16 portrait.
+Input Image 1 is the exact composition and identity base. Input Image 2 is the approved nine-action reference.
+Preserve exactly from Image 1: canvas, uniform #00ff00 background, same adult East Asian woman's right hand, five fingers, skin, nails, 80–85° upright traditional three-finger grip, same brush, subject position, hand scale, lighting, and forearm extending through the right frame edge.
+Change only the brush-contact action described below. Keep the entire hand and wrist identical. No background shadow, texture, text, labels, grid, logo, watermark, extra hand, extra brush, stray mark, or green on the subject.
+```
+
+Pose 01 used the same requirements directly as a full prompt. Poses 02–09
+used the shared prompt plus their named action addition.
+
+| Pose | Generated chroma source SHA-256 | Published RGBA SHA-256 |
+|---|---|---|
+| 01 HOVER | `3dc41c13a30220a8d6a78271135307cea0dfc35daf47e3176e93e9d2cecab122` | `7cb1b6e47eab38f5294d08fb1b51ff256466a97667973a867ae616a6da0bb429` |
+| 02 TOUCH DOWN | `6a70d611609ec20663766c1a18ac1f7e55ad1c5da2dc767a96e03bb3391f9fe0` | `700d83a95e5446753156b83d5d0cb5a4c035e11f5ee27628a447d39cc0248752` |
+| 03 PRESS | `5210e55c4fae9d610203a9a947d2b3c6f420e43cd76a6831a1e581ab29018881` | `a8141623bf31bd41a877094b19bc5ce259bd3603f60503ed9d111afb6a9a371a` |
+| 04 TRAVEL | `7c2fa6c420229cfcf12601603a4655d0e8eca7bfb2bea8ad7f54ea0c330cf490` | `43c5c9df05d6f16e10b93c7ea7bef6eabf43296bd9a3c8687e6a73380b51bc31` |
+| 05 TURN | `0c8da34f98409227c13073dfd44346463d406208d538cf5569126010840036ad` | `041a7542a138d679927ff8a17c4a89c2965f7ed55cfbe1e4fa8f0581f5e947e2` |
+| 06 LIFT PRESSURE | `a80f4ed700e064cf8a57e34baffb7d04fadd7e67073bbb0758b9102d5e6b1650` | `e5f86d96a3162d775cd636adedd996af9ab48023813a3a30a52bd8b6990df259` |
+| 07 RETURN TIP | `18afb008d47a0df59c51359b5c88feecb1e646155f2427ca85155dd26893a2c8` | `485711d794e1226b4998030146b369f399fc8a2c3cc8a69b28c5ae4a21fb1eaa` |
+| 08 FINISH | `12de1d603b0051bfdb6f58887680383ad7d40bf11480a9078e2d09da499147b1` | `7ccf6b02f089410fb140de231dc2535208ec432e15598ca2e3e240929dd92000` |
+| 09 LEAVE PAPER, cleaned | `0ed045d4e3f9b67efb217c9224bc1391e63d17f061f06c9750c5d79d3f0defe1` | `8d7ae7052800f11be0acece156ea83e379d1135ca09a14fbaf90ffc7b71a1872` |
+
+The nine published files were resized to 720×1280 with Lanczos filtering and
+converted to RGBA with a local chroma-key/despill helper. Pose 09 additionally
+received a targeted ImageGen edit that removed one detached ink fleck while
+preserving the lifted-tip gap. These v2 files remain only as disclosed version
+history and are not loaded by the active demo.
+
+#### Exact v2 pose-09 cleanup prompt
+
+```text
+Create a clean chroma-key production version of this same asset. Preserve the same adult right hand, five-finger anatomy, upright traditional Chinese calligraphy brush, grip, proportions, lighting, scale, and placement. The brush must remain visibly lifted. Remove the small detached dark comma-shaped ink fleck below the bristle tip completely. There must be a clear empty gap below the intact bristles. Replace every transparent/checkerboard/background area with one perfectly flat uniform bright chroma green #00FF00, edge to edge, with no texture, gradient, shadow, checkerboard, paper, or other object. No text, no ink marks, no extra fingers, no extra brush. Output one vertical sprite image.
+```
+
+### Historical v3 sprite identity
 
 | Asset | SHA-256 |
 |---|---|
@@ -145,4 +193,59 @@ The prompt describes the intended production asset. It must not be read as a cla
 
 `scripts/prepare_nine_action_sprites.py` crops the 3×3 sheet, removes the chroma background, suppresses green spill, locks every detected bristle tip to canvas coordinate (315,620), scales all subjects equally, extends only sleeve texture through the right frame boundary, and writes nine 720×1280 RGBA sprites. The generated chroma source is retained in ignored production output and is not distributed; the script and published sprites are included for review.
 
-`assets/brush-pose-final.png` is byte-identical to approved v3 pose 09 (`a9f8a713feffd92e911aa6d5e52b8716f641a48d34f7f73c32c2588bace68b00`) so the static SVG evidence validator can bind the same lifted final hand used by motion.
+These v3 sprites remain in the repository only as version history. They are not used by the active demo because the long lateral hair shapes could read as a black cord moving with the hand.
+
+## Compact-bristle v4 correction
+
+- Service: OpenAI ImageGen, built-in image-editing tool.
+- Correction date: 2026-08-22.
+- Input: the v3 generated 3×3 chroma source (`05846c4ddab353b3ff888d852bb64c64b8702ebcf7910cccc72079c002c669ba`).
+- Purpose: preserve the approved hand, grip, sleeve, and action order while replacing rope-like black hair extensions with compact calligraphy bristles.
+
+### First exact edit prompt
+
+```text
+Use case: precise-object-edit
+Asset type: production 3×3 chroma-key sprite sheet for a Chinese calligraphy animation
+Input image: edit target and exact layout reference.
+Primary request: edit only the black brush-hair tuft below the black ferrule in each of the nine cells. Remove every long L-shaped, rope-like or hose-like black extension. Replace it with a physically believable compact Chinese calligraphy brush tuft: the dark hair from ferrule to tip is about 38–46 pixels long in this 941×1672 sheet; most of the tuft stays aligned with the rigid upright wooden shaft, while only the final 10–16 pixels compress or flex for the action. Keep nine distinct actions in reading order: hover with pointed dry tuft and a gap; touch with first contact; press with short compressed rounded tuft; travel with a compact backward flex only at the tip; turn with compact sideways flex only at the tip; lift with reduced compact contact; return with a tiny reverse hook only at the last hairs; finish with a short tapered ending; leave with pointed tuft and a clear gap.
+Preserve exactly: same one adult right hand, five fingers, same grip, anatomy, hand scale, skin, gray linen sleeve, rigid upright wooden handle, lighting, cell positions, 3×3 layout, and crop. Sleeve remains continuous through the right edge of each cell.
+Background: preserve one perfectly flat uniform chroma green #00FF00 edge to edge in every cell.
+Constraints: no ink trail, no black stroke beyond the hair tuft, no paper, no shadows on green, no grid, no labels, no text, no watermark, no extra fingers, no extra hands, no extra brushes, no detached tips. Change only the brush hairs below each ferrule.
+```
+
+The selected intermediate edit is SHA-256 `7e2823b629cae666bb667fbc870d3af4b5b4e72f618c8d20f4375e129d0b9c6f`.
+
+### Second exact edit prompt
+
+```text
+Keep this exact 3×3 chroma-green sprite sheet, the same hand, sleeve, grip, rigid handle, scale, framing, lighting, and compact 38–46 pixel brush-hair length. Make one targeted change only: make the nine brush-hair tip shapes clearly distinguish the calligraphy actions without ever becoming a long curved rope.
+Reading order: 01 hover = narrow pointed tuft; 02 touch = point just beginning to flatten; 03 press = visibly short, wider, rounded compressed tuft; 04 travel = compact tuft with only the final 10–14 pixels flexing backward; 05 turn = compact tuft with only the final 10–14 pixels flexing sideways; 06 lift = narrow reduced-pressure contact; 07 return = tiny reverse hook confined to the last 8–10 pixels; 08 finish = short fine taper; 09 leave = narrow pointed tuft. Keep all nine tips local to the ferrule and no black line or ink trail anywhere.
+Preserve perfectly flat uniform #00FF00 background and all other pixels/composition. No text, grid, paper, shadows on green, watermark, extra fingers, extra hands, extra brushes, detached tips, L-shapes, hose shapes, or long black strokes.
+```
+
+### Active v4 sprite identity with deterministic soft-hair reconstruction
+
+After chroma keying and alignment, `scripts/prepare_nine_action_sprites.py`
+removes the generated compact tuft and rebuilds the visible hairs from a
+code-authored pressure model. This preserves the selected synthetic hand,
+grip, shaft, sleeve, and lighting while making the hair states inspectable and
+repeatable: pointed at rest, rounded on first touch, visibly fanned under
+pressure, tapered at finish, and separated from the paper on leave. The
+post-processing script SHA-256 is
+`6d36f2138613f408b8fec4fd64ced472620e88209bc13d9b36287d2c1d5060c7`.
+
+| Asset | SHA-256 |
+|---|---|
+| Selected compact-bristle 3×3 chroma source, 941×1672 | `8b14692b15f74c4d2bc6e1a38f56a698ab7ca98aaa927f234c34ff487b37c4c0` |
+| 01 HOVER | `142ca1b8d1b8ef3eea85a432fce5aa7f17641a5c3be84865158231c0c845589a` |
+| 02 TOUCH | `d009180e4687c586c89b6700eec255fa2f487cde5093699dc42391169dd95c8e` |
+| 03 PRESS | `4937512b84b0144d4c4aecb5fa07859d13a123817cfff0f57a510e78e41436f0` |
+| 04 TRAVEL | `b0a6b592427f419880a6bfe8952e961f423b422cbe9d736d8aa6c6fbfcd4c213` |
+| 05 TURN | `31b51a36e37cc13251b78454c67fe78f18f22a93dd74fe006e9322ec9523b649` |
+| 06 LIFT | `2570c9d48f093e7648ebf1eeedbf34855e976dcf655a1919cf8b0d03fecb9ee9` |
+| 07 RETURN | `7511f86429b2eb677f9c9219c918f1a3d9f87cf9e0d7b96d5f279dad01c75a63` |
+| 08 FINISH | `96b02f554de2800e8722114f1b47f5bf221145ef67eb91828596810c4077dd88` |
+| 09 LEAVE | `a0fd8190962e75cd24b7f8e0ed5a9659c36450512ae867f78925dff54729a3d2` |
+
+`scripts/prepare_nine_action_sprites.py` turns the selected v4 sheet into nine 720×1280 RGBA sprites and applies the disclosed deterministic soft-hair reconstruction. `assets/brush-pose-final.png` is byte-identical to v4 pose 09 (`a0fd8190962e75cd24b7f8e0ed5a9659c36450512ae867f78925dff54729a3d2`) so static and motion evidence use the same lifted hand.

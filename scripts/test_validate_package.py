@@ -55,6 +55,17 @@ def main() -> None:
         baseline = clone_candidate(parent, "baseline")
         expect("baseline public package passes", run_validator(baseline).returncode == 0)
 
+        agents_case = clone_candidate(parent, "vendored-agent-skill")
+        (agents_case / ".agents/skills/motion-graphics").mkdir(parents=True)
+        (agents_case / ".agents/skills/motion-graphics/SKILL.md").write_text("third-party tooling\n", encoding="utf-8")
+        result = run_validator(agents_case)
+        expect("reject vendored agent tooling bundle", result.returncode == 1 and "forbidden third-party tooling bundle" in result.stdout)
+
+        lock_case = clone_candidate(parent, "vendored-skill-lock")
+        (lock_case / "skills-lock.json").write_text("{}\n", encoding="utf-8")
+        result = run_validator(lock_case)
+        expect("reject skill installer lock bundle", result.returncode == 1 and "forbidden third-party tooling bundle" in result.stdout)
+
         html_case = clone_candidate(parent, "external-html")
         (html_case / "index.html").write_text((html_case / "index.html").read_text(encoding="utf-8") + '\n<script src="//example.com/track.js"></script>\n', encoding="utf-8")
         result = run_validator(html_case)
@@ -145,6 +156,14 @@ def main() -> None:
         result = run_validator(timing_case)
         expect("reject GIF final hold under 1.1 seconds", result.returncode == 1 and "GIF final hold" in result.stdout)
 
+        timing_case = clone_candidate(parent, "moving-black-tail")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["inkContact"]["activeCoreMaxPixels"] = 40
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject a long black core that travels with the brush", result.returncode == 1 and "active ink core" in result.stdout)
+
         ink_delay_case = clone_candidate(parent, "drifted-ink-delay")
         plan_path = ink_delay_case / "assets/demo-plan.json"
         plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -171,7 +190,7 @@ def main() -> None:
 
         source_record_case = clone_candidate(parent, "misbound-readme-capture-source")
         source_record_path = source_record_case / "references/readme-animation-record.md"
-        approved_app_hash = "a825eb56fbd811caded2eb0f7bc46dab1232a0ccf356c2719e14fb80a1b49ff0"
+        approved_app_hash = "05c73dc6368abf66b31bb4083fa9a8a87b755da93325122d1e89595d7fc3b7ae"
         source_record_text = source_record_path.read_text(encoding="utf-8").replace(
             f"`app.js` SHA-256 `{approved_app_hash}`",
             f"`app.js` SHA-256 `{'0' * 64}`",
@@ -288,15 +307,23 @@ def main() -> None:
 
         brush_pose_case = clone_candidate(parent, "changed-brush-pose")
         shutil.copyfile(
-            brush_pose_case / "assets/brush-poses-v3/pose-02.png",
-            brush_pose_case / "assets/brush-poses-v3/pose-01.png",
+            brush_pose_case / "assets/brush-poses-v4/pose-02.png",
+            brush_pose_case / "assets/brush-poses-v4/pose-01.png",
         )
         result = run_validator(brush_pose_case)
         expect("reject changed nine-action brush pose", result.returncode == 1 and "pose-01.png does not match" in result.stdout)
 
+        historical_brush_case = clone_candidate(parent, "changed-historical-brush-pose")
+        shutil.copyfile(
+            historical_brush_case / "assets/brush-poses-v2/pose-02.png",
+            historical_brush_case / "assets/brush-poses-v2/pose-01.png",
+        )
+        result = run_validator(historical_brush_case)
+        expect("reject changed historical brush pose", result.returncode == 1 and "disclosed historical provenance hash" in result.stdout)
+
         final_brush_case = clone_candidate(parent, "changed-final-brush")
         shutil.copyfile(
-            final_brush_case / "assets/brush-poses-v3/pose-08.png",
+            final_brush_case / "assets/brush-poses-v4/pose-08.png",
             final_brush_case / "assets/brush-pose-final.png",
         )
         result = run_validator(final_brush_case)
@@ -306,11 +333,11 @@ def main() -> None:
         record_path = record_case / "references/readme-animation-record.md"
         record_text = record_path.read_text(encoding="utf-8")
         record_text = record_text.replace(
-            "`134f5de0ea0b0912ccb446143f309dd815e33a5825ab81790e1ede86738080db` |",
+            "`8b9166cbac1522ffab69a1c0494b1124ce1a4ce8351fbf15c91c8952d6f123e9` |",
             f"`{'0' * 64}` |",
             1,
         )
-        record_text += "\n<!-- 134f5de0ea0b0912ccb446143f309dd815e33a5825ab81790e1ede86738080db -->\n"
+        record_text += "\n<!-- 8b9166cbac1522ffab69a1c0494b1124ce1a4ce8351fbf15c91c8952d6f123e9 -->\n"
         record_path.write_text(record_text, encoding="utf-8")
         result = run_validator(record_case)
         expect("reject GIF hash hidden outside provenance table row", result.returncode == 1 and "exact approved GIF table row" in result.stdout)
@@ -335,7 +362,7 @@ def main() -> None:
         expect("reject oversized GIF before parsing", "16 MiB" in oversized_error)
 
         manifest_case = clone_candidate(parent, "missing-manifest")
-        for relative in [".nojekyll", ".github/workflows/validate.yml", "motion-timing.js", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v3/pose-09.png", "assets/reference/real-brush-gray-linen.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/evidence/hero-middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
+        for relative in [".nojekyll", ".github/workflows/validate.yml", "motion-timing.js", "scripts/test_validate_storyboard.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v2/pose-09.png", "assets/brush-poses-v4/pose-09.png", "assets/reference/real-brush-gray-linen.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/evidence/hero-middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
             (manifest_case / relative).unlink()
         result = run_validator(manifest_case)
         expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 15)

@@ -11,7 +11,7 @@ from pathlib import Path
 PREFIX = "window.INKBRUSH_TIMING = "
 TOP_LEVEL_FIELDS = {
     "durationMs", "fps", "breaks", "strokeSegments", "actionProgress",
-    "knowledgeThresholds", "inkDelays", "gif", "deadlines",
+    "knowledgeThresholds", "inkDelays", "inkContact", "gif", "deadlines",
 }
 
 
@@ -129,6 +129,14 @@ def validate_motion_timing(timing: dict) -> list[str]:
         errors.append("motion timing ink delays are invalid")
     elif any(not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in ink_delays.values()) or ink_delays["diffusionFrames"] >= ink_delays["dryingFrames"]:
         errors.append("motion timing ink delays must be increasing positive frame counts")
+
+    ink_contact = timing.get("inkContact")
+    if not isinstance(ink_contact, dict) or set(ink_contact) != {"activeCoreMaxPixels"}:
+        errors.append("motion timing ink contact fields are invalid")
+    else:
+        active_core = ink_contact["activeCoreMaxPixels"]
+        if not _number(active_core) or not 4 <= active_core <= 18:
+            errors.append("active ink core must stay within 4-18 pixels at the brush tip")
 
     gif = timing.get("gif")
     if not isinstance(gif, dict) or set(gif) != {"width", "height", "timelineSamples", "activeLastIndex", "frameDurationMs"}:

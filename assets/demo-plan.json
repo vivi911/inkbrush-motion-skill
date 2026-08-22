@@ -32,18 +32,18 @@
     }
   },
   "staticArtifact": "assets/static-board.svg",
-  "staticArtifactSha256": "680a4dd16c45e57d53573c14f525b47e166c72a72c456a153bc570aec1cf16fa",
+  "staticArtifactSha256": "2e220daa1a1fc53ed9ae57a1609741056c8c460884cf9a89ef2c0e2b942b9865",
   "motionEvidence": {
     "rendererLane": "svg-js",
     "rendererOwner": "Vivi / GoAskVivi",
     "reviewer": "independent visual director",
-    "staticApprovalSha256": "680a4dd16c45e57d53573c14f525b47e166c72a72c456a153bc570aec1cf16fa",
+    "staticApprovalSha256": "2e220daa1a1fc53ed9ae57a1609741056c8c460884cf9a89ef2c0e2b942b9865",
     "nineActionProof": "assets/nine-action-proof.png",
-    "nineActionProofSha256": "dd573eac7a25162b8ae93cb38b899667120e7a97c536516294e23439df75e4d8",
+    "nineActionProofSha256": "6b16a518803ba73b6e8054b1fab3e9231d14d175293cd465b93bd587de9806d9",
     "frames": [
-      {"role": "start", "frame": 9, "path": "assets/evidence/start.png", "sha256": "2d00e598528a1c0d21f5a7cfa474ae75854f750fbea216d0e28b189d5cf67511"},
-      {"role": "middle", "frame": 165, "path": "assets/evidence/middle.png", "sha256": "0b9febb891a44564d8f394c779c2826efd5eddfa7af0bd3bdd438f8b2d87ad20"},
-      {"role": "end", "frame": 276, "path": "assets/evidence/end.png", "sha256": "944c0143edb56719aa42247294e0634f18e013afbbb01b89c919c9009e997a11"}
+      {"role": "start", "frame": 9, "path": "assets/evidence/start.png", "sha256": "cd0b1953d0e332ae91225d1f8cc43499f79ae531d1e9bb0665b9eb119abaee92"},
+      {"role": "middle", "frame": 165, "path": "assets/evidence/middle.png", "sha256": "7441f44c4ceab5d05096b297665e4c2e1d25ca8a6fbf22f06df1ac8dfdc8248f"},
+      {"role": "end", "frame": 276, "path": "assets/evidence/end.png", "sha256": "31f823dc5f58f246d31d0b88c034bc9eabe5dc7a11b89eaba8d5ad989fee4cc8"}
     ]
   },
   "beats": [

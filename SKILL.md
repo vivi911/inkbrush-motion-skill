@@ -66,6 +66,7 @@ Read `references/qa-rubric.md` before calling any visual ready. The validators v
 - Do not use wipes, rectangular masks, or opacity fades as the primary writing illusion.
 - Do not call a floating brush, detached hand, pencil grip, or rigid single-pose translation a real-hand calligraphy animation.
 - Do not let bare skin touch a frame boundary, let the brush fall outside 80–85°, or leave a uniform opaque trail after the brush has moved on.
+- In visible-hand mode, cap the moving fresh-ink core at 18 native SVG pixels (default 6). Any longer rigid black segment that travels with the hand is a failed proof.
 - Do not publish, deploy, spend generation credits, or install third-party code without authorization.
 - Read `COPYRIGHT.md` and `references/copyright-and-provenance.md` before adding external assets.
 - This repository is MIT-licensed. Preserve the copyright and license notice in redistributed copies.

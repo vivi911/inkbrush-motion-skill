@@ -199,7 +199,10 @@ def render_frame(background: Image.Image, sprites: list[Image.Image], progress: 
     draw_dry_trail(dry, ease(dry_progress))
     frame = Image.alpha_composite(frame, dry)
 
-    active_span = 0.075
+    # Convert the physical contact-patch cap from native canvas pixels to the
+    # normalized path fraction used by points_between(). A long moving segment
+    # reads as a black cord attached to the hand rather than deposited ink.
+    active_span = TIMING["inkContact"]["activeCoreMaxPixels"] / PATH_LENGTH
     active_start = max(0.0, stroke - active_span)
     active = points_between(active_start, stroke)
     if len(active) >= 2 and stroke > 0:
@@ -228,7 +231,7 @@ def render_frame(background: Image.Image, sprites: list[Image.Image], progress: 
 
 def main() -> None:
     background = Image.open(ROOT / "assets/ai-agent-knowledge-cleanplate.png").convert("RGB").resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
-    sprites = [Image.open(ROOT / f"assets/brush-poses-v3/pose-{index:02d}.png").convert("RGBA") for index in range(1, 10)]
+    sprites = [Image.open(ROOT / f"assets/brush-poses-v4/pose-{index:02d}.png").convert("RGBA") for index in range(1, 10)]
     output_dir = ROOT / "output/visual-gate-v3"
     evidence_dir = ROOT / "assets/evidence"
     output_dir.mkdir(parents=True, exist_ok=True)

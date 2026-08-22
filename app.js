@@ -32,17 +32,17 @@
   let activePose = -1;
 
   const brushPoses = [
-    { src: "assets/brush-poses-v3/pose-01.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v3/pose-02.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v3/pose-03.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v3/pose-04.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v3/pose-05.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v3/pose-06.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v3/pose-07.png", anchor: [315, 620] },
-    { src: "assets/brush-poses-v3/pose-08.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-01.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-02.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-03.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-04.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-05.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-06.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-07.png", anchor: [315, 620] },
+    { src: "assets/brush-poses-v4/pose-08.png", anchor: [315, 620] },
     // LEAVE uses its own clean lifted pose and keeps the bristles
     // 40 px above the completed stroke so the final hold reads as off-paper.
-    { src: "assets/brush-poses-v3/pose-09.png", anchor: [315, 662] },
+    { src: "assets/brush-poses-v4/pose-09.png", anchor: [315, 662] },
   ];
   brushPoses.forEach(({ src }) => { const image = new Image(); image.src = src; });
 
@@ -84,7 +84,9 @@
     const dryProgress = clamp((stroke - dryingDelay) / (1 - dryingDelay), 0, 1);
     const poseIndex = poseIndexFor(progress);
     const distance = stroke * pathLength;
-    const activeSpan = pathLength * 0.075;
+    // Only the tiny contact patch may travel with the bristles. Everything
+    // behind it belongs to the stationary wet/dry paper layers.
+    const activeSpan = timing.inkContact.activeCoreMaxPixels;
     const activeLength = Math.max(0.01, Math.min(distance, activeSpan));
     const activeStart = Math.max(0, distance - activeSpan);
 
