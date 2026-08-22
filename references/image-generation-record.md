@@ -289,23 +289,26 @@ raster-only axial compression to the photographed terminal pixels: hair height
 60 px, maximum contact width 27 px, 3 px terminal width, 42 px ferrule region,
 and 4 px shaft overlap. No vector or code-drawn nib is composited into v5.
 
-The builder SHA-256 is `6ddf2f0561ab0f3f5bd8081d91b0f865515134d4b776c0d4a1d2fddc885c617c`.
+The builder SHA-256 is `917650614f976083703c4cac5b6011b446fb1faa723e82d12a8d43bfcb144211`.
 The machine-readable parameters and hashes are also stored in
 `assets/brush-poses-v5/manifest.json` (SHA-256
-`573fb65d5a10fd22eabfc05e0bf0fa5a0bfe81a97b431a6ab780e7e4fec2e7b5`).
+`5ccf96475ab88e7c695f1e713b269dfe2554b81d73749a9219f5561c835331be`).
 
-| Active v5 asset | SHA-256 |
-|---|---|
-| 01 HOVER | `0395742b0478962b0dcd09ccc292db797a5e3d9e0f8eec8b26a0f8c1ce91396f` |
-| 02 TOUCH | `3b7d85a04a7a694685d5c6f1944972936d8bf422e544c9841e2dd91a28a176ad` |
-| 03 PRESS | `3b0f97e63d0b4d355d43c6568d538a29e15e70528bbed2c7dca115bc3c2922cb` |
-| 04 TRAVEL | `dfafed3c777090a411e2e84f4854b1e288255f1f235dd527235399f7bbfafe5c` |
-| 05 TURN | `d379bc9a2e4c367763d377039ea720a61f11fd8e54f292940625f3b796f58a74` |
-| 06 LIFT | `45c4296951793fb2f3190fb1b5be67be813d0d2dcf9dda3a69df0b66484d7217` |
-| 07 RETURN | `b14c6d6b0135fab607d8929dbfdee1ad9a572a4f38d1b7bb4b3459d60d8a9225` |
-| 08 FINISH | `fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff` |
-| 09 LEAVE | `a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681` |
+| Active v5 asset | Published PNG SHA-256 | Decoded RGBA pixel SHA-256 |
+|---|---|---|
+| 01 HOVER | `0395742b0478962b0dcd09ccc292db797a5e3d9e0f8eec8b26a0f8c1ce91396f` | `9b20b32cc7faa52279aad3f1875c2a4ecaf28a184bd0a72199ee6f152f9a4d32` |
+| 02 TOUCH | `3b7d85a04a7a694685d5c6f1944972936d8bf422e544c9841e2dd91a28a176ad` | `22bef1b8a23e9b3540f7f0ea136e4c08e1691c5d81c8b4a9872ff0eeff64612e` |
+| 03 PRESS | `3b0f97e63d0b4d355d43c6568d538a29e15e70528bbed2c7dca115bc3c2922cb` | `7a592d7a4ffa786a87ce7baefa5e059607a7159ddc599298a7618eb52ccb0282` |
+| 04 TRAVEL | `dfafed3c777090a411e2e84f4854b1e288255f1f235dd527235399f7bbfafe5c` | `db1352632674e7789b469c8f6debe0a6a2499f55e46fd8f1c9600cfc8964cb00` |
+| 05 TURN | `d379bc9a2e4c367763d377039ea720a61f11fd8e54f292940625f3b796f58a74` | `86c28eea71b46d271ed2fafe7a85a1c6c6601677f50a18a41fa8ecacffa7ad0c` |
+| 06 LIFT | `45c4296951793fb2f3190fb1b5be67be813d0d2dcf9dda3a69df0b66484d7217` | `19ac93ae0bdf30b89c5cba5ae25006e8ce8c0a809b2db724a30d5ec1db0ce1ac` |
+| 07 RETURN | `b14c6d6b0135fab607d8929dbfdee1ad9a572a4f38d1b7bb4b3459d60d8a9225` | `08197037ead8a848b6727af480cdfedef9f99b7315c2ae86577d8801f8866886` |
+| 08 FINISH | `fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff` | `92f2c8a68e8c129c2502fbdd3c057edaf5583f44f05ddf6e912bd9d027ca5f8a` |
+| 09 LEAVE | `a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681` | `3b35defb30d79fd71208c978da2660bb0719c06f37713eeb3d996564f98eba45` |
 
 `assets/brush-pose-final.png` is byte-identical to active v5 pose 09. Two
-independent rebuilds under Pillow 11.3.0 reproduced all nine PNG files
-byte-for-byte via `scripts/test_build_calligraphy_brush_v5.py`.
+independent rebuilds under Pillow 11.3.0 reproduce all nine decoded RGBA images
+pixel-for-pixel via `scripts/test_build_calligraphy_brush_v5.py`; the test also
+checks byte stability within one environment. Published PNG byte hashes remain
+separate because zlib compression bytes can differ across platforms without
+changing decoded pixels.

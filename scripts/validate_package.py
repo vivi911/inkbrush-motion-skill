@@ -61,6 +61,17 @@ BRUSH_ASSET_SHA256 = {
     "assets/brush-poses-v5/pose-08.png": "fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff",
     "assets/brush-poses-v5/pose-09.png": "a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681",
 }
+BRUSH_PIXEL_SHA256 = {
+    "assets/brush-poses-v5/pose-01.png": "9b20b32cc7faa52279aad3f1875c2a4ecaf28a184bd0a72199ee6f152f9a4d32",
+    "assets/brush-poses-v5/pose-02.png": "22bef1b8a23e9b3540f7f0ea136e4c08e1691c5d81c8b4a9872ff0eeff64612e",
+    "assets/brush-poses-v5/pose-03.png": "7a592d7a4ffa786a87ce7baefa5e059607a7159ddc599298a7618eb52ccb0282",
+    "assets/brush-poses-v5/pose-04.png": "db1352632674e7789b469c8f6debe0a6a2499f55e46fd8f1c9600cfc8964cb00",
+    "assets/brush-poses-v5/pose-05.png": "86c28eea71b46d271ed2fafe7a85a1c6c6601677f50a18a41fa8ecacffa7ad0c",
+    "assets/brush-poses-v5/pose-06.png": "19ac93ae0bdf30b89c5cba5ae25006e8ce8c0a809b2db724a30d5ec1db0ce1ac",
+    "assets/brush-poses-v5/pose-07.png": "08197037ead8a848b6727af480cdfedef9f99b7315c2ae86577d8801f8866886",
+    "assets/brush-poses-v5/pose-08.png": "92f2c8a68e8c129c2502fbdd3c057edaf5583f44f05ddf6e912bd9d027ca5f8a",
+    "assets/brush-poses-v5/pose-09.png": "3b35defb30d79fd71208c978da2660bb0719c06f37713eeb3d996564f98eba45",
+}
 HISTORICAL_BRUSH_ASSET_SHA256 = {
     "assets/brush-poses-v2/pose-01.png": "7cb1b6e47eab38f5294d08fb1b51ff256466a97667973a867ae616a6da0bb429",
     "assets/brush-poses-v2/pose-02.png": "700d83a95e5446753156b83d5d0cb5a4c035e11f5ee27628a447d39cc0248752",
@@ -92,8 +103,8 @@ HISTORICAL_BRUSH_ASSET_SHA256 = {
 }
 FINAL_BRUSH_SHA256 = BRUSH_ASSET_SHA256["assets/brush-poses-v5/pose-09.png"]
 V5_SOURCE_SHA256 = "569fb216f3510dcff04813ad451e96d09d458a6ca61bb942d2d57558fce9f6d9"
-V5_BUILDER_SHA256 = "6ddf2f0561ab0f3f5bd8081d91b0f865515134d4b776c0d4a1d2fddc885c617c"
-V5_MANIFEST_SHA256 = "573fb65d5a10fd22eabfc05e0bf0fa5a0bfe81a97b431a6ab780e7e4fec2e7b5"
+V5_BUILDER_SHA256 = "917650614f976083703c4cac5b6011b446fb1faa723e82d12a8d43bfcb144211"
+V5_MANIFEST_SHA256 = "5ccf96475ab88e7c695f1e713b269dfe2554b81d73749a9219f5561c835331be"
 CLEAN_PLATE_SHA256 = "37e16d24d69537bcdbb88dcee8307b78ae77a02c05fec79d82bc77a8a5f2e658"
 REAL_BRUSH_REFERENCE_SHA256 = "49153b50a9a56539430099af1aa6475957b9bc7b9630075bdebc9927fcb6f85d"
 NINE_ACTION_PROOF_SHA256 = "b9e6d42f916c3bba43ac44c5ec76dc1e1daccb7f065ed002b42854a641e9dfe7"
@@ -352,7 +363,7 @@ def main() -> int:
         ):
             errors.append("v5 brush manifest identity or dimensions drift")
         actions = manifest.get("actions") if isinstance(manifest, dict) else None
-        action_fields = {"index", "action", "sourceCell", "transform", "anchor", "output", "sha256"}
+        action_fields = {"index", "action", "sourceCell", "transform", "anchor", "output", "sha256", "pixelSha256"}
         if not isinstance(actions, list) or len(actions) != 9:
             errors.append("v5 brush manifest must contain nine actions")
         else:
@@ -379,6 +390,7 @@ def main() -> int:
                     or record.get("anchor") != [315, 620]
                     or record.get("output") != relative
                     or record.get("sha256") != BRUSH_ASSET_SHA256[relative]
+                    or record.get("pixelSha256") != BRUSH_PIXEL_SHA256[relative]
                 ):
                     errors.append(f"v5 brush manifest action {index:02d} identity or transform drift")
         if sha256_file(manifest_path) != V5_MANIFEST_SHA256:

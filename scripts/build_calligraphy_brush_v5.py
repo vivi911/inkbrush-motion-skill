@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import struct
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
@@ -50,6 +51,16 @@ def sha256_file(path: Path) -> str:
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
+    return digest.hexdigest()
+
+
+def sha256_rgba(image: Image.Image) -> str:
+    """Hash decoded RGBA pixels independently of platform PNG compression."""
+
+    rgba = image.convert("RGBA")
+    digest = hashlib.sha256()
+    digest.update(struct.pack(">II", *rgba.size))
+    digest.update(rgba.tobytes())
     return digest.hexdigest()
 
 
@@ -267,6 +278,7 @@ def build(source_path: Path, output_dir: Path, manifest_path: Path, final_copy: 
             "anchor": list(ANCHOR),
             "output": output_path.relative_to(ROOT).as_posix() if output_path.is_relative_to(ROOT) else output_path.name,
             "sha256": sha256_file(output_path),
+            "pixelSha256": sha256_rgba(pose),
         })
 
     final_copy.parent.mkdir(parents=True, exist_ok=True)

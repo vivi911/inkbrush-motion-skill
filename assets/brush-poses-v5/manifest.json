@@ -29,7 +29,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-01.png",
-      "sha256": "0395742b0478962b0dcd09ccc292db797a5e3d9e0f8eec8b26a0f8c1ce91396f"
+      "sha256": "0395742b0478962b0dcd09ccc292db797a5e3d9e0f8eec8b26a0f8c1ce91396f",
+      "pixelSha256": "9b20b32cc7faa52279aad3f1875c2a4ecaf28a184bd0a72199ee6f152f9a4d32"
     },
     {
       "index": 2,
@@ -43,7 +44,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-02.png",
-      "sha256": "3b7d85a04a7a694685d5c6f1944972936d8bf422e544c9841e2dd91a28a176ad"
+      "sha256": "3b7d85a04a7a694685d5c6f1944972936d8bf422e544c9841e2dd91a28a176ad",
+      "pixelSha256": "22bef1b8a23e9b3540f7f0ea136e4c08e1691c5d81c8b4a9872ff0eeff64612e"
     },
     {
       "index": 3,
@@ -69,7 +71,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-03.png",
-      "sha256": "3b0f97e63d0b4d355d43c6568d538a29e15e70528bbed2c7dca115bc3c2922cb"
+      "sha256": "3b0f97e63d0b4d355d43c6568d538a29e15e70528bbed2c7dca115bc3c2922cb",
+      "pixelSha256": "7a592d7a4ffa786a87ce7baefa5e059607a7159ddc599298a7618eb52ccb0282"
     },
     {
       "index": 4,
@@ -83,7 +86,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-04.png",
-      "sha256": "dfafed3c777090a411e2e84f4854b1e288255f1f235dd527235399f7bbfafe5c"
+      "sha256": "dfafed3c777090a411e2e84f4854b1e288255f1f235dd527235399f7bbfafe5c",
+      "pixelSha256": "db1352632674e7789b469c8f6debe0a6a2499f55e46fd8f1c9600cfc8964cb00"
     },
     {
       "index": 5,
@@ -97,7 +101,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-05.png",
-      "sha256": "d379bc9a2e4c367763d377039ea720a61f11fd8e54f292940625f3b796f58a74"
+      "sha256": "d379bc9a2e4c367763d377039ea720a61f11fd8e54f292940625f3b796f58a74",
+      "pixelSha256": "86c28eea71b46d271ed2fafe7a85a1c6c6601677f50a18a41fa8ecacffa7ad0c"
     },
     {
       "index": 6,
@@ -111,7 +116,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-06.png",
-      "sha256": "45c4296951793fb2f3190fb1b5be67be813d0d2dcf9dda3a69df0b66484d7217"
+      "sha256": "45c4296951793fb2f3190fb1b5be67be813d0d2dcf9dda3a69df0b66484d7217",
+      "pixelSha256": "19ac93ae0bdf30b89c5cba5ae25006e8ce8c0a809b2db724a30d5ec1db0ce1ac"
     },
     {
       "index": 7,
@@ -125,7 +131,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-07.png",
-      "sha256": "b14c6d6b0135fab607d8929dbfdee1ad9a572a4f38d1b7bb4b3459d60d8a9225"
+      "sha256": "b14c6d6b0135fab607d8929dbfdee1ad9a572a4f38d1b7bb4b3459d60d8a9225",
+      "pixelSha256": "08197037ead8a848b6727af480cdfedef9f99b7315c2ae86577d8801f8866886"
     },
     {
       "index": 8,
@@ -139,7 +146,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-08.png",
-      "sha256": "fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff"
+      "sha256": "fe02935133e310ab47198111eca3c5b52f3ca944d43f82facc186fe45104beff",
+      "pixelSha256": "92f2c8a68e8c129c2502fbdd3c057edaf5583f44f05ddf6e912bd9d027ca5f8a"
     },
     {
       "index": 9,
@@ -153,7 +161,8 @@
         620
       ],
       "output": "assets/brush-poses-v5/pose-09.png",
-      "sha256": "a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681"
+      "sha256": "a18e3f4c1424688e0134163caf4e8b896acb25379b84dc36bebe4537a4b77681",
+      "pixelSha256": "3b35defb30d79fd71208c978da2660bb0719c06f37713eeb3d996564f98eba45"
     }
   ]
 }

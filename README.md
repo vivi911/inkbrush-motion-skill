@@ -100,7 +100,7 @@ python3 scripts/test_validate_storyboard.py
 python3 scripts/test_validate_package.py
 ```
 
-Maintainers with Pillow 11.3.0 can also prove that the disclosed v5 source rebuilds all nine active sprites byte-for-byte:
+Maintainers with Pillow 11.3.0 can also prove that the disclosed v5 source rebuilds all nine active sprites pixel-for-pixel. The test separately checks byte stability within one build environment because PNG compression bytes can differ across platforms:
 
 ```bash
 python3 scripts/test_build_calligraphy_brush_v5.py
