@@ -7,6 +7,7 @@ import hashlib
 import importlib
 import math
 import os
+import platform
 import re
 import struct
 import subprocess
@@ -29,7 +30,7 @@ def sha256_file(path: Path) -> str:
 
 
 def ffmpeg_executable() -> str:
-    """Return the pinned maintainer FFmpeg 7.1 binary or fail closed."""
+    """Return imageio-ffmpeg 0.6.0's platform-pinned FFmpeg or fail closed."""
     override = os.environ.get("INKBRUSH_FFMPEG", "").strip()
     if override:
         executable = Path(override).expanduser()
@@ -37,9 +38,7 @@ def ffmpeg_executable() -> str:
         try:
             imageio_ffmpeg = importlib.import_module("imageio_ffmpeg")
         except ImportError as exc:
-            raise ValueError(
-                "imageio-ffmpeg 0.6.0 with FFmpeg 7.1 is required for MP4 validation"
-            ) from exc
+            raise ValueError("imageio-ffmpeg 0.6.0 is required for MP4 validation") from exc
         if getattr(imageio_ffmpeg, "__version__", None) != "0.6.0":
             raise ValueError("MP4 validation requires imageio-ffmpeg 0.6.0")
         executable = Path(imageio_ffmpeg.get_ffmpeg_exe())
@@ -56,8 +55,17 @@ def ffmpeg_executable() -> str:
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise ValueError(f"cannot execute FFmpeg: {exc}") from exc
-    if version.returncode != 0 or not version.stdout.startswith("ffmpeg version 7.1 "):
-        raise ValueError("MP4 validation requires the pinned FFmpeg 7.1 tool identity")
+    expected_versions = {"Darwin": "7.1", "Linux": "7.0.2-static"}
+    if platform.system() == "Windows":
+        expected_version = "7.1" if struct.calcsize("P") * 8 == 64 else "4.2.2"
+    else:
+        expected_version = expected_versions.get(platform.system())
+    if expected_version is None:
+        raise ValueError(f"unsupported maintainer platform for pinned FFmpeg: {platform.system()}")
+    version_match = re.match(r"ffmpeg version ([^\s]+)", version.stdout)
+    actual_version = version_match.group(1) if version_match else ""
+    if version.returncode != 0 or actual_version != expected_version:
+        raise ValueError(f"MP4 validation requires the pinned FFmpeg {expected_version} tool identity on {platform.system()}")
     return str(executable)
 
 
@@ -97,11 +105,11 @@ def mp4_metadata(path: Path) -> tuple[str, int, int, float, int, float, int, int
             check=False,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
-        raise ValueError(f"MP4 cannot be fully decoded with FFmpeg 7.1: {exc}") from exc
+        raise ValueError(f"MP4 cannot be fully decoded with the pinned FFmpeg tool: {exc}") from exc
     if decoded.returncode != 0 or "progress=end" not in decoded.stdout:
         diagnostic = decoded.stderr.strip().splitlines()
         detail = diagnostic[-1] if diagnostic else f"exit {decoded.returncode}"
-        raise ValueError(f"MP4 cannot be fully decoded with FFmpeg 7.1: {detail}")
+        raise ValueError(f"MP4 cannot be fully decoded with the pinned FFmpeg tool: {detail}")
 
     input_metadata = decoded.stderr.split("Stream mapping:", 1)[0]
     duration_match = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", input_metadata)

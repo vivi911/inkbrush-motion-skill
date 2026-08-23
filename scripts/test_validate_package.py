@@ -6,6 +6,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -105,9 +106,17 @@ def main() -> None:
 
         workflow_tool_case = clone_candidate(parent, "missing-ci-video-tool-gate")
         workflow_path = workflow_tool_case / ".github/workflows/validate.yml"
-        workflow_path.write_text(workflow_path.read_text(encoding="utf-8").replace("ffmpeg version 7.1 ", "ffmpeg version 7.2 "), encoding="utf-8")
+        workflow_path.write_text(workflow_path.read_text(encoding="utf-8").replace("7.0.2-static", "7.2-static"), encoding="utf-8")
         result = run_validator(workflow_tool_case)
-        expect("reject CI without pinned FFmpeg 7.1 gate", result.returncode == 1 and "verify FFmpeg 7.1" in result.stdout)
+        expect("reject CI without pinned Linux FFmpeg gate", result.returncode == 1 and "exact Linux FFmpeg 7.0.2-static" in result.stdout)
+
+        prefixed_tool_case = clone_candidate(parent, "prefixed-fake-ffmpeg-version")
+        fake_tool = parent / "fake-ffmpeg"
+        expected_prefix = "7.0.2-static" if platform.system() == "Linux" else "7.1"
+        fake_tool.write_text(f"#!/bin/sh\nprintf 'ffmpeg version {expected_prefix}-evil Copyright fake\\n'\n", encoding="utf-8")
+        fake_tool.chmod(0o755)
+        result = run_validator(prefixed_tool_case, {"INKBRUSH_FFMPEG": str(fake_tool)})
+        expect("reject FFmpeg version that only matches the approved prefix", result.returncode == 1 and "pinned FFmpeg" in result.stdout)
 
         html_case = clone_candidate(parent, "external-html")
         (html_case / "index.html").write_text((html_case / "index.html").read_text(encoding="utf-8") + '\n<script src="//example.com/track.js"></script>\n', encoding="utf-8")

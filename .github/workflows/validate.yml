@@ -17,17 +17,26 @@ jobs:
           python-version: "3.12"
       - name: Install pinned maintainer build dependencies
         run: python3 -m pip install --requirement requirements-dev.txt
-      - name: Verify pinned FFmpeg tool identity
+      - name: Verify pinned Linux FFmpeg tool identity
         run: |
           python3 - <<'PY'
           import imageio_ffmpeg
+          import hashlib
+          import re
           import subprocess
 
           executable = imageio_ffmpeg.get_ffmpeg_exe()
+          package_version = imageio_ffmpeg.get_ffmpeg_version()
           version = subprocess.check_output([executable, "-version"], text=True).splitlines()[0]
-          if not version.startswith("ffmpeg version 7.1 "):
-              raise SystemExit(f"unexpected FFmpeg tool identity: {version}")
-          print(version)
+          version_match = re.match(r"ffmpeg version ([^\s]+)", version)
+          version_token = version_match.group(1) if version_match else ""
+          with open(executable, "rb") as handle:
+              executable_sha256 = hashlib.file_digest(handle, "sha256").hexdigest()
+          if package_version != "7.0.2-static" or version_token != "7.0.2-static":
+              raise SystemExit(f"unexpected Linux FFmpeg tool identity: {package_version} / {version}")
+          if executable_sha256 != "e7e7fb30477f717e6f55f9180a70386c62677ef8a4d4d1a5d948f4098aa3eb99":
+              raise SystemExit(f"unexpected Linux FFmpeg executable hash: {executable_sha256}")
+          print(f"{version} / {executable_sha256}")
           PY
       - name: Rebuild v5 brush sprites twice
         run: python3 scripts/test_build_calligraphy_brush_v5.py

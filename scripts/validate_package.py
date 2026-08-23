@@ -258,15 +258,15 @@ def main() -> int:
     copyright_text = (ROOT / "COPYRIGHT.md").read_text(encoding="utf-8")
     for marker in ["AI-assistance disclosure", "Third-party material", "Names and endorsement"]:
         if marker not in copyright_text: errors.append(f"COPYRIGHT.md missing section: {marker}")
-    for marker in ["https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz", "https://ffmpeg.org/legal.html", "https://code.videolan.org/videolan/x264/-/blob/master/COPYING"]:
+    for marker in ["https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz", "https://ffmpeg.org/releases/ffmpeg-7.0.2.tar.xz", "https://ffmpeg.org/legal.html", "https://code.videolan.org/videolan/x264/-/blob/master/COPYING"]:
         if marker not in copyright_text: errors.append(f"COPYRIGHT.md missing video-tool provenance source: {marker}")
 
     requirements_text = (ROOT / "requirements-dev.txt").read_text(encoding="utf-8")
     if requirements_text != "Pillow==11.3.0\nimageio-ffmpeg==0.6.0\n":
         errors.append("requirements-dev.txt must pin the approved Pillow and imageio-ffmpeg versions")
     workflow_text = (ROOT / ".github/workflows/validate.yml").read_text(encoding="utf-8")
-    if "python3 -m pip install --requirement requirements-dev.txt" not in workflow_text or 'ffmpeg version 7.1 ' not in workflow_text:
-        errors.append("CI must install the pinned maintainer requirements and verify FFmpeg 7.1")
+    if "python3 -m pip install --requirement requirements-dev.txt" not in workflow_text or '7.0.2-static' not in workflow_text or 'e7e7fb30477f717e6f55f9180a70386c62677ef8a4d4d1a5d948f4098aa3eb99' not in workflow_text:
+        errors.append("CI must install the pinned maintainer requirements and verify the exact Linux FFmpeg 7.0.2-static identity")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     if '<img src="assets/inkbrush-motion-demo.gif"' not in readme or 'width="360"' not in readme.split("</a>", 1)[0]:
@@ -548,7 +548,7 @@ def main() -> int:
         expected_tool_identity_line = (
             "- Tool identity: Pillow 11.3.0 and imageio-ffmpeg 0.6.0; the approved macOS arm64 executable reports FFmpeg 7.1, "
             "`--enable-gpl --enable-libx264`, and SHA-256 `6d175a4743ca50256e89a8cdd731100f9cee33bd79aeea46894d209410dc6617`. "
-            "CI installs the same pinned package versions and requires FFmpeg 7.1 before validation. Source and license boundaries are in "
+            "CI installs the same pinned package versions and requires the package's Linux x86_64 FFmpeg 7.0.2-static before validation. Source and license boundaries are in "
             "[`copyright-and-provenance.md`](copyright-and-provenance.md)."
         )
         tool_identity_lines = [line for line in animation_record.splitlines() if line.startswith("- Tool identity:")]
