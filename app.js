@@ -26,6 +26,7 @@
   const diffusionDelay = timing.inkDelays.diffusionFrames / totalFrames;
   const dryingDelay = timing.inkDelays.dryingFrames / totalFrames;
   const pathLength = path.getTotalLength();
+  const inkTone = timing.inkTone;
   let frameId = 0;
   let loopTimer = 0;
   let activePose = -1;
@@ -88,7 +89,10 @@
 
     path.style.strokeDasharray = `${activeLength} ${pathLength + activeSpan}`;
     path.style.strokeDashoffset = String(-activeStart);
-    path.style.opacity = String(0.78 * (1 - clamp((progress - timing.breaks.at(-1)) / (1 - timing.breaks.at(-1)), 0, 1)));
+    path.style.stroke = inkTone.freshCoreColor;
+    path.style.opacity = String(inkTone.freshCoreOpacity * (1 - clamp((progress - timing.breaks.at(-1)) / (1 - timing.breaks.at(-1)), 0, 1)));
+    diffusion.style.stroke = inkTone.wetFringeColor;
+    diffusion.style.opacity = String(inkTone.wetFringeOpacity);
     diffusion.style.strokeDashoffset = String(pathLength * (1 - ease(bloomProgress)));
     dryMask.style.strokeDashoffset = String(pathLength * (1 - ease(dryProgress)));
     placeBrush(stroke, poseIndex);
@@ -128,7 +132,10 @@
     });
     path.style.strokeDasharray = `0.01 ${pathLength}`;
     path.style.strokeDashoffset = "0";
-    path.style.opacity = "0.78";
+    path.style.stroke = inkTone.freshCoreColor;
+    path.style.opacity = String(inkTone.freshCoreOpacity);
+    diffusion.style.stroke = inkTone.wetFringeColor;
+    diffusion.style.opacity = String(inkTone.wetFringeOpacity);
     reveals.forEach((reveal) => reveal.classList.remove("is-visible"));
     journeyFrame.dataset.motionState = "reset";
     journeyFrame.getBoundingClientRect();

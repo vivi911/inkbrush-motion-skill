@@ -28,7 +28,7 @@ def write_png(path: Path, width: int, height: int, rgba: tuple[int, int, int, in
 
 def base_plan() -> dict:
     return {
-        "version": "1.0", "status": "STATIC_REVIEW_READY", "title": "Human AI",
+        "version": "2.0", "status": "STATIC_REVIEW_READY", "title": "Human AI",
         "summary": "A three-beat journey", "aspectRatio": "9:16", "width": 720, "height": 1280,
         "fps": 30, "previewSeconds": 9, "finalHoldFrames": 33, "safeMarginPercent": 8,
         "styleRecipe": "shan-shui-scroll", "textMode": "code-native", "brushMode": "none", "staticArtifact": "board.svg",
@@ -65,6 +65,8 @@ def main() -> None:
         write_svg(root / "board.svg")
         plan["staticArtifactSha256"] = sha256_static_artifact(root / "board.svg")
         expect("valid static evidence", validate(plan, root) == [])
+        bad = copy.deepcopy(plan); bad["version"] = "1.0"
+        expect("reject legacy v1 storyboard without explicit migration", any("version must be 2.0" in error for error in validate(bad, root)))
         for too_short in (30, 32):
             bad = copy.deepcopy(plan); bad["finalHoldFrames"] = too_short
             expect(f"reject {too_short}-frame final hold", any("at least 33" in error for error in validate(bad, root)))
@@ -91,7 +93,8 @@ def main() -> None:
             "cropBoundary": "fabric-only", "sleeveStyle": "gray-linen",
             "actions": ["hover", "touch", "press", "travel", "turn", "lift", "return", "finish", "leave"],
             "inkPhysics": {
-                "paper": "xuan", "freshCoreOpacity": 0.78, "wetEdgeOpacity": 0.2,
+                "paper": "xuan", "freshCoreColor": "#2b2722", "freshCoreOpacity": 0.92,
+                "wetEdgeColor": "#50554d", "wetEdgeOpacity": 0.22,
                 "dryTrailOpacity": 0.42, "dryBrushGapPercent": 20,
                 "dryingDelayFrames": 12, "diffusionDelayFrames": 5,
             },
@@ -103,6 +106,10 @@ def main() -> None:
         expect("reject bare-skin frame crop", any("cropBoundary" in error for error in validate(bad, root)))
         bad = copy.deepcopy(real_hand); bad["realHandProfile"]["inkPhysics"]["dryTrailOpacity"] = 0.9
         expect("reject opaque undried trail profile", any("dryTrailOpacity" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(real_hand); bad["realHandProfile"]["inkPhysics"]["freshCoreColor"] = "black"
+        expect("reject unbound fresh-core color", any("freshCoreColor" in error for error in validate(bad, root)))
+        bad = copy.deepcopy(real_hand); bad["realHandProfile"]["inkPhysics"]["wetEdgeOpacity"] = 0.18
+        expect("reject valid-range ink tone drift", any("shared motion timing contract" in error for error in validate(bad, root)))
         bad = copy.deepcopy(plan); del bad["beats"][0]["copy"]
         expect("reject missing beat copy", any("copy must be non-empty" in error for error in validate(bad, root)))
         bad = copy.deepcopy(plan); bad["staticArtifact"] = "missing.svg"

@@ -15,13 +15,15 @@ Read this contract only when a visible hand appears. It turns the fragile parts 
 
 ## Xuan-paper ink model
 
+Storyboard contract v2.0 adds required `freshCoreColor` and `wetEdgeColor` fields and raises the allowed fresh-core opacity to 0.88–0.94. To migrate a v1.0 real-hand plan, add both lowercase hex colors, set the fresh core inside the new range, and update `version` to `2.0`; do not relabel an unchanged v1.0 plan.
+
 Model one stroke as three local layers:
 
-1. `fresh core`: darkest only at the touching brush tip, 70–85% opacity, default 6 native SVG pixels and never longer than 18 pixels behind the bristle anchor;
-2. `wet fringe`: 1.6–2.2× the core width, 15–25% opacity, delayed by 2–6 frames; and
+1. `fresh core`: warm ink black near `#2b2722`, darkest only at the touching brush tip, 88–94% opacity, default 6 native SVG pixels and never longer than 18 pixels behind the bristle anchor;
+2. `wet fringe`: muted charcoal near `#50554d`, 1.6–2.2× the core width, 15–25% opacity, delayed by 2–6 frames; and
 3. `dry trail`: warm charcoal, 35–50% opacity, with 15–35% paper-fibre gaps.
 
-Begin visible drying 12–24 frames after the tip passes. Do not apply one global blur or one uniform opacity to the full route. The oldest trail must be lighter and more broken than the newest contact area. The fresh core may move with the bristles; wet fringe and dry trail pixels must remain fixed on the paper. A rigid black tail translating with the hand is an automatic failure.
+Begin visible drying 12–24 frames after the tip passes. Do not apply one global blur or one uniform opacity to the full route. The oldest trail must be lighter and more broken than the newest contact area. The fresh core may move with the bristles; wet fringe and dry trail pixels must remain fixed on the paper. Never darken the whole route to compensate for a pale contact point. A rigid black tail translating with the hand is an automatic failure.
 
 ## Nine-action proof
 

@@ -7,7 +7,7 @@
   "required": ["version", "status", "title", "summary", "aspectRatio", "width", "height", "fps", "previewSeconds", "finalHoldFrames", "safeMarginPercent", "styleRecipe", "textMode", "brushMode", "beats"],
   "properties": {
     "$schema": {"type": "string"},
-    "version": {"const": "1.0"},
+    "version": {"const": "2.0"},
     "status": {"enum": ["PLAN_ONLY", "STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED", "HOLD"]},
     "title": {"type": "string", "minLength": 1},
     "summary": {"type": "string", "minLength": 1},
@@ -35,10 +35,12 @@
         "inkPhysics": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["paper", "freshCoreOpacity", "wetEdgeOpacity", "dryTrailOpacity", "dryBrushGapPercent", "dryingDelayFrames", "diffusionDelayFrames"],
+          "required": ["paper", "freshCoreColor", "freshCoreOpacity", "wetEdgeColor", "wetEdgeOpacity", "dryTrailOpacity", "dryBrushGapPercent", "dryingDelayFrames", "diffusionDelayFrames"],
           "properties": {
             "paper": {"const": "xuan"},
-            "freshCoreOpacity": {"type": "number", "minimum": 0.7, "maximum": 0.85},
+            "freshCoreColor": {"type": "string", "pattern": "^#[0-9a-f]{6}$"},
+            "freshCoreOpacity": {"type": "number", "minimum": 0.88, "maximum": 0.94},
+            "wetEdgeColor": {"type": "string", "pattern": "^#[0-9a-f]{6}$"},
             "wetEdgeOpacity": {"type": "number", "minimum": 0.15, "maximum": 0.25},
             "dryTrailOpacity": {"type": "number", "minimum": 0.35, "maximum": 0.5},
             "dryBrushGapPercent": {"type": "number", "minimum": 15, "maximum": 35},

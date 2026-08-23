@@ -5,14 +5,16 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from pathlib import Path
 
 
 PREFIX = "window.INKBRUSH_TIMING = "
 TOP_LEVEL_FIELDS = {
     "durationMs", "fps", "breaks", "strokeSegments", "actionProgress",
-    "knowledgeThresholds", "inkDelays", "inkContact", "gif", "deadlines",
+    "knowledgeThresholds", "inkDelays", "inkContact", "inkTone", "gif", "deadlines",
 }
+HEX_COLOR = re.compile(r"^#[0-9a-f]{6}$")
 
 
 def load_motion_timing(path: Path) -> dict:
@@ -137,6 +139,22 @@ def validate_motion_timing(timing: dict) -> list[str]:
         active_core = ink_contact["activeCoreMaxPixels"]
         if not _number(active_core) or not 4 <= active_core <= 18:
             errors.append("active ink core must stay within 4-18 pixels at the brush tip")
+
+    ink_tone = timing.get("inkTone")
+    tone_fields = {"freshCoreColor", "freshCoreOpacity", "wetFringeColor", "wetFringeOpacity"}
+    if not isinstance(ink_tone, dict) or set(ink_tone) != tone_fields:
+        errors.append("motion timing ink tone fields are invalid")
+    else:
+        for field in ("freshCoreColor", "wetFringeColor"):
+            value = ink_tone[field]
+            if not isinstance(value, str) or HEX_COLOR.fullmatch(value) is None:
+                errors.append(f"motion timing {field} must be a lowercase six-digit hex color")
+        fresh_opacity = ink_tone["freshCoreOpacity"]
+        if not _number(fresh_opacity) or not 0.88 <= fresh_opacity <= 0.94:
+            errors.append("motion timing fresh core opacity must stay within 0.88-0.94")
+        fringe_opacity = ink_tone["wetFringeOpacity"]
+        if not _number(fringe_opacity) or not 0.15 <= fringe_opacity <= 0.25:
+            errors.append("motion timing wet fringe opacity must stay within 0.15-0.25")
 
     gif = timing.get("gif")
     if not isinstance(gif, dict) or set(gif) != {"width", "height", "timelineSamples", "activeLastIndex", "frameDurationMs"}:

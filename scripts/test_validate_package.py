@@ -164,6 +164,38 @@ def main() -> None:
         result = run_validator(timing_case)
         expect("reject a long black core that travels with the brush", result.returncode == 1 and "active ink core" in result.stdout)
 
+        timing_case = clone_candidate(parent, "seven-pixel-demo-core")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["inkContact"]["activeCoreMaxPixels"] = 7
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject demo core drift from exact six pixels", result.returncode == 1 and "exactly 6 pixels" in result.stdout)
+
+        timing_case = clone_candidate(parent, "pale-fresh-core")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["inkTone"]["freshCoreOpacity"] = 0.7
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject a pale fresh core", result.returncode == 1 and "fresh core opacity" in result.stdout)
+
+        timing_case = clone_candidate(parent, "invalid-fresh-core-color")
+        timing_path = timing_case / "motion-timing.js"
+        timing = load_motion_timing(timing_path)
+        timing["inkTone"]["freshCoreColor"] = "black"
+        write_timing(timing_path, timing)
+        result = run_validator(timing_case)
+        expect("reject an unbound fresh-core color", result.returncode == 1 and "freshCoreColor" in result.stdout)
+
+        tone_case = clone_candidate(parent, "drifted-plan-ink-tone")
+        plan_path = tone_case / "assets/demo-plan.json"
+        plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        plan["realHandProfile"]["inkPhysics"]["wetEdgeOpacity"] = 0.18
+        plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        result = run_validator(tone_case)
+        expect("reject demo-plan ink tone drift", result.returncode == 1 and "ink tone drifts" in result.stdout)
+
         ink_delay_case = clone_candidate(parent, "drifted-ink-delay")
         plan_path = ink_delay_case / "assets/demo-plan.json"
         plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -190,7 +222,7 @@ def main() -> None:
 
         source_record_case = clone_candidate(parent, "misbound-readme-capture-source")
         source_record_path = source_record_case / "references/readme-animation-record.md"
-        approved_app_hash = "71804469abd11aa52b45e7b8cc391b426b1f63f7f09ca2ee97ffb3fa6f32d1cf"
+        approved_app_hash = "d759f5657437eee95ced784ac72ba365bce7d5406d17ac4a49531cd6c5fc3471"
         source_record_text = source_record_path.read_text(encoding="utf-8").replace(
             f"`app.js` SHA-256 `{approved_app_hash}`",
             f"`app.js` SHA-256 `{'0' * 64}`",
@@ -200,6 +232,12 @@ def main() -> None:
         source_record_path.write_text(source_record_text, encoding="utf-8")
         result = run_validator(source_record_case)
         expect("reject capture-source hash hidden outside its provenance field", result.returncode == 1 and "exact capture source identity line" in result.stdout)
+
+        behavior_record_case = clone_candidate(parent, "drifted-ink-behavior-record")
+        behavior_record_path = behavior_record_case / "references/readme-animation-record.md"
+        behavior_record_path.write_text(behavior_record_path.read_text(encoding="utf-8").replace("`#2b2722`, 92% opacity", "`#2c2722`, 92% opacity", 1), encoding="utf-8")
+        result = run_validator(behavior_record_case)
+        expect("reject drifted ink behavior record", result.returncode == 1 and "exact ink behavior line" in result.stdout)
 
         source_comment_case = clone_candidate(parent, "comment-hidden-capture-source")
         source_comment_path = source_comment_case / "references/readme-animation-record.md"
@@ -228,6 +266,21 @@ def main() -> None:
         schema_path.write_text(schema_text, encoding="utf-8")
         result = run_validator(schema_case)
         expect("reject schema field drift", result.returncode == 1 and "schema top-level fields drift" in result.stdout)
+
+        schema_version_case = clone_candidate(parent, "schema-version-drift")
+        schema_path = schema_version_case / "references/storyboard.schema.json"
+        schema_path.write_text(schema_path.read_text(encoding="utf-8").replace('"version": {"const": "2.0"}', '"version": {"const": "1.0"}', 1), encoding="utf-8")
+        result = run_validator(schema_version_case)
+        expect("reject storyboard schema version drift", result.returncode == 1 and "storyboard version drifts" in result.stdout)
+
+        schema_range_case = clone_candidate(parent, "schema-fresh-core-range-drift")
+        schema_path = schema_range_case / "references/storyboard.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        ink_properties = schema["properties"]["realHandProfile"]["properties"]["inkPhysics"]["properties"]
+        ink_properties["freshCoreOpacity"]["minimum"] = 0.7
+        schema_path.write_text(json.dumps(schema, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        result = run_validator(schema_range_case)
+        expect("reject fresh-core schema range drift", result.returncode == 1 and "freshCoreOpacity range drifts" in result.stdout)
 
         schema_beat_case = clone_candidate(parent, "schema-required-beat-drift")
         schema_path = schema_beat_case / "references/storyboard.schema.json"
@@ -396,11 +449,11 @@ def main() -> None:
         record_path = record_case / "references/readme-animation-record.md"
         record_text = record_path.read_text(encoding="utf-8")
         record_text = record_text.replace(
-            "`a3160d3d094dc5473fe73c13d67e067300c5d08641946045424524f9f7ad7929` |",
+            "`5a4a50381f3f21f5431affbd913cefd78813e9a216f9187302bbc37a9ba11a6f` |",
             f"`{'0' * 64}` |",
             1,
         )
-        record_text += "\n<!-- a3160d3d094dc5473fe73c13d67e067300c5d08641946045424524f9f7ad7929 -->\n"
+        record_text += "\n<!-- 5a4a50381f3f21f5431affbd913cefd78813e9a216f9187302bbc37a9ba11a6f -->\n"
         record_path.write_text(record_text, encoding="utf-8")
         result = run_validator(record_case)
         expect("reject GIF hash hidden outside provenance table row", result.returncode == 1 and "exact approved GIF table row" in result.stdout)

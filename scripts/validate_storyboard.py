@@ -16,6 +16,7 @@ from motion_timing import load_motion_timing, minimum_final_hold_frames
 
 
 STATES = {"PLAN_ONLY", "STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED", "HOLD"}
+STORYBOARD_VERSION = "2.0"
 STATIC_STATES = {"STATIC_REVIEW_READY", "MOTION_PROOF_READY", "RENDERER_REQUIRED"}
 STYLE_RECIPES = {"shan-shui-scroll", "minimal-calligraphy", "seal-diagram"}
 BRUSH_MODES = {"none", "brush-only", "real-hand-nine-action"}
@@ -30,8 +31,15 @@ TOP_LEVEL_FIELDS = REQUIRED_FIELDS | {"$schema", "realHandProfile", "staticArtif
 BEAT_FIELDS = {"id", "label", "copy", "zhLabel", "startSecond", "endSecond"}
 REAL_HAND_FIELDS = {"profile", "brushAngleRange", "armEntry", "cropBoundary", "sleeveStyle", "actions", "inkPhysics"}
 INK_PHYSICS_FIELDS = {
-    "paper", "freshCoreOpacity", "wetEdgeOpacity", "dryTrailOpacity", "dryBrushGapPercent",
+    "paper", "freshCoreColor", "freshCoreOpacity", "wetEdgeColor", "wetEdgeOpacity", "dryTrailOpacity", "dryBrushGapPercent",
     "dryingDelayFrames", "diffusionDelayFrames",
+}
+INK_COLOR_PATTERN = r"^#[0-9a-f]{6}$"
+INK_PHYSICS_RANGES = {
+    "freshCoreOpacity": (0.88, 0.94),
+    "wetEdgeOpacity": (0.15, 0.25),
+    "dryTrailOpacity": (0.35, 0.5),
+    "dryBrushGapPercent": (15, 35),
 }
 MOTION_FIELDS = {
     "rendererLane", "rendererOwner", "reviewer", "staticApprovalSha256", "frames",
@@ -68,6 +76,7 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
     if not isinstance(plan, dict):
         return ["storyboard plan must be a JSON object"]
     errors: list[str] = []
+    timing = None
     try:
         timing = load_motion_timing(Path(__file__).resolve().parents[1] / "motion-timing.js")
         min_final_hold_frames = minimum_final_hold_frames(timing)
@@ -82,7 +91,7 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
         errors.append(f"unknown top-level fields: {', '.join(unknown)}")
 
     status = plan.get("status")
-    if plan.get("version") != "1.0": errors.append("version must be 1.0")
+    if plan.get("version") != STORYBOARD_VERSION: errors.append(f"version must be {STORYBOARD_VERSION}")
     if status not in STATES: errors.append(f"status must be one of {sorted(STATES)}")
     if not isinstance(plan.get("title"), str) or not plan.get("title", "").strip(): errors.append("title must be non-empty")
     if not isinstance(plan.get("summary"), str) or not plan.get("summary", "").strip(): errors.append("summary must be non-empty")
@@ -130,11 +139,11 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
                 if unknown_ink: errors.append(f"realHandProfile.inkPhysics has unknown fields: {', '.join(unknown_ink)}")
                 if missing_ink: errors.append(f"realHandProfile.inkPhysics is missing fields: {', '.join(missing_ink)}")
                 if ink.get("paper") != "xuan": errors.append("inkPhysics.paper must be xuan")
-                ranges = {
-                    "freshCoreOpacity": (0.7, 0.85), "wetEdgeOpacity": (0.15, 0.25),
-                    "dryTrailOpacity": (0.35, 0.5), "dryBrushGapPercent": (15, 35),
-                }
-                for field, (minimum, maximum) in ranges.items():
+                for field in ("freshCoreColor", "wetEdgeColor"):
+                    value = ink.get(field)
+                    if not isinstance(value, str) or re.fullmatch(INK_COLOR_PATTERN, value) is None:
+                        errors.append(f"inkPhysics.{field} must be a lowercase six-digit hex color")
+                for field, (minimum, maximum) in INK_PHYSICS_RANGES.items():
                     value = ink.get(field)
                     if not _finite_number(value) or not minimum <= value <= maximum:
                         errors.append(f"inkPhysics.{field} must be between {minimum:g} and {maximum:g}")
@@ -142,6 +151,18 @@ def validate(plan: dict[str, Any], base_dir: Path | None) -> list[str]:
                     value = ink.get(field)
                     if not isinstance(value, int) or isinstance(value, bool) or not minimum <= value <= maximum:
                         errors.append(f"inkPhysics.{field} must be an integer between {minimum} and {maximum}")
+                if timing is not None:
+                    expected_ink = {
+                        "freshCoreColor": timing["inkTone"]["freshCoreColor"],
+                        "freshCoreOpacity": timing["inkTone"]["freshCoreOpacity"],
+                        "wetEdgeColor": timing["inkTone"]["wetFringeColor"],
+                        "wetEdgeOpacity": timing["inkTone"]["wetFringeOpacity"],
+                        "dryingDelayFrames": timing["inkDelays"]["dryingFrames"],
+                        "diffusionDelayFrames": timing["inkDelays"]["diffusionFrames"],
+                    }
+                    for field, expected in expected_ink.items():
+                        if ink.get(field) != expected:
+                            errors.append(f"inkPhysics.{field} drifts from the shared motion timing contract")
     elif real_hand is not None:
         errors.append("realHandProfile is only allowed for real-hand-nine-action")
     if status == "PLAN_ONLY" and ({"staticArtifact", "staticArtifactSha256"} & plan.keys()): errors.append("PLAN_ONLY must not claim a static artifact or hash")

@@ -21,12 +21,15 @@ from validate_storyboard import (
     BEAT_FIELDS,
     BRUSH_MODES,
     FRAME_FIELDS,
+    INK_COLOR_PATTERN,
     INK_PHYSICS_FIELDS,
+    INK_PHYSICS_RANGES,
     MOTION_FIELDS,
     NINE_ACTIONS,
     REAL_HAND_FIELDS,
     RENDERER_LANES,
     REQUIRED_FIELDS,
+    STORYBOARD_VERSION,
     STATES,
     STYLE_RECIPES,
     TOP_LEVEL_FIELDS,
@@ -36,18 +39,18 @@ from validate_storyboard import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-README_GIF_SHA256 = "a3160d3d094dc5473fe73c13d67e067300c5d08641946045424524f9f7ad7929"
+README_GIF_SHA256 = "5a4a50381f3f21f5431affbd913cefd78813e9a216f9187302bbc37a9ba11a6f"
 README_SOURCE_SHA256 = {
-    "index.html": "0e8b475da0708e7c136791dc461ffc7844e1d4745a12884e95f929af261b740a",
-    "styles.css": "efdcff1009fde42b6670791333082ad808434e2c11a4b99ab308455aa9e668d7",
-    "motion-timing.js": "b2db8b094527aaacdc3febf9f004b2ffc23f3b72ff3f8462f1e76f6b441cc6aa",
-    "app.js": "71804469abd11aa52b45e7b8cc391b426b1f63f7f09ca2ee97ffb3fa6f32d1cf",
-    "scripts/motion_timing.py": "6417a4b90b29dff1ab584e6c0930fde04a93a0472526a9451f9d915541154700",
-    "scripts/render_readme_gif.py": "91d94c2a0b38547a6326da2a7f7a22ab40f0cdd250b68cb2dbae030f7a89b5bd",
+    "index.html": "66678a1c5dbcf994d03247ad6396bd9f4ce5c66564dfd376e8003cb1d858475b",
+    "styles.css": "16ebbcae1feb1e8c27183177f4c0526654ffa8d4a983f85a8b69a7de503f0dda",
+    "motion-timing.js": "44ee0405a0bfd9d3c01b29f1fee4cc1d1ac387c1b3169af38ac3c17b24ba8389",
+    "app.js": "d759f5657437eee95ced784ac72ba365bce7d5406d17ac4a49531cd6c5fc3471",
+    "scripts/motion_timing.py": "708fb3198e6a01ceb529efdf21a333d7f2f2da5ccf5f8aeb5549db1eb32c4414",
+    "scripts/render_readme_gif.py": "5a20b0d23a8454c02172334acdc3ca13a9950815d205300ca240605ebfa1dad1",
 }
 HERO_EVIDENCE_SHA256 = {
     "assets/evidence/hero-start.png": "135d924707022680d773158d93e383aa1681a58fdcfeec5fb62694b8aacf28fb",
-    "assets/evidence/hero-middle.png": "4f4d2736a61e16d3e83664af77e47a8c61b20d3653c67c8c4a5166fe969e32e3",
+    "assets/evidence/hero-middle.png": "fa0fd80155640f563c157c8f8564b525d43605c306cba368cfb2c7dbfef5f808",
     "assets/evidence/hero-end.png": "d0468aa84929c405a7c9c410b968b863a4211ac33fadb991eb3b9bcb982a3332",
 }
 BRUSH_ASSET_SHA256 = {
@@ -108,7 +111,7 @@ V5_BUILDER_SHA256 = "a47e8170ec39a9a0022d226472c22c176269843bebfd30dada89f34c6ca
 V5_MANIFEST_SHA256 = "7c15e08231a65c20b1c468e8982b30617b4b376e1f39e9a498814011d5211d98"
 CLEAN_PLATE_SHA256 = "37e16d24d69537bcdbb88dcee8307b78ae77a02c05fec79d82bc77a8a5f2e658"
 REAL_BRUSH_REFERENCE_SHA256 = "49153b50a9a56539430099af1aa6475957b9bc7b9630075bdebc9927fcb6f85d"
-NINE_ACTION_PROOF_SHA256 = "b9e6d42f916c3bba43ac44c5ec76dc1e1daccb7f065ed002b42854a641e9dfe7"
+NINE_ACTION_PROOF_SHA256 = "675f845871e860d03fc1aa03098fd3744f94ecac6d58ad5cc49235eb49ca20e4"
 REQUIRED = [
     ".gitignore", ".nojekyll", ".github/workflows/validate.yml",
     "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md",
@@ -123,6 +126,7 @@ REQUIRED = [
     "scripts/build_calligraphy_brush_v5.py", "scripts/generate_social_preview.py", "scripts/motion_timing.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/test_build_calligraphy_brush_v5.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
 ]
 FORBIDDEN_PUBLIC_BUNDLES = [".agents", "skills-lock.json"]
+DEMO_ACTIVE_CORE_PIXELS = 6
 
 
 def _external_or_active_url(value: str) -> bool:
@@ -278,6 +282,8 @@ def main() -> int:
     try:
         timing = load_motion_timing(ROOT / "motion-timing.js")
         errors.extend(validate_motion_timing(timing))
+        if timing["inkContact"]["activeCoreMaxPixels"] != DEMO_ACTIVE_CORE_PIXELS:
+            errors.append(f"public demo active ink core must be exactly {DEMO_ACTIVE_CORE_PIXELS} pixels")
     except (OSError, ValueError) as exc:
         errors.append(str(exc))
         timing = None
@@ -299,6 +305,7 @@ def main() -> int:
         if schema.get("title") != "InkBrush Motion Storyboard": errors.append("storyboard schema title is incorrect")
         schema_properties = schema.get("properties", {})
         if schema.get("additionalProperties") is not False or set(schema_properties) != TOP_LEVEL_FIELDS: errors.append("schema top-level fields drift from the Python validator")
+        if schema_properties.get("version", {}).get("const") != STORYBOARD_VERSION: errors.append("schema storyboard version drifts from the Python validator")
         if set(schema.get("required", [])) != REQUIRED_FIELDS: errors.append("schema required fields drift from the Python validator")
         if timing is not None and schema_properties.get("finalHoldFrames", {}).get("minimum") != minimum_final_hold_frames(timing): errors.append("schema final hold minimum drifts from the motion timing contract")
         if set(schema_properties.get("status", {}).get("enum", [])) != STATES: errors.append("schema status enum drifts from the Python validator")
@@ -311,6 +318,14 @@ def main() -> int:
         ink_schema = hand_schema.get("properties", {}).get("inkPhysics", {})
         if ink_schema.get("additionalProperties") is not False or set(ink_schema.get("properties", {})) != INK_PHYSICS_FIELDS: errors.append("schema inkPhysics fields drift from the Python validator")
         if set(ink_schema.get("required", [])) != INK_PHYSICS_FIELDS: errors.append("schema required inkPhysics fields drift from the Python validator")
+        ink_properties = ink_schema.get("properties", {})
+        for color_field in ("freshCoreColor", "wetEdgeColor"):
+            if ink_properties.get(color_field, {}).get("pattern") != INK_COLOR_PATTERN:
+                errors.append(f"schema {color_field} pattern drifts from the Python validator")
+        for field, (minimum, maximum) in INK_PHYSICS_RANGES.items():
+            field_schema = ink_properties.get(field, {})
+            if field_schema.get("minimum") != minimum or field_schema.get("maximum") != maximum:
+                errors.append(f"schema {field} range drifts from the Python validator")
         beat_schema = schema_properties.get("beats", {}).get("items", {})
         if beat_schema.get("additionalProperties") is not False or set(beat_schema.get("properties", {})) != BEAT_FIELDS: errors.append("schema beat fields drift from the Python validator")
         if set(beat_schema.get("required", [])) != {"id", "label", "copy", "startSecond", "endSecond"}: errors.append("schema required beat fields drift from the Python validator")
@@ -339,6 +354,13 @@ def main() -> int:
             or plan_ink.get("dryingDelayFrames") != timing["inkDelays"]["dryingFrames"]
         ):
             errors.append("demo-plan ink delays drift from the shared motion timing contract")
+        if timing is not None and (
+            plan_ink.get("freshCoreColor") != timing["inkTone"]["freshCoreColor"]
+            or plan_ink.get("freshCoreOpacity") != timing["inkTone"]["freshCoreOpacity"]
+            or plan_ink.get("wetEdgeColor") != timing["inkTone"]["wetFringeColor"]
+            or plan_ink.get("wetEdgeOpacity") != timing["inkTone"]["wetFringeOpacity"]
+        ):
+            errors.append("demo-plan ink tone drifts from the shared motion timing contract")
         for beat in plan.get("beats", []):
             for field in ("label", "copy"):
                 exact_text = beat.get(field)
@@ -461,6 +483,19 @@ def main() -> int:
         source_lines = [line for line in animation_record.splitlines() if line.startswith("- Source code identity:")]
         if source_lines != [expected_source_line]:
             errors.append("readme animation record must contain one exact capture source identity line")
+        fresh_percent = round(timing["inkTone"]["freshCoreOpacity"] * 100)
+        wet_percent = round(timing["inkTone"]["wetFringeOpacity"] * 100)
+        expected_behavior_line = (
+            "- Brush and ink behavior: each active v5 sprite preserves a complete photographic-looking ferrule and wet tuft from the disclosed source sheet; "
+            "PRESS applies the recorded raster-only compression. "
+            f"The moving fresh core is a short warm ink black (`{timing['inkTone']['freshCoreColor']}`, {fresh_percent}% opacity) capped at {DEMO_ACTIVE_CORE_PIXELS} native pixels behind the tip; "
+            f"the muted wet fringe (`{timing['inkTone']['wetFringeColor']}`, {wet_percent}% opacity) diffuses after {timing['inkDelays']['diffusionFrames']} frames; "
+            f"the unchanged older trail stays on the paper and dries after {timing['inkDelays']['dryingFrames']} frames into a pale, irregular fibre mark. "
+            "No fixed wet circle follows the hand, and the full route is never darkened to compensate for the contact point."
+        )
+        behavior_lines = [line for line in animation_record.splitlines() if line.startswith("- Brush and ink behavior:")]
+        if behavior_lines != [expected_behavior_line]:
+            errors.append("readme animation record must contain one exact ink behavior line")
         gif_rows = [line for line in animation_record.splitlines() if line.startswith("| `assets/inkbrush-motion-demo.gif` |")]
         expected_gif_row = [
             "`assets/inkbrush-motion-demo.gif`", "360×640", "60", "10.22 seconds", f"`{README_GIF_SHA256}`",

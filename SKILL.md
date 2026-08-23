@@ -17,6 +17,7 @@ Turn knowledge into a quiet visual journey built from brush, ink, paper, and del
 - When a visible hand is requested, use nine readable calligraphy actions in order: hover, touch, press, travel, turn, lift pressure, return tip, finish, and leave paper. A floating brush or one rigid sprite does not satisfy this contract.
 - Keep a photographic-looking hand, shaft, ferrule, and complete wet tuft in each visible-hand sprite. Never repair a photographed brush by attaching a code-drawn polygon nib; disclose the source sheet, build manifest, and output hashes.
 - Default real-hand work to the `gray-linen-xuan` profile: an upright brush, a continuous sleeve entering from the right or lower-right, and ink that visibly dries into the paper instead of staying as a solid black ribbon.
+- Keep the touching core short and warm-black (`#2b2722`, default 92% opacity), with a restrained wet fringe (default 22%). Never darken the fixed dry trail to compensate for a pale contact point.
 - For a public repository showcase, prove the result above the fold: render the README loop at no less than `360×640`, show the first visible ink by `0.8 s`, reveal the first knowledge beat by `2.5 s`, and place labeled start / middle / end evidence directly below the preview.
 
 ## Workflow

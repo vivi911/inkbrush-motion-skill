@@ -25,6 +25,11 @@ ACTIONS = ["HOVER", "TOUCH", "PRESS", "TRAVEL", "TURN", "LIFT", "RETURN", "FINIS
 BREAKS = TIMING["breaks"]
 ACTION_PROGRESS = TIMING["actionProgress"]
 KNOWLEDGE_THRESHOLDS = TIMING["knowledgeThresholds"]
+INK_TONE = TIMING["inkTone"]
+
+
+def hex_rgb(value: str) -> tuple[int, int, int]:
+    return tuple(int(value[index:index + 2], 16) for index in (1, 3, 5))
 
 
 def font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -191,7 +196,9 @@ def render_frame(background: Image.Image, sprites: list[Image.Image], progress: 
     diffusion = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     diffusion_points = points_between(0, ease(diffusion_progress))
     if len(diffusion_points) >= 2:
-        ImageDraw.Draw(diffusion).line(diffusion_points, fill=(86, 96, 87, 51), width=36, joint="curve")
+        wet_rgb = hex_rgb(INK_TONE["wetFringeColor"])
+        wet_alpha = round(255 * INK_TONE["wetFringeOpacity"])
+        ImageDraw.Draw(diffusion).line(diffusion_points, fill=(*wet_rgb, wet_alpha), width=36, joint="curve")
         diffusion = diffusion.filter(ImageFilter.GaussianBlur(5))
         frame = Image.alpha_composite(frame, diffusion)
 
@@ -206,12 +213,13 @@ def render_frame(background: Image.Image, sprites: list[Image.Image], progress: 
     active_start = max(0.0, stroke - active_span)
     active = points_between(active_start, stroke)
     if len(active) >= 2 and stroke > 0:
-        opacity = 198 if progress < BREAKS[-1] else round(198 * max(0, 1 - (progress - BREAKS[-1]) / (1 - BREAKS[-1])))
+        full_opacity = round(255 * INK_TONE["freshCoreOpacity"])
+        opacity = full_opacity if progress < BREAKS[-1] else round(full_opacity * max(0, 1 - (progress - BREAKS[-1]) / (1 - BREAKS[-1])))
         pose = pose_index(progress)
         widths = [6, 7, 15, 12, 14, 9, 10, 7, 0]
         if opacity and widths[pose]:
             active_layer = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-            ImageDraw.Draw(active_layer).line(active, fill=(45, 53, 47, opacity), width=widths[pose], joint="curve")
+            ImageDraw.Draw(active_layer).line(active, fill=(*hex_rgb(INK_TONE["freshCoreColor"]), opacity), width=widths[pose], joint="curve")
             frame = Image.alpha_composite(frame, active_layer)
 
     index = pose_index(progress)
