@@ -8,7 +8,13 @@
   </a>
 </div>
 
-[公開後觀看 HTML 動畫示範](https://vivi911.github.io/inkbrush-motion-skill/)｜[英文主 README](README.md)｜[Skill 規格](SKILL.md)
+[觀看 HTML 動畫示範](https://vivi911.github.io/inkbrush-motion-skill/)｜[觀看 12 秒 1080×1920 MP4](assets/inkbrush-ai-agent-12s.mp4)｜[英文主 README](README.md)｜[Skill 規格](SKILL.md)
+
+<div align="center">
+  <a href="assets/inkbrush-ai-agent-12s.mp4">
+    <img src="assets/inkbrush-ai-agent-12s-contact-sheet.png" alt="InkBrush Motion 12 秒範例的懸筆、運筆與完成畫面" width="720">
+  </a>
+</div>
 
 ## 核心規則
 

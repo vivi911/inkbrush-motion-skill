@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import math
+import os
 import re
 import struct
+import subprocess
 import unicodedata
 import zlib
 from pathlib import Path
@@ -23,6 +26,117 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def ffmpeg_executable() -> str:
+    """Return the pinned maintainer FFmpeg 7.1 binary or fail closed."""
+    override = os.environ.get("INKBRUSH_FFMPEG", "").strip()
+    if override:
+        executable = Path(override).expanduser()
+    else:
+        try:
+            imageio_ffmpeg = importlib.import_module("imageio_ffmpeg")
+        except ImportError as exc:
+            raise ValueError(
+                "imageio-ffmpeg 0.6.0 with FFmpeg 7.1 is required for MP4 validation"
+            ) from exc
+        if getattr(imageio_ffmpeg, "__version__", None) != "0.6.0":
+            raise ValueError("MP4 validation requires imageio-ffmpeg 0.6.0")
+        executable = Path(imageio_ffmpeg.get_ffmpeg_exe())
+    if not executable.is_file() or not os.access(executable, os.X_OK):
+        raise ValueError(f"FFmpeg executable is missing or not executable: {executable}")
+    try:
+        version = subprocess.run(
+            [str(executable), "-version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValueError(f"cannot execute FFmpeg: {exc}") from exc
+    if version.returncode != 0 or not version.stdout.startswith("ffmpeg version 7.1 "):
+        raise ValueError("MP4 validation requires the pinned FFmpeg 7.1 tool identity")
+    return str(executable)
+
+
+def mp4_metadata(path: Path) -> tuple[str, int, int, float, int, float, int, int]:
+    """Fully decode an MP4 and return codec, width, height, fps, frames, duration, video streams, audio streams."""
+    try:
+        file_size = path.stat().st_size
+    except OSError as exc:
+        raise ValueError(f"cannot stat MP4 {path}: {exc}") from exc
+    if not file_size or file_size > 64 * 1024 * 1024:
+        raise ValueError(f"MP4 is empty or exceeds the 64 MiB package limit: {path}")
+
+    executable = ffmpeg_executable()
+    command = [
+        executable,
+        "-nostdin",
+        "-hide_banner",
+        "-xerror",
+        "-i",
+        str(path),
+        "-map",
+        "0",
+        "-f",
+        "null",
+        "-",
+        "-progress",
+        "pipe:1",
+        "-nostats",
+    ]
+    try:
+        decoded = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValueError(f"MP4 cannot be fully decoded with FFmpeg 7.1: {exc}") from exc
+    if decoded.returncode != 0 or "progress=end" not in decoded.stdout:
+        diagnostic = decoded.stderr.strip().splitlines()
+        detail = diagnostic[-1] if diagnostic else f"exit {decoded.returncode}"
+        raise ValueError(f"MP4 cannot be fully decoded with FFmpeg 7.1: {detail}")
+
+    input_metadata = decoded.stderr.split("Stream mapping:", 1)[0]
+    duration_match = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", input_metadata)
+    if not duration_match:
+        raise ValueError(f"MP4 duration metadata is missing: {path}")
+    hours, minutes, seconds = duration_match.groups()
+    duration = int(hours) * 3600 + int(minutes) * 60 + float(seconds)
+
+    streams: list[tuple[str, str]] = []
+    stream_pattern = re.compile(
+        r"^\s*Stream #0:\d+(?:\[[^\]]+\])?(?:\([^)]*\))?:\s*([A-Za-z]+):\s*(.+)$",
+        re.MULTILINE,
+    )
+    for stream_type, details in stream_pattern.findall(input_metadata):
+        streams.append((stream_type.lower(), details))
+    video_details = [details for stream_type, details in streams if stream_type == "video"]
+    audio_streams = sum(stream_type == "audio" for stream_type, _ in streams)
+    if len(video_details) != 1:
+        raise ValueError(f"MP4 must contain exactly one video stream, found {len(video_details)}")
+    if audio_streams:
+        raise ValueError(f"MP4 must not contain audio streams, found {audio_streams}")
+    if len(streams) != 1:
+        raise ValueError(f"MP4 must contain only its one video stream, found {len(streams)} total streams")
+
+    video = video_details[0]
+    codec_match = re.match(r"([^\s,(]+)", video)
+    dimensions_match = re.search(r"(?:^|,\s*)(\d{2,5})x(\d{2,5})(?:[\s,]|$)", video)
+    fps_match = re.search(r"(?:^|,\s*)(\d+(?:\.\d+)?)\s+fps(?:[\s,]|$)", video)
+    frames = [int(value) for value in re.findall(r"^frame=(\d+)$", decoded.stdout, re.MULTILINE)]
+    if not codec_match or not dimensions_match or not fps_match or not frames:
+        raise ValueError(f"MP4 video metadata is incomplete: {path}")
+    codec = codec_match.group(1).lower()
+    width, height = (int(value) for value in dimensions_match.groups())
+    fps = float(fps_match.group(1))
+    return codec, width, height, fps, frames[-1], duration, len(video_details), audio_streams
 
 
 def png_dimensions(path: Path) -> tuple[int, int]:

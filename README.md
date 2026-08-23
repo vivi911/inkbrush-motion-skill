@@ -7,6 +7,7 @@
   <p><em>Actual delivery motion. Click to replay.</em></p>
   <p>
     <a href="https://vivi911.github.io/inkbrush-motion-skill/">Live demo</a> ·
+    <a href="assets/inkbrush-ai-agent-12s.mp4">Watch 12s MP4</a> ·
     <a href="SKILL.md">Use the Skill</a> ·
     <a href="README.zh-TW.md">繁體中文</a>
   </p>
@@ -27,6 +28,13 @@
 
 <p align="center"><strong>Tip leads → Ink absorbs → Evidence holds</strong></p>
 
+<p align="center">
+  <a href="assets/inkbrush-ai-agent-12s.mp4">
+    <img src="assets/inkbrush-ai-agent-12s-contact-sheet.png" alt="Three frames from the 12-second InkBrush Motion MP4: poised brush, active ink painting, and completed AI knowledge lesson" width="720">
+  </a><br>
+  <strong><a href="assets/inkbrush-ai-agent-12s.mp4">Watch the complete 12-second 1080×1920 MP4 example</a></strong>
+</p>
+
 <details>
   <summary><strong>See all nine calligraphy actions</strong></summary>
   <p><img src="assets/nine-action-proof.png" alt="Nine-action proof from hover through leave paper" width="720"></p>
@@ -43,6 +51,7 @@ The repository includes both the reusable Skill and a zero-dependency SVG/CSS/Ja
 | Native 9:16 static board | The composition works before motion hides layout problems |
 | Nine-action real-hand painter | The wrist, upright grip, pressure, turn, finish, and off-paper hold read as distinct actions |
 | 6–10 second motion proof | The brush leads the active stroke; ink never appears ahead of it |
+| 12-second delivery example | A downloadable 1080×1920 H.264 proof shows the complete AI lesson and final hold |
 | Start / middle / end evidence | Reviewers can inspect causality, diffusion, exact text, and final hold |
 | Rights packet | Sources, licenses, and authorship boundaries stay explicit |
 
@@ -94,13 +103,14 @@ If that direction is useful, **star the repository**. Stars help more makers dis
 ## Validation
 
 ```bash
+python3 -m pip install --requirement requirements-dev.txt
 python3 scripts/validate_package.py
 python3 scripts/validate_storyboard.py assets/demo-plan.json
 python3 scripts/test_validate_storyboard.py
 python3 scripts/test_validate_package.py
 ```
 
-Maintainers with Pillow 11.3.0 can also prove that the disclosed v5 source rebuilds all nine active sprites pixel-for-pixel. The test separately checks byte stability within one build environment because PNG compression bytes can differ across platforms:
+The pinned maintainer tools are Pillow 11.3.0 and imageio-ffmpeg 0.6.0, which supplies FFmpeg 7.1 for MP4 structure and full-decode checks. Maintainers can also prove that the disclosed v5 source rebuilds all nine active sprites pixel-for-pixel. The test separately checks byte stability within one build environment because PNG compression bytes can differ across platforms:
 
 ```bash
 python3 scripts/test_build_calligraphy_brush_v5.py
@@ -112,7 +122,7 @@ The demo is intentionally dependency-free. The references list optional open-sou
 
 Copyright © 2026 Vivi (GoAskVivi).
 
-The source code, Skill instructions, documentation, code-authored SVG/CSS/JavaScript visuals, published social-preview PNG and animated README GIF, and the selected AI-assisted demo backgrounds and brush sprites in this repository are available under the [MIT License](LICENSE) to the extent those materials are copyrightable and controlled by the publisher, subject to the detailed boundaries in [COPYRIGHT.md](COPYRIGHT.md). Keep the copyright and license notice with copies or substantial portions.
+The source code, Skill instructions, documentation, code-authored SVG/CSS/JavaScript visuals, published social-preview PNG, animated README GIF, 12-second MP4 example, and the selected AI-assisted demo backgrounds and brush sprites in this repository are available under the [MIT License](LICENSE) to the extent those materials are copyrightable and controlled by the publisher, subject to the detailed boundaries in [COPYRIGHT.md](COPYRIGHT.md). Keep the copyright and license notice with copies or substantial portions.
 
 The names **GoAskVivi** and its brand identity are not licensed for implied endorsement. See [COPYRIGHT.md](COPYRIGHT.md) for the human direction, AI-assistance, third-party, and trademark boundaries.
 

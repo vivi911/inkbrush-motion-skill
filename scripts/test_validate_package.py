@@ -12,16 +12,17 @@ import sys
 import tempfile
 from pathlib import Path
 
-from artifact_checks import gif_metadata
+from artifact_checks import ffmpeg_executable, gif_metadata
 from motion_timing import PREFIX, load_motion_timing
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run_validator(candidate: Path) -> subprocess.CompletedProcess[str]:
+def run_validator(candidate: Path, environment_overrides: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     environment = dict(os.environ)
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    environment.update(environment_overrides or {})
     return subprocess.run(
         [sys.executable, "scripts/validate_package.py"],
         cwd=candidate,
@@ -49,6 +50,36 @@ def write_timing(path: Path, timing: dict) -> None:
     path.write_text(f"{PREFIX}{payload};\n", encoding="utf-8")
 
 
+def write_video_fixture(
+    path: Path,
+    *,
+    size: str = "32x32",
+    fps: int = 30,
+    duration: float = 1.0,
+    codec: str = "libx264",
+    audio: bool = False,
+) -> None:
+    command = [
+        ffmpeg_executable(),
+        "-y",
+        "-loglevel",
+        "error",
+        "-f",
+        "lavfi",
+        "-i",
+        f"color=c=black:s={size}:r={fps}:d={duration}",
+    ]
+    if audio:
+        command.extend(["-f", "lavfi", "-i", f"anullsrc=r=48000:cl=mono:d={duration}"])
+    command.extend(["-c:v", codec, "-pix_fmt", "yuv420p"])
+    if audio:
+        command.extend(["-c:a", "aac", "-shortest"])
+    else:
+        command.append("-an")
+    command.append(str(path))
+    subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="inkbrush-package-tests-") as temp:
         parent = Path(temp)
@@ -65,6 +96,18 @@ def main() -> None:
         (lock_case / "skills-lock.json").write_text("{}\n", encoding="utf-8")
         result = run_validator(lock_case)
         expect("reject skill installer lock bundle", result.returncode == 1 and "forbidden third-party tooling bundle" in result.stdout)
+
+        requirements_case = clone_candidate(parent, "drifted-maintainer-requirements")
+        requirements_path = requirements_case / "requirements-dev.txt"
+        requirements_path.write_text(requirements_path.read_text(encoding="utf-8").replace("imageio-ffmpeg==0.6.0", "imageio-ffmpeg==0.6.1"), encoding="utf-8")
+        result = run_validator(requirements_case)
+        expect("reject unpinned maintainer video tool drift", result.returncode == 1 and "approved Pillow and imageio-ffmpeg" in result.stdout)
+
+        workflow_tool_case = clone_candidate(parent, "missing-ci-video-tool-gate")
+        workflow_path = workflow_tool_case / ".github/workflows/validate.yml"
+        workflow_path.write_text(workflow_path.read_text(encoding="utf-8").replace("ffmpeg version 7.1 ", "ffmpeg version 7.2 "), encoding="utf-8")
+        result = run_validator(workflow_tool_case)
+        expect("reject CI without pinned FFmpeg 7.1 gate", result.returncode == 1 and "verify FFmpeg 7.1" in result.stdout)
 
         html_case = clone_candidate(parent, "external-html")
         (html_case / "index.html").write_text((html_case / "index.html").read_text(encoding="utf-8") + '\n<script src="//example.com/track.js"></script>\n', encoding="utf-8")
@@ -210,6 +253,15 @@ def main() -> None:
         result = run_validator(proof_case)
         expect("reject README without three-part first-screen proof", result.returncode == 1 and "three-part first-screen proof" in result.stdout)
 
+        example_link_case = clone_candidate(parent, "missing-12-second-example-link")
+        example_readme_path = example_link_case / "README.md"
+        example_readme_path.write_text(
+            example_readme_path.read_text(encoding="utf-8").replace('href="assets/inkbrush-ai-agent-12s.mp4"', 'href="assets/missing.mp4"'),
+            encoding="utf-8",
+        )
+        result = run_validator(example_link_case)
+        expect("reject README without approved 12-second MP4 link", result.returncode == 1 and "12-second MP4 and contact sheet" in result.stdout)
+
         hero_hash_case = clone_candidate(parent, "changed-first-screen-evidence")
         shutil.copyfile(hero_hash_case / "assets/evidence/hero-end.png", hero_hash_case / "assets/evidence/hero-start.png")
         result = run_validator(hero_hash_case)
@@ -238,6 +290,12 @@ def main() -> None:
         behavior_record_path.write_text(behavior_record_path.read_text(encoding="utf-8").replace("`#2b2722`, 92% opacity", "`#2c2722`, 92% opacity", 1), encoding="utf-8")
         result = run_validator(behavior_record_case)
         expect("reject drifted ink behavior record", result.returncode == 1 and "exact ink behavior line" in result.stdout)
+
+        tool_record_case = clone_candidate(parent, "drifted-video-tool-record")
+        tool_record_path = tool_record_case / "references/readme-animation-record.md"
+        tool_record_path.write_text(tool_record_path.read_text(encoding="utf-8").replace("imageio-ffmpeg 0.6.0;", "imageio-ffmpeg 0.6.1;", 1), encoding="utf-8")
+        result = run_validator(tool_record_case)
+        expect("reject drifted video tool identity record", result.returncode == 1 and "exact 12-second tool identity line" in result.stdout)
 
         source_comment_case = clone_candidate(parent, "comment-hidden-capture-source")
         source_comment_path = source_comment_case / "references/readme-animation-record.md"
@@ -349,6 +407,45 @@ def main() -> None:
         gif_path.write_bytes(gif_data[:-1] + b"\x21\xfe\x03abc\x00" + gif_data[-1:])
         result = run_validator(hash_case)
         expect("reject changed GIF provenance hash", result.returncode == 1 and "provenance hash" in result.stdout)
+
+        mp4_hash_case = clone_candidate(parent, "changed-12-second-mp4-provenance")
+        mp4_path = mp4_hash_case / "assets/inkbrush-ai-agent-12s.mp4"
+        mp4_data = bytearray(mp4_path.read_bytes())
+        mp4_data[-1] ^= 1
+        mp4_path.write_bytes(mp4_data)
+        result = run_validator(mp4_hash_case)
+        expect("reject changed 12-second MP4 provenance hash", result.returncode == 1 and "12s.mp4 does not match" in result.stdout)
+
+        for label, settings, expected_error in [
+            ("dimensions", {"size": "32x32"}, "dimensions must be 1080x1920"),
+            ("frame-rate", {"fps": 24}, "frame rate must be 30 fps"),
+            ("duration", {"duration": 1.0}, "exactly 360 frames and 12.00 seconds"),
+            ("codec", {"codec": "mpeg4"}, "codec must be H.264"),
+            ("audio", {"audio": True}, "must not contain audio streams"),
+        ]:
+            structure_case = clone_candidate(parent, f"changed-12-second-{label}")
+            structure_path = structure_case / "assets/inkbrush-ai-agent-12s.mp4"
+            write_video_fixture(structure_path, **settings)
+            result = run_validator(structure_case)
+            expect(f"reject 12-second MP4 {label} drift", result.returncode == 1 and expected_error in result.stdout)
+
+        decode_case = clone_candidate(parent, "truncated-12-second-mp4")
+        decode_path = decode_case / "assets/inkbrush-ai-agent-12s.mp4"
+        decode_path.write_bytes(decode_path.read_bytes()[: decode_path.stat().st_size // 2])
+        result = run_validator(decode_case)
+        expect("reject MP4 that does not fully decode", result.returncode == 1 and "cannot be fully decoded" in result.stdout)
+
+        missing_tool_case = clone_candidate(parent, "missing-ffmpeg-tool")
+        result = run_validator(missing_tool_case, {"INKBRUSH_FFMPEG": "/definitely/missing/ffmpeg"})
+        expect("reject missing pinned FFmpeg tool", result.returncode == 1 and "missing or not executable" in result.stdout)
+
+        contact_hash_case = clone_candidate(parent, "changed-12-second-contact-sheet-provenance")
+        contact_path = contact_hash_case / "assets/inkbrush-ai-agent-12s-contact-sheet.png"
+        contact_data = bytearray(contact_path.read_bytes())
+        contact_data[-1] ^= 1
+        contact_path.write_bytes(contact_data)
+        result = run_validator(contact_hash_case)
+        expect("reject changed 12-second contact-sheet provenance hash", result.returncode == 1 and "contact-sheet" in result.stdout)
 
         clean_plate_case = clone_candidate(parent, "changed-clean-plate")
         shutil.copyfile(
@@ -478,7 +575,7 @@ def main() -> None:
         expect("reject oversized GIF before parsing", "16 MiB" in oversized_error)
 
         manifest_case = clone_candidate(parent, "missing-manifest")
-        for relative in [".nojekyll", ".github/workflows/validate.yml", "motion-timing.js", "scripts/test_validate_storyboard.py", "scripts/test_build_calligraphy_brush_v5.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v2/pose-09.png", "assets/brush-poses-v5/pose-09.png", "assets/brush-poses-v5/manifest.json", "assets/reference/real-brush-gray-linen.png", "assets/reference/brush-hand-sheet-v5.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/evidence/hero-middle.png", "assets/inkbrush-motion-demo.gif", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
+        for relative in [".nojekyll", ".github/workflows/validate.yml", "requirements-dev.txt", "motion-timing.js", "scripts/test_validate_storyboard.py", "scripts/test_build_calligraphy_brush_v5.py", "scripts/render_12s_example.py", "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png", "assets/brush-pose-final.png", "assets/brush-poses-v2/pose-09.png", "assets/brush-poses-v5/pose-09.png", "assets/brush-poses-v5/manifest.json", "assets/reference/real-brush-gray-linen.png", "assets/reference/brush-hand-sheet-v5.png", "assets/nine-action-proof.png", "assets/evidence/middle.png", "assets/evidence/hero-middle.png", "assets/inkbrush-motion-demo.gif", "assets/inkbrush-ai-agent-12s.mp4", "assets/inkbrush-ai-agent-12s-contact-sheet.png", "references/real-brush-contract.md", "references/image-generation-record.md", "references/readme-animation-record.md"]:
             (manifest_case / relative).unlink()
         result = run_validator(manifest_case)
         expect("reject missing CI/Pages/test/art/provenance manifest", result.returncode == 1 and result.stdout.count("missing required file") >= 15)

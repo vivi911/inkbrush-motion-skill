@@ -10,7 +10,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-from artifact_checks import gif_metadata, png_dimensions, sha256_file, validate_svg_safety
+from artifact_checks import gif_metadata, mp4_metadata, png_dimensions, sha256_file, validate_svg_safety
 from motion_timing import (
     load_motion_timing,
     minimum_final_hold_frames,
@@ -40,8 +40,11 @@ from validate_storyboard import (
 
 ROOT = Path(__file__).resolve().parents[1]
 README_GIF_SHA256 = "5a4a50381f3f21f5431affbd913cefd78813e9a216f9187302bbc37a9ba11a6f"
+EXAMPLE_MP4_SHA256 = "a161f7ad71fec300cfa0bd097b234940ce2009d067437a3deb2af886844b9cfb"
+EXAMPLE_CONTACT_SHEET_SHA256 = "0da3df925f53b5c72d455ec6cd087fb7d53b7b7a1a99d01770586292fdcfe3cf"
+EXAMPLE_RENDERER_SHA256 = "4be3989f9a48a408cd3dc3995772a8335286b345da8a7c59d0b7767075a3beb3"
 README_SOURCE_SHA256 = {
-    "index.html": "66678a1c5dbcf994d03247ad6396bd9f4ce5c66564dfd376e8003cb1d858475b",
+    "index.html": "788a97feb32bedeadf5c52192242edc8aa458e50bc7c1ce6887f6f1e1d394e74",
     "styles.css": "16ebbcae1feb1e8c27183177f4c0526654ffa8d4a983f85a8b69a7de503f0dda",
     "motion-timing.js": "44ee0405a0bfd9d3c01b29f1fee4cc1d1ac387c1b3169af38ac3c17b24ba8389",
     "app.js": "d759f5657437eee95ced784ac72ba365bce7d5406d17ac4a49531cd6c5fc3471",
@@ -114,16 +117,17 @@ REAL_BRUSH_REFERENCE_SHA256 = "49153b50a9a56539430099af1aa6475957b9bc7b9630075bd
 NINE_ACTION_PROOF_SHA256 = "675f845871e860d03fc1aa03098fd3744f94ecac6d58ad5cc49235eb49ca20e4"
 REQUIRED = [
     ".gitignore", ".nojekyll", ".github/workflows/validate.yml",
-    "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md",
+    "SKILL.md", "README.md", "README.zh-TW.md", "LICENSE", "COPYRIGHT.md", "CONTRIBUTING.md", "requirements-dev.txt",
     "SECURITY.md", "index.html", "styles.css", "motion-timing.js", "app.js", "agents/openai.yaml",
     "assets/icon.svg", "assets/static-board.svg", "assets/social-preview.svg", "assets/social-preview.png", "assets/inkbrush-motion-demo.gif",
+    "assets/inkbrush-ai-agent-12s.mp4", "assets/inkbrush-ai-agent-12s-contact-sheet.png",
     "assets/ai-agent-knowledge-journey.png", "assets/ai-agent-knowledge-prestroke.png", "assets/ai-agent-knowledge-cleanplate.png",
     "assets/brush-pose-final.png", *BRUSH_ASSET_SHA256, *HISTORICAL_BRUSH_ASSET_SHA256, "assets/reference/real-brush-gray-linen.png",
     "assets/reference/brush-hand-sheet-v5.png", "assets/brush-poses-v5/manifest.json",
     "assets/nine-action-proof.png", "assets/evidence/start.png", "assets/evidence/middle.png", "assets/evidence/end.png", *HERO_EVIDENCE_SHA256, "assets/demo-plan.json",
     "references/style-contract.md", "references/motion-contract.md", "references/qa-rubric.md",
     "references/real-brush-contract.md", "references/copyright-and-provenance.md", "references/image-generation-record.md", "references/readme-animation-record.md", "references/open-source-notes.md", "references/storyboard.schema.json",
-    "scripts/build_calligraphy_brush_v5.py", "scripts/generate_social_preview.py", "scripts/motion_timing.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/test_build_calligraphy_brush_v5.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
+    "scripts/artifact_checks.py", "scripts/build_calligraphy_brush_v5.py", "scripts/generate_social_preview.py", "scripts/motion_timing.py", "scripts/prepare_nine_action_sprites.py", "scripts/render_readme_gif.py", "scripts/render_12s_example.py", "scripts/test_build_calligraphy_brush_v5.py", "scripts/test_validate_package.py", "scripts/test_validate_storyboard.py",
 ]
 FORBIDDEN_PUBLIC_BUNDLES = [".agents", "skills-lock.json"]
 DEMO_ACTIVE_CORE_PIXELS = 6
@@ -254,12 +258,23 @@ def main() -> int:
     copyright_text = (ROOT / "COPYRIGHT.md").read_text(encoding="utf-8")
     for marker in ["AI-assistance disclosure", "Third-party material", "Names and endorsement"]:
         if marker not in copyright_text: errors.append(f"COPYRIGHT.md missing section: {marker}")
+    for marker in ["https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz", "https://ffmpeg.org/legal.html", "https://code.videolan.org/videolan/x264/-/blob/master/COPYING"]:
+        if marker not in copyright_text: errors.append(f"COPYRIGHT.md missing video-tool provenance source: {marker}")
+
+    requirements_text = (ROOT / "requirements-dev.txt").read_text(encoding="utf-8")
+    if requirements_text != "Pillow==11.3.0\nimageio-ffmpeg==0.6.0\n":
+        errors.append("requirements-dev.txt must pin the approved Pillow and imageio-ffmpeg versions")
+    workflow_text = (ROOT / ".github/workflows/validate.yml").read_text(encoding="utf-8")
+    if "python3 -m pip install --requirement requirements-dev.txt" not in workflow_text or 'ffmpeg version 7.1 ' not in workflow_text:
+        errors.append("CI must install the pinned maintainer requirements and verify FFmpeg 7.1")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     if '<img src="assets/inkbrush-motion-demo.gif"' not in readme or 'width="360"' not in readme.split("</a>", 1)[0]:
         errors.append("README.md must lead with the 360-pixel animated delivery demo")
     if "Tip leads → Ink absorbs → Evidence holds" not in readme:
         errors.append("README.md must state the three-part first-screen proof")
+    if 'href="assets/inkbrush-ai-agent-12s.mp4"' not in readme or 'src="assets/inkbrush-ai-agent-12s-contact-sheet.png"' not in readme:
+        errors.append("README.md must link the approved 12-second MP4 and contact sheet")
     for relative in HERO_EVIDENCE_SHA256:
         if f'src="{relative}"' not in readme:
             errors.append(f"README.md is missing first-screen evidence: {relative}")
@@ -270,6 +285,8 @@ def main() -> int:
     errors.extend(audit_html_runtime(html))
     if html.find('src="motion-timing.js"') > html.find('src="app.js"') or html.find('src="motion-timing.js"') < 0:
         errors.append("index.html must load motion-timing.js before app.js")
+    if 'href="assets/inkbrush-ai-agent-12s.mp4"' not in html:
+        errors.append("index.html must link the approved 12-second MP4")
     css = (ROOT / "styles.css").read_text(encoding="utf-8")
     if re.search(r"@import\b|url\(\s*[\"']?(?:https?:)?//", css, re.IGNORECASE): errors.append("styles.css must not import external runtime resources")
     javascript = (ROOT / "app.js").read_text(encoding="utf-8")
@@ -471,6 +488,27 @@ def main() -> int:
         if gif_duration_ms != expected_duration_ms: errors.append("assets/inkbrush-motion-demo.gif duration drifts from the motion timing contract")
         actual_gif_hash = sha256_file(ROOT / "assets/inkbrush-motion-demo.gif")
         if actual_gif_hash != README_GIF_SHA256: errors.append("assets/inkbrush-motion-demo.gif does not match the approved provenance hash")
+        example_mp4 = ROOT / "assets/inkbrush-ai-agent-12s.mp4"
+        example_mp4_hash_drift = sha256_file(example_mp4) != EXAMPLE_MP4_SHA256
+        if example_mp4_hash_drift:
+            errors.append("assets/inkbrush-ai-agent-12s.mp4 does not match the approved provenance hash")
+        # A clean candidate always gets a full decode. Unrelated negative cases
+        # may skip that expensive repeat, while any changed MP4 still must pass
+        # the structure/decode gate and produce its dedicated failure reason.
+        if example_mp4_hash_drift or not errors:
+            codec, width, height, fps, frames, duration, video_streams, audio_streams = mp4_metadata(example_mp4)
+            if codec != "h264": errors.append("assets/inkbrush-ai-agent-12s.mp4 codec must be H.264")
+            if (width, height) != (1080, 1920): errors.append("assets/inkbrush-ai-agent-12s.mp4 dimensions must be 1080x1920")
+            if fps != 30.0: errors.append("assets/inkbrush-ai-agent-12s.mp4 frame rate must be 30 fps")
+            if frames != 360 or duration != 12.0: errors.append("assets/inkbrush-ai-agent-12s.mp4 must be exactly 360 frames and 12.00 seconds")
+            if video_streams != 1 or audio_streams != 0: errors.append("assets/inkbrush-ai-agent-12s.mp4 must contain one video stream and no audio")
+        example_contact_sheet = ROOT / "assets/inkbrush-ai-agent-12s-contact-sheet.png"
+        if png_dimensions(example_contact_sheet) != (1184, 764):
+            errors.append("assets/inkbrush-ai-agent-12s-contact-sheet.png must be 1184x764")
+        if sha256_file(example_contact_sheet) != EXAMPLE_CONTACT_SHEET_SHA256:
+            errors.append("assets/inkbrush-ai-agent-12s-contact-sheet.png does not match the approved provenance hash")
+        if sha256_file(ROOT / "scripts/render_12s_example.py") != EXAMPLE_RENDERER_SHA256:
+            errors.append("scripts/render_12s_example.py does not match the approved provenance hash")
         animation_record = (ROOT / "references/readme-animation-record.md").read_text(encoding="utf-8")
         if "<!--" in animation_record or "-->" in animation_record:
             errors.append("readme animation record forbids HTML comments that can hide provenance")
@@ -503,6 +541,27 @@ def main() -> int:
         parsed_gif_row = [cell.strip() for cell in gif_rows[0].strip().strip("|").split("|")] if len(gif_rows) == 1 else []
         if parsed_gif_row != expected_gif_row:
             errors.append("readme animation record must contain one exact approved GIF table row")
+        expected_example_renderer_line = f"- Renderer identity: `scripts/render_12s_example.py` SHA-256 `{EXAMPLE_RENDERER_SHA256}`."
+        example_renderer_lines = [line for line in animation_record.splitlines() if line.startswith("- Renderer identity:")]
+        if example_renderer_lines != [expected_example_renderer_line]:
+            errors.append("readme animation record must contain one exact 12-second renderer identity line")
+        expected_tool_identity_line = (
+            "- Tool identity: Pillow 11.3.0 and imageio-ffmpeg 0.6.0; the approved macOS arm64 executable reports FFmpeg 7.1, "
+            "`--enable-gpl --enable-libx264`, and SHA-256 `6d175a4743ca50256e89a8cdd731100f9cee33bd79aeea46894d209410dc6617`. "
+            "CI installs the same pinned package versions and requires FFmpeg 7.1 before validation. Source and license boundaries are in "
+            "[`copyright-and-provenance.md`](copyright-and-provenance.md)."
+        )
+        tool_identity_lines = [line for line in animation_record.splitlines() if line.startswith("- Tool identity:")]
+        if tool_identity_lines != [expected_tool_identity_line]:
+            errors.append("readme animation record must contain one exact 12-second tool identity line")
+        example_rows = [line for line in animation_record.splitlines() if line.startswith("| `assets/inkbrush-ai-agent-12s")]
+        expected_example_rows = [
+            ["`assets/inkbrush-ai-agent-12s.mp4`", "1080×1920", "360", "12.00 seconds", f"`{EXAMPLE_MP4_SHA256}`"],
+            ["`assets/inkbrush-ai-agent-12s-contact-sheet.png`", "1184×764", "3 review times", "static", f"`{EXAMPLE_CONTACT_SHEET_SHA256}`"],
+        ]
+        parsed_example_rows = [[cell.strip() for cell in row.strip().strip("|").split("|")] for row in example_rows]
+        if parsed_example_rows != expected_example_rows:
+            errors.append("readme animation record must contain the two exact approved 12-second output rows")
     except ValueError as exc:
         errors.append(str(exc))
 
